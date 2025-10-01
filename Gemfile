@@ -90,7 +90,7 @@ gem 'whenever', '~> 1.0', require: false
 
 # Payment processing
 gem 'square.rb', '~> 42.0'  # Square's official Ruby SDK
-gem 'jwt', '~> 2.7'         # For webhook verification
+gem 'jwt', '~> 3.1'         # For webhook verification
 
 # For secure key management
 gem 'encrypted_strings', '~> 0.3'
