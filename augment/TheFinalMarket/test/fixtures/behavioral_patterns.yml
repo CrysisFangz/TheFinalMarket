@@ -1,0 +1,18 @@
+# Behavioral pattern fixtures for testing
+
+normal_pattern:
+  user: one
+  pattern_type: browsing
+  pattern_data: { pages_viewed: 10, time_spent: 300 }
+  anomaly_score: 0.1
+  is_anomalous: false
+  created_at: <%= 1.day.ago %>
+
+anomalous_pattern:
+  user: two
+  pattern_type: purchasing
+  pattern_data: { rapid_purchases: 5, time_window: 60 }
+  anomaly_score: 0.85
+  is_anomalous: true
+  created_at: <%= 1.hour.ago %>
+

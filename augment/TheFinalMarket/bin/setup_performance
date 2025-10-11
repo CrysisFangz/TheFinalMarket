@@ -1,0 +1,70 @@
+#!/usr/bin/env ruby
+require "fileutils"
+
+# Path to your application root.
+APP_ROOT = File.expand_path("..", __dir__)
+
+def system!(*args)
+  system(*args, exception: true)
+end
+
+FileUtils.chdir APP_ROOT do
+  puts "\n== Setting up Performance Optimization System =="
+  
+  puts "\n== Installing dependencies =="
+  system! "gem install bundler --conservative"
+  system("bundle check") || system!("bundle install")
+  
+  puts "\n== Checking Redis connection =="
+  begin
+    require "redis"
+    redis = Redis.new(url: ENV.fetch("REDIS_URL", "redis://localhost:6379/0"))
+    redis.ping
+    puts "✓ Redis is running"
+  rescue => e
+    puts "✗ Redis connection failed: #{e.message}"
+    puts "  Please install and start Redis:"
+    puts "  brew install redis"
+    puts "  brew services start redis"
+  end
+  
+  puts "\n== Checking PostgreSQL connection =="
+  begin
+    system! "bin/rails db:version"
+    puts "✓ PostgreSQL is running"
+  rescue => e
+    puts "✗ PostgreSQL connection failed"
+    puts "  Please ensure PostgreSQL is running"
+  end
+  
+  puts "\n== Creating GraphQL schema dump =="
+  begin
+    system! "bin/rails graphql:schema:dump"
+    puts "✓ GraphQL schema dumped"
+  rescue => e
+    puts "✗ GraphQL schema dump failed (this is OK if GraphQL isn't fully configured yet)"
+  end
+  
+  puts "\n== Checking image processing dependencies =="
+  begin
+    require "vips"
+    puts "✓ libvips is installed"
+  rescue LoadError
+    puts "✗ libvips not found"
+    puts "  Please install libvips:"
+    puts "  brew install vips"
+  end
+  
+  puts "\n== Performance Optimization Setup Complete! =="
+  puts "\nNext steps:"
+  puts "1. Configure environment variables in .env or credentials"
+  puts "2. Set up CloudFlare CDN (optional)"
+  puts "3. Configure database sharding for production (optional)"
+  puts "4. Test GraphQL API at /graphiql (development only)"
+  puts "5. Test PWA features in Chrome DevTools"
+  puts "6. Run performance tests with Lighthouse"
+  puts "\nFor more information, see:"
+  puts "- PERFORMANCE_OPTIMIZATION_GUIDE.md"
+  puts "- PERFORMANCE_OPTIMIZATION_SUMMARY.md"
+end
+

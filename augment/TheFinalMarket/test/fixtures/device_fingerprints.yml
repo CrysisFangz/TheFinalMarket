@@ -1,0 +1,29 @@
+# Device fingerprint fixtures for testing
+
+trusted_device:
+  fingerprint_hash: "abc123def456"
+  user: one
+  status: trusted
+  first_seen_at: <%= 30.days.ago %>
+  last_seen_at: <%= 1.day.ago %>
+  user_count: 1
+  created_at: <%= 30.days.ago %>
+
+suspicious_device:
+  fingerprint_hash: "xyz789uvw012"
+  user: two
+  status: suspicious
+  first_seen_at: <%= 1.day.ago %>
+  last_seen_at: <%= 1.hour.ago %>
+  user_count: 5
+  created_at: <%= 1.day.ago %>
+
+blocked_device:
+  fingerprint_hash: "blocked123456"
+  user: two
+  status: blocked
+  first_seen_at: <%= 7.days.ago %>
+  last_seen_at: <%= 1.day.ago %>
+  user_count: 10
+  created_at: <%= 7.days.ago %>
+
