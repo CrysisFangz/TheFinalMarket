@@ -1,0 +1,152 @@
+# Database Sharding Configuration for The Final Market
+# This file defines the sharding strategy for horizontal scaling
+
+# Sharding Strategy: User-based sharding
+# Users are distributed across shards based on user_id % num_shards
+
+development:
+  sharding:
+    enabled: false
+    num_shards: 1
+    strategy: user_based
+    
+test:
+  sharding:
+    enabled: false
+    num_shards: 1
+    strategy: user_based
+
+production:
+  sharding:
+    enabled: true
+    num_shards: 4
+    strategy: user_based
+    
+    # Shard 1 - Users with ID % 4 == 0
+    shard_1:
+      adapter: postgresql
+      encoding: unicode
+      pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+      host: <%= ENV.fetch("SHARD_1_DB_HOST") { "localhost" } %>
+      port: <%= ENV.fetch("SHARD_1_DB_PORT") { 5432 } %>
+      database: thefinalmarket_shard_1
+      username: <%= ENV.fetch("SHARD_1_DB_USERNAME") { "postgres" } %>
+      password: <%= ENV.fetch("SHARD_1_DB_PASSWORD") { "" } %>
+      
+      # Read replica for shard 1
+      replica:
+        host: <%= ENV.fetch("SHARD_1_REPLICA_HOST") { "localhost" } %>
+        port: <%= ENV.fetch("SHARD_1_REPLICA_PORT") { 5433 } %>
+        database: thefinalmarket_shard_1_replica
+        username: <%= ENV.fetch("SHARD_1_REPLICA_USERNAME") { "postgres" } %>
+        password: <%= ENV.fetch("SHARD_1_REPLICA_PASSWORD") { "" } %>
+    
+    # Shard 2 - Users with ID % 4 == 1
+    shard_2:
+      adapter: postgresql
+      encoding: unicode
+      pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+      host: <%= ENV.fetch("SHARD_2_DB_HOST") { "localhost" } %>
+      port: <%= ENV.fetch("SHARD_2_DB_PORT") { 5432 } %>
+      database: thefinalmarket_shard_2
+      username: <%= ENV.fetch("SHARD_2_DB_USERNAME") { "postgres" } %>
+      password: <%= ENV.fetch("SHARD_2_DB_PASSWORD") { "" } %>
+      
+      replica:
+        host: <%= ENV.fetch("SHARD_2_REPLICA_HOST") { "localhost" } %>
+        port: <%= ENV.fetch("SHARD_2_REPLICA_PORT") { 5433 } %>
+        database: thefinalmarket_shard_2_replica
+        username: <%= ENV.fetch("SHARD_2_REPLICA_USERNAME") { "postgres" } %>
+        password: <%= ENV.fetch("SHARD_2_REPLICA_PASSWORD") { "" } %>
+    
+    # Shard 3 - Users with ID % 4 == 2
+    shard_3:
+      adapter: postgresql
+      encoding: unicode
+      pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+      host: <%= ENV.fetch("SHARD_3_DB_HOST") { "localhost" } %>
+      port: <%= ENV.fetch("SHARD_3_DB_PORT") { 5432 } %>
+      database: thefinalmarket_shard_3
+      username: <%= ENV.fetch("SHARD_3_DB_USERNAME") { "postgres" } %>
+      password: <%= ENV.fetch("SHARD_3_DB_PASSWORD") { "" } %>
+      
+      replica:
+        host: <%= ENV.fetch("SHARD_3_REPLICA_HOST") { "localhost" } %>
+        port: <%= ENV.fetch("SHARD_3_REPLICA_PORT") { 5433 } %>
+        database: thefinalmarket_shard_3_replica
+        username: <%= ENV.fetch("SHARD_3_REPLICA_USERNAME") { "postgres" } %>
+        password: <%= ENV.fetch("SHARD_3_REPLICA_PASSWORD") { "" } %>
+    
+    # Shard 4 - Users with ID % 4 == 3
+    shard_4:
+      adapter: postgresql
+      encoding: unicode
+      pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+      host: <%= ENV.fetch("SHARD_4_DB_HOST") { "localhost" } %>
+      port: <%= ENV.fetch("SHARD_4_DB_PORT") { 5432 } %>
+      database: thefinalmarket_shard_4
+      username: <%= ENV.fetch("SHARD_4_DB_USERNAME") { "postgres" } %>
+      password: <%= ENV.fetch("SHARD_4_DB_PASSWORD") { "" } %>
+      
+      replica:
+        host: <%= ENV.fetch("SHARD_4_REPLICA_HOST") { "localhost" } %>
+        port: <%= ENV.fetch("SHARD_4_REPLICA_PORT") { 5433 } %>
+        database: thefinalmarket_shard_4_replica
+        username: <%= ENV.fetch("SHARD_4_REPLICA_USERNAME") { "postgres" } %>
+        password: <%= ENV.fetch("SHARD_4_REPLICA_PASSWORD") { "" } %>
+
+# Connection Pool Settings
+connection_pool:
+  size: 100
+  timeout: 5000
+  checkout_timeout: 5
+  reaping_frequency: 10
+  
+# Read/Write Splitting
+read_write_splitting:
+  enabled: true
+  default_role: :writing
+  
+  # Automatically route SELECT queries to replicas
+  auto_route_reads: true
+  
+  # Delay threshold for replica lag (in seconds)
+  max_replica_lag: 5
+  
+# Sharding Rules
+sharding_rules:
+  # User-based sharding
+  user_based:
+    model: User
+    shard_key: :id
+    num_shards: 4
+    algorithm: modulo
+    
+  # Product-based sharding (optional)
+  product_based:
+    model: Product
+    shard_key: :user_id
+    num_shards: 4
+    algorithm: modulo
+    
+  # Order-based sharding (optional)
+  order_based:
+    model: Order
+    shard_key: :user_id
+    num_shards: 4
+    algorithm: modulo
+
+# Failover Configuration
+failover:
+  enabled: true
+  max_retries: 3
+  retry_delay: 1
+  health_check_interval: 30
+  
+# Monitoring
+monitoring:
+  enabled: true
+  slow_query_threshold: 1000
+  log_queries: true
+  track_replica_lag: true
+

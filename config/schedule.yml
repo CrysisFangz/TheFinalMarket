@@ -1,0 +1,105 @@
+# Sidekiq Cron Schedule Configuration
+# This file defines recurring background jobs for The Final Market
+
+# Dynamic Pricing System Jobs
+pricing_optimization:
+  cron: "0 * * * *"  # Every hour at minute 0
+  class: "PricingOptimizationJob"
+  queue: default
+  description: "Optimize product prices using AI/ML algorithms"
+
+competitor_price_scraping:
+  cron: "0 2 * * *"  # Daily at 2:00 AM
+  class: "CompetitorPriceScraperJob"
+  queue: low_priority
+  description: "Scrape competitor prices from various platforms"
+
+# Gamification System Jobs
+leaderboard_refresh:
+  cron: "0 * * * *"  # Every hour at minute 0
+  class: "LeaderboardRefreshJob"
+  queue: default
+  description: "Refresh leaderboard rankings and snapshots"
+
+daily_challenge_generation:
+  cron: "0 0 * * *"  # Daily at midnight
+  class: "DailyChallengeGenerationJob"
+  queue: default
+  description: "Generate new daily challenges for users"
+
+achievement_check:
+  cron: "*/30 * * * *"  # Every 30 minutes
+  class: "AchievementCheckJob"
+  queue: default
+  description: "Check and award achievements for active users"
+
+# Analytics and Reporting Jobs
+analytics_aggregation:
+  cron: "0 1 * * *"  # Daily at 1:00 AM
+  class: "AnalyticsAggregationJob"
+  queue: low_priority
+  description: "Aggregate daily analytics data"
+
+weekly_report:
+  cron: "0 9 * * 1"  # Every Monday at 9:00 AM
+  class: "WeeklyReportJob"
+  queue: low_priority
+  description: "Generate and send weekly performance reports"
+
+# Maintenance Jobs
+cleanup_old_data:
+  cron: "0 3 * * 0"  # Every Sunday at 3:00 AM
+  class: "DataCleanupJob"
+  queue: low_priority
+  description: "Clean up old logs, expired sessions, and temporary data"
+
+cache_warming:
+  cron: "0 4 * * *"  # Daily at 4:00 AM
+  class: "CacheWarmingJob"
+  queue: low_priority
+  description: "Pre-warm frequently accessed caches"
+
+# Internationalization Jobs
+exchange_rate_update:
+  cron: "0 * * * *"  # Every hour
+  class: "ExchangeRateUpdateJob"
+  queue: default
+  description: "Update currency exchange rates from external APIs"
+
+# Fraud Detection Jobs
+trust_score_update:
+  cron: "0 2 * * *"  # Daily at 2:00 AM
+  class: "TrustScoreUpdateJob"
+  queue: default
+  description: "Update trust scores for all active users"
+
+behavioral_analysis:
+  cron: "0 */6 * * *"  # Every 6 hours
+  class: "BehavioralAnalysisJob"
+  queue: default
+  description: "Analyze behavioral patterns and detect anomalies"
+
+fraud_cleanup:
+  cron: "0 3 * * 0"  # Every Sunday at 3:00 AM
+  class: "FraudCleanupJob"
+  queue: low_priority
+  description: "Clean up old fraud detection data"
+
+# Business Intelligence Jobs
+analytics_metrics:
+  cron: "0 1 * * *"  # Daily at 1:00 AM
+  class: "AnalyticsMetricsJob"
+  queue: default
+  description: "Record daily analytics metrics"
+
+customer_segment_update:
+  cron: "0 4 * * *"  # Daily at 4:00 AM
+  class: "CustomerSegmentUpdateJob"
+  queue: default
+  description: "Update customer segments based on criteria"
+
+data_export_cleanup:
+  cron: "0 5 * * 0"  # Every Sunday at 5:00 AM
+  class: "DataExportCleanupJob"
+  queue: low_priority
+  description: "Clean up expired data exports"

@@ -10,6 +10,24 @@ Rails.application.routes.draw do
         patch :ship
       end
     end
+
+    # Dynamic Pricing routes
+    resources :pricing, only: [:index, :show] do
+      member do
+        get :recommendations
+        post :apply_recommendation
+      end
+      collection do
+        get :analytics
+        get :rules
+        post :create_rule
+        get :updates
+        get :export
+        post :bulk_optimize
+      end
+    end
+
+    resources :pricing_rules, only: [:update, :destroy]
   end
 
   # Seller Dashboard
@@ -23,6 +41,20 @@ Rails.application.routes.draw do
   # Search routes
   get 'search', to: 'search#index'
   get 'search/suggestions', to: 'search#suggestions'
+
+  # Gamification routes
+  namespace :gamification do
+    root to: 'gamification#dashboard', as: :dashboard
+    get 'achievements', to: 'gamification#achievements'
+    get 'daily_challenges', to: 'gamification#daily_challenges'
+    get 'leaderboards', to: 'gamification#leaderboards'
+  end
+
+  # API routes for gamification
+  namespace :api do
+    get 'daily_challenges', to: 'gamification#daily_challenges_api'
+    get 'achievements/check', to: 'gamification#check_achievements'
+  end
 
   # Admin routes
   namespace :admin do
@@ -195,6 +227,26 @@ Rails.application.routes.draw do
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
+
+  # Internationalization routes
+  namespace :settings do
+    post 'update_currency', to: 'internationalization#update_currency'
+    post 'update_locale', to: 'internationalization#update_locale'
+    post 'update_timezone', to: 'internationalization#update_timezone'
+  end
+
+  # Shipping calculator
+  post 'shipping/calculate', to: 'shipping#calculate'
+  get 'shipping/zones', to: 'shipping#zones'
+
+  # Currency API
+  get 'currencies', to: 'currencies#index'
+  get 'currencies/:code', to: 'currencies#show'
+  get 'currencies/:code/rate', to: 'currencies#rate'
+
+  # Countries API
+  get 'countries', to: 'countries#index'
+  get 'countries/:code', to: 'countries#show'
 
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest

@@ -1,0 +1,251 @@
+<div class="container mx-auto px-4 py-8" data-controller="pricing-dashboard">
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">Dynamic Pricing Dashboard</h1>
+      <p class="text-gray-600 mt-2">AI-powered pricing optimization for your products</p>
+    </div>
+    
+    <div class="flex gap-3">
+      <%= link_to seller_pricing_analytics_path, class: "btn btn-outline" do %>
+        <i class="fas fa-chart-line mr-2"></i>
+        Analytics
+      <% end %>
+      <%= link_to seller_pricing_rules_path, class: "btn btn-outline" do %>
+        <i class="fas fa-cog mr-2"></i>
+        Pricing Rules
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Performance Overview -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-600">Optimization Score</p>
+          <p class="text-3xl font-bold text-purple-600 mt-2"><%= @optimization_score %>%</p>
+        </div>
+        <div class="bg-purple-100 rounded-full p-3">
+          <i class="fas fa-brain text-purple-600 text-2xl"></i>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div class="w-full bg-gray-200 rounded-full h-2">
+          <div class="bg-purple-600 h-2 rounded-full" style="width: <%= @optimization_score %>%"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-600">Price Changes (30d)</p>
+          <p class="text-3xl font-bold text-blue-600 mt-2"><%= @performance[:total_price_changes] %></p>
+        </div>
+        <div class="bg-blue-100 rounded-full p-3">
+          <i class="fas fa-exchange-alt text-blue-600 text-2xl"></i>
+        </div>
+      </div>
+      <p class="text-sm text-gray-500 mt-2">
+        <%= @performance[:automated_changes] %> automated, 
+        <%= @performance[:manual_changes] %> manual
+      </p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-600">Revenue Impact</p>
+          <p class="text-3xl font-bold text-green-600 mt-2">
+            <%= number_to_currency(@performance[:revenue_impact] / 100.0) %>
+          </p>
+        </div>
+        <div class="bg-green-100 rounded-full p-3">
+          <i class="fas fa-dollar-sign text-green-600 text-2xl"></i>
+        </div>
+      </div>
+      <p class="text-sm text-gray-500 mt-2">Last 30 days</p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-600">Avg Price Change</p>
+          <p class="text-3xl font-bold text-orange-600 mt-2">
+            <%= number_to_percentage(@performance[:average_change_percentage], precision: 1) %>
+          </p>
+        </div>
+        <div class="bg-orange-100 rounded-full p-3">
+          <i class="fas fa-percentage text-orange-600 text-2xl"></i>
+        </div>
+      </div>
+      <p class="text-sm text-gray-500 mt-2">Across all products</p>
+    </div>
+  </div>
+
+  <!-- Products Table -->
+  <div class="bg-white rounded-lg shadow-md overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+      <h2 class="text-xl font-semibold text-gray-900">Your Products</h2>
+      
+      <%= form_with url: seller_pricing_bulk_optimize_path, method: :post, class: "flex gap-2" do |f| %>
+        <button type="submit" class="btn btn-primary btn-sm" data-action="click->pricing-dashboard#bulkOptimize">
+          <i class="fas fa-magic mr-2"></i>
+          Optimize Selected
+        </button>
+      <% end %>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left">
+              <input type="checkbox" data-action="change->pricing-dashboard#toggleAll" class="rounded">
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Product
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Current Price
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Recommended Price
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Change
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Active Rules
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <% @products.each do |product| %>
+            <% pricing_service = DynamicPricingService.new(product) %>
+            <% recommendation = pricing_service.price_recommendation %>
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4">
+                <input type="checkbox" name="product_ids[]" value="<%= product.id %>" class="rounded">
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex items-center">
+                  <% if product.images.attached? %>
+                    <%= image_tag product.images.first.variant(resize_to_limit: [50, 50]), class: "h-10 w-10 rounded object-cover mr-3" %>
+                  <% end %>
+                  <div>
+                    <div class="text-sm font-medium text-gray-900"><%= product.name %></div>
+                    <div class="text-sm text-gray-500">SKU: <%= product.sku %></div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm font-semibold text-gray-900">
+                  <%= number_to_currency(product.price_cents / 100.0) %>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm font-semibold text-purple-600">
+                  <%= number_to_currency(recommendation[:recommended_price] / 100.0) %>
+                </div>
+                <div class="text-xs text-gray-500">
+                  <%= recommendation[:confidence] %>% confidence
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <% change_pct = recommendation[:change_percentage] %>
+                <span class="px-2 py-1 text-xs font-semibold rounded-full <%= change_pct > 0 ? 'bg-green-100 text-green-800' : change_pct < 0 ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800' %>">
+                  <%= change_pct > 0 ? '+' : '' %><%= number_to_percentage(change_pct, precision: 1) %>
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex gap-1">
+                  <% product.pricing_rules.active.each do |rule| %>
+                    <span class="px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-800">
+                      <%= rule.rule_type.humanize %>
+                    </span>
+                  <% end %>
+                  <% if product.pricing_rules.active.empty? %>
+                    <span class="text-sm text-gray-400">None</span>
+                  <% end %>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm">
+                <div class="flex gap-2">
+                  <%= link_to seller_pricing_path(product), class: "text-purple-600 hover:text-purple-900" do %>
+                    <i class="fas fa-chart-line"></i>
+                  <% end %>
+                  <%= link_to seller_pricing_recommendations_path(product), class: "text-blue-600 hover:text-blue-900" do %>
+                    <i class="fas fa-lightbulb"></i>
+                  <% end %>
+                  <%= button_to seller_pricing_apply_recommendation_path(product), method: :post, class: "text-green-600 hover:text-green-900", data: { confirm: "Apply recommended price?" } do %>
+                    <i class="fas fa-check"></i>
+                  <% end %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Quick Stats -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Top Performing Rules</h3>
+      <div class="space-y-3">
+        <% @performance[:top_performing_rules]&.first(3)&.each do |rule| %>
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="text-sm font-medium text-gray-900"><%= rule[:rule_name] %></p>
+              <p class="text-xs text-gray-500"><%= rule[:rule_type].humanize %></p>
+            </div>
+            <div class="text-right">
+              <p class="text-sm font-semibold text-green-600">
+                <%= number_to_currency(rule[:total_revenue_impact] / 100.0) %>
+              </p>
+              <p class="text-xs text-gray-500"><%= rule[:times_applied] %> times</p>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Conversion Impact</h3>
+      <div class="text-center">
+        <p class="text-4xl font-bold text-purple-600">
+          <%= @performance.dig(:conversion_impact, :improvement_rate) || 0 %>%
+        </p>
+        <p class="text-sm text-gray-600 mt-2">Improvement Rate</p>
+        <p class="text-xs text-gray-500 mt-4">
+          <%= @performance.dig(:conversion_impact, :improved) || 0 %> of 
+          <%= @performance.dig(:conversion_impact, :total) || 0 %> changes improved conversion
+        </p>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+      <div class="space-y-2">
+        <%= link_to seller_pricing_analytics_path, class: "block w-full btn btn-outline btn-sm" do %>
+          <i class="fas fa-chart-bar mr-2"></i>
+          View Detailed Analytics
+        <% end %>
+        <%= link_to seller_pricing_rules_path, class: "block w-full btn btn-outline btn-sm" do %>
+          <i class="fas fa-plus mr-2"></i>
+          Create Pricing Rule
+        <% end %>
+        <%= link_to "#", class: "block w-full btn btn-outline btn-sm", data: { action: "click->pricing-dashboard#exportReport" } do %>
+          <i class="fas fa-download mr-2"></i>
+          Export Report
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+

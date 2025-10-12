@@ -19,7 +19,7 @@ gem "ransack"
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 # For other platforms, this gem is optional.
-gem "tzinfo-data", platforms: %i[ windows jruby ]
+gem "tzinfo-data", platforms: %i[ mingw mswin x64_mingw jruby ]
 
 # Use the database-backed adapters for Rails.cache, Active Job, and Action Cable
 gem "solid_cache"
@@ -40,7 +40,7 @@ gem "image_processing", "~> 1.2"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
-  gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
+  gem "debug", platforms: %i[ mri mingw mswin x64_mingw ], require: "debug/prelude"
 
   # Static analysis for security vulnerabilities [https://brakemanscanner.org/]
   gem "brakeman", require: false
@@ -102,3 +102,19 @@ gem "dartsass-rails", "~> 0.5.1"
 
 gem "elasticsearch-model", "~> 8.0"
 gem "elasticsearch-rails", "~> 8.0"
+
+# For 2FA and security
+gem 'rotp', '~> 6.3'  # TOTP for 2FA
+gem 'rqrcode', '~> 2.2'  # QR code generation
+
+# For blockchain and crypto
+gem 'eth', '~> 0.5'  # Ethereum integration (optional)
+
+# For data analysis
+gem 'descriptive_statistics', '~> 2.5'  # Statistical calculations
+
+# For Faker data in seeds
+gem 'faker', '~> 3.2'
+
+# For debugging
+gem 'readapt', group :development

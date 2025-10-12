@@ -1,0 +1,50 @@
+# Fraud check fixtures for testing
+
+low_risk_login:
+  user: one
+  checkable: one (Order)
+  check_type: login_attempt
+  risk_score: 15
+  flagged: false
+  ip_address: "192.168.1.1"
+  user_agent: "Mozilla/5.0"
+  factors: { factors: [{ factor: "Account age: 365 days", weight: 0 }] }
+  action_taken: none
+  created_at: <%= 1.day.ago %>
+
+high_risk_order:
+  user: two
+  checkable: two (Order)
+  check_type: order_placement
+  risk_score: 75
+  flagged: true
+  ip_address: "10.0.0.1"
+  user_agent: "Mozilla/5.0"
+  factors: { factors: [{ factor: "Very new account (< 1 day)", weight: 20 }, { factor: "Email not verified", weight: 10 }] }
+  action_taken: flagged_for_review
+  created_at: <%= 2.hours.ago %>
+
+critical_risk_payment:
+  user: two
+  checkable: one (Order)
+  check_type: payment_method
+  risk_score: 85
+  flagged: true
+  ip_address: "10.0.0.1"
+  user_agent: "Mozilla/5.0"
+  factors: { factors: [{ factor: "Blacklisted IP address", weight: 40 }, { factor: "Multiple previous fraud flags", weight: 25 }] }
+  action_taken: account_suspended
+  created_at: <%= 1.hour.ago %>
+
+medium_risk_listing:
+  user: one
+  checkable: one (Product)
+  check_type: listing_creation
+  risk_score: 45
+  flagged: false
+  ip_address: "192.168.1.1"
+  user_agent: "Mozilla/5.0"
+  factors: { factors: [{ factor: "Recent account (< 30 days)", weight: 5 }] }
+  action_taken: none
+  created_at: <%= 3.days.ago %>
+

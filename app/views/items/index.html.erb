@@ -1,0 +1,392 @@
+<%# Enhanced Product Browsing Experience with Advanced Filters and Features %>
+
+<div class="min-h-screen bg-gradient-to-br from-spirit-light/30 to-white"
+     data-controller="advanced-filters enhanced-cart product-comparison wishlist-manager"
+     data-advanced-filters-url-value="<%= items_path %>"
+     data-enhanced-cart-url-value="<%= cart_items_path %>"
+     data-product-comparison-url-value="<%= comparisons_path %>">
+
+  <%# Hero Section %>
+  <div class="bg-gradient-to-r from-spirit-primary to-spirit-secondary py-12 mb-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center text-white space-y-4">
+        <h1 class="text-5xl font-bold drop-shadow-lg animate-slideInUp">
+          Discover Amazing Products
+        </h1>
+        <p class="text-xl opacity-90 animate-slideInUp" style="animation-delay: 0.1s;">
+          Explore our curated marketplace of unique items
+        </p>
+        
+        <%# Enhanced Search Bar %>
+        <div class="max-w-2xl mx-auto mt-6 animate-slideInUp" style="animation-delay: 0.2s;"
+             data-controller="search">
+          <%= form_with url: items_path, method: :get, 
+              class: "relative",
+              data: { 
+                turbo_frame: "search_results",
+                search_target: "form",
+                action: "submit->advanced-filters#search"
+              } do |f| %>
+            <div class="relative">
+              <%= f.text_field :query,
+                  class: "w-full px-6 py-4 pr-24 rounded-full border-2 border-white/20 bg-white/10 backdrop-blur-sm text-white placeholder-white/60 focus:outline-none focus:bg-white/20 focus:border-white/40 transition-all duration-300 text-lg",
+                  placeholder: "Search for products, categories, or brands...",
+                  value: params[:query],
+                  data: {
+                    search_target: "input",
+                    action: "input->search#search"
+                  } %>
+              
+              <button type="submit" 
+                      class="absolute right-2 top-1/2 transform -translate-y-1/2 px-6 py-2 bg-spirit-accent hover:bg-spirit-accent/80 text-white rounded-full font-medium transition-all duration-200">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+              </button>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+    <div class="flex flex-col lg:flex-row gap-8">
+      
+      <%# Filters Sidebar %>
+      <aside class="lg:w-80 flex-shrink-0">
+        <div class="filter-panel">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-spirit-dark">Filters</h2>
+            <button class="text-sm text-spirit-primary hover:text-spirit-secondary font-medium"
+                    data-action="click->advanced-filters#clearAll"
+                    data-advanced-filters-target="clearButton">
+              Clear All
+            </button>
+          </div>
+
+          <%# Active Filters Display %>
+          <div data-advanced-filters-target="activeFilters"></div>
+
+          <%= form_with url: items_path, method: :get, 
+              data: { 
+                advanced_filters_target: "form",
+                turbo: false 
+              } do |f| %>
+
+            <%# Price Range Filter %>
+            <div class="filter-section">
+              <div class="filter-section-title">
+                <span>💰 Price Range</span>
+              </div>
+              
+              <div class="space-y-4">
+                <div class="text-center mb-2">
+                  <span class="text-lg font-semibold text-spirit-primary" 
+                        data-advanced-filters-target="priceDisplay">
+                    $0 - $1000+
+                  </span>
+                </div>
+                
+                <div class="space-y-2">
+                  <label class="text-sm text-gray-600">Minimum Price</label>
+                  <%= range_field_tag 'filter_price_min', 
+                      params.dig(:filter_price_min) || 0,
+                      min: 0,
+                      max: 1000,
+                      step: 10,
+                      class: "w-full",
+                      data: { 
+                        advanced_filters_target: "priceMin",
+                        action: "input->advanced-filters#filterByCategory"
+                      } %>
+                </div>
+                
+                <div class="space-y-2">
+                  <label class="text-sm text-gray-600">Maximum Price</label>
+                  <%= range_field_tag 'filter_price_max',
+                      params.dig(:filter_price_max) || 1000,
+                      min: 0,
+                      max: 1000,
+                      step: 10,
+                      class: "w-full",
+                      data: { 
+                        advanced_filters_target: "priceMax",
+                        action: "input->advanced-filters#filterByCategory"
+                      } %>
+                </div>
+              </div>
+            </div>
+
+            <%# Category Filter %>
+            <div class="filter-section">
+              <div class="filter-section-title">
+                <span>📂 Categories</span>
+              </div>
+              
+              <div class="space-y-2 max-h-64 overflow-y-auto">
+                <% @categories&.each do |category| %>
+                  <label class="flex items-center space-x-3 p-2 rounded-lg hover:bg-spirit-light/50 cursor-pointer transition-colors duration-200 group">
+                    <%= check_box_tag "filter_categories[]", 
+                        category.id,
+                        params.dig(:filter_categories)&.include?(category.id.to_s),
+                        class: "w-4 h-4 text-spirit-primary border-gray-300 rounded focus:ring-spirit-primary",
+                        data: { 
+                          advanced_filters_target: "categoryCheckbox",
+                          action: "change->advanced-filters#filterByCategory",
+                          label: category.name
+                        } %>
+                    <span class="text-gray-700 group-hover:text-spirit-primary transition-colors duration-200">
+                      <%= category.name %>
+                    </span>
+                    <span class="text-xs text-gray-400 ml-auto">
+                      <%= category.products_count || 0 %>
+                    </span>
+                  </label>
+                <% end %>
+              </div>
+            </div>
+
+            <%# Rating Filter %>
+            <div class="filter-section">
+              <div class="filter-section-title">
+                <span>⭐ Rating</span>
+              </div>
+              
+              <div class="space-y-2">
+                <% [5, 4, 3, 2, 1].each do |rating| %>
+                  <button type="button"
+                          class="w-full flex items-center space-x-2 p-3 rounded-lg border-2 border-gray-200 hover:border-spirit-primary transition-all duration-200 text-left"
+                          data-action="click->advanced-filters#filterByRating"
+                          data-advanced-filters-target="ratingButton"
+                          data-rating="<%= rating %>">
+                    <div class="flex text-yellow-400">
+                      <%= '★' * rating + '☆' * (5 - rating) %>
+                    </div>
+                    <span class="text-sm text-gray-600">& Up</span>
+                  </button>
+                <% end %>
+              </div>
+            </div>
+
+            <%# Condition Filter %>
+            <div class="filter-section">
+              <div class="filter-section-title">
+                <span>🏷️ Condition</span>
+              </div>
+              
+              <div class="space-y-2">
+                <% ['New', 'Like New', 'Used - Good', 'Used - Fair'].each do |condition| %>
+                  <label class="flex items-center space-x-3 p-2 rounded-lg hover:bg-spirit-light/50 cursor-pointer transition-colors duration-200">
+                    <%= check_box_tag "filter_condition[]",
+                        condition,
+                        false,
+                        class: "w-4 h-4 text-spirit-primary border-gray-300 rounded focus:ring-spirit-primary",
+                        data: { action: "change->advanced-filters#filterByCategory" } %>
+                    <span class="text-gray-700"><%= condition %></span>
+                  </label>
+                <% end %>
+              </div>
+            </div>
+
+            <%# Shipping Filter %>
+            <div class="filter-section">
+              <div class="filter-section-title">
+                <span>🚚 Shipping</span>
+              </div>
+              
+              <div class="space-y-2">
+                <label class="flex items-center space-x-3 p-2 rounded-lg hover:bg-spirit-light/50 cursor-pointer transition-colors duration-200">
+                  <%= check_box_tag "filter_free_shipping",
+                      "1",
+                      false,
+                      class: "w-4 h-4 text-spirit-primary border-gray-300 rounded focus:ring-spirit-primary",
+                      data: { action: "change->advanced-filters#filterByCategory" } %>
+                  <span class="text-gray-700">Free Shipping</span>
+                </label>
+                
+                <label class="flex items-center space-x-3 p-2 rounded-lg hover:bg-spirit-light/50 cursor-pointer transition-colors duration-200">
+                  <%= check_box_tag "filter_fast_shipping",
+                      "1",
+                      false,
+                      class: "w-4 h-4 text-spirit-primary border-gray-300 rounded focus:ring-spirit-primary",
+                      data: { action: "change->advanced-filters#filterByCategory" } %>
+                  <span class="text-gray-700">Fast Shipping (1-2 days)</span>
+                </label>
+              </div>
+            </div>
+
+          <% end %>
+        </div>
+      </aside>
+
+      <%# Main Content %>
+      <main class="flex-1 min-w-0">
+        
+        <%# Results Header %>
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-4 sm:space-y-0">
+          <div>
+            <h2 class="text-2xl font-bold text-gray-900">
+              <span data-advanced-filters-target="resultCount">
+                <%= @items&.total_count || @items&.count || 0 %>
+              </span>
+              Products Found
+            </h2>
+            <p class="text-gray-600 mt-1">
+              <%= params[:query].present? ? "Search results for \"#{params[:query]}\"" : "Browse our collection" %>
+            </p>
+          </div>
+
+          <%# Sort Options %>
+          <div class="flex items-center space-x-4">
+            <label class="text-sm font-medium text-gray-700">Sort by:</label>
+            <%= select_tag 'sort',
+                options_for_select([
+                  ['Relevance', 'relevance'],
+                  ['Price: Low to High', 'price_asc'],
+                  ['Price: High to Low', 'price_desc'],
+                  ['Newest First', 'newest'],
+                  ['Most Popular', 'popular'],
+                  ['Top Rated', 'rating']
+                ], params[:sort]),
+                class: "px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-spirit-primary focus:border-transparent",
+                data: { 
+                  advanced_filters_target: "sortSelect",
+                  action: "change->advanced-filters#sortResults"
+                } %>
+          </div>
+        </div>
+
+        <%# Loading Spinner %>
+        <div class="hidden mb-6" data-advanced-filters-target="loadingSpinner">
+          <div class="flex items-center justify-center py-8">
+            <div class="spirit-loader"></div>
+            <span class="ml-4 text-spirit-primary font-medium">Loading products...</span>
+          </div>
+        </div>
+
+        <%# Products Grid %>
+        <div class="products-grid stagger-children" 
+             data-advanced-filters-target="results"
+             data-filter-results>
+          
+          <% if @items&.any? %>
+            <%= render partial: 'items/item_card', collection: @items, as: :item %>
+          <% else %>
+            <%# Empty State %>
+            <div class="col-span-full empty-state">
+              <svg class="empty-state-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <h3 class="empty-state-title">No Products Found</h3>
+              <p class="empty-state-description">
+                Try adjusting your filters or search terms
+              </p>
+              <button class="spirit-button" data-action="click->advanced-filters#clearAll">
+                Clear All Filters
+              </button>
+            </div>
+          <% end %>
+        </div>
+
+        <%# Pagination %>
+        <% if @items&.respond_to?(:total_pages) && @items.total_pages > 1 %>
+          <div class="mt-12 flex justify-center">
+            <%= paginate @items, 
+                theme: 'twitter-bootstrap-4',
+                nav_class: 'flex space-x-2' %>
+          </div>
+        <% end %>
+
+      </main>
+    </div>
+  </div>
+
+  <%# Comparison Bar (Fixed at bottom) %>
+  <div class="comparison-bar translate-y-full" 
+       data-product-comparison-target="bar">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <h3 class="text-lg font-bold text-gray-900">
+            Compare Products 
+            <span class="ml-2 px-2 py-1 bg-spirit-primary text-white rounded-full text-sm"
+                  data-product-comparison-target="count">0</span>
+          </h3>
+          
+          <div class="flex-1 flex space-x-2 overflow-x-auto"
+               data-product-comparison-target="list">
+            <!-- Comparison items will be inserted here -->
+          </div>
+        </div>
+        
+        <div class="flex items-center space-x-3">
+          <button class="spirit-button"
+                  data-action="click->product-comparison#showComparison"
+                  data-product-comparison-target="compareButton">
+            Compare Now
+          </button>
+          
+          <button class="px-4 py-2 text-gray-600 hover:text-red-500 font-medium"
+                  data-action="click->product-comparison#clearAll">
+            Clear All
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%# Cart Drawer %>
+  <div class="cart-drawer-backdrop hidden"
+       data-enhanced-cart-target="backdrop"
+       data-action="click->enhanced-cart#closeDrawer"></div>
+
+  <div class="cart-drawer translate-x-full"
+       data-enhanced-cart-target="cartDrawer">
+    <div class="flex items-center justify-between p-6 border-b border-gray-200">
+      <h2 class="text-2xl font-bold text-gray-900">
+        Shopping Cart
+        <span class="ml-2 text-sm font-normal text-gray-500">
+          (<span data-enhanced-cart-target="count"><%= current_user&.cart_items&.sum(:quantity) || 0 %></span> items)
+        </span>
+      </h2>
+      
+      <button class="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              data-action="click->enhanced-cart#closeDrawer">
+        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    
+    <div class="flex-1 overflow-y-auto p-6"
+         data-enhanced-cart-target="itemsList">
+      <!-- Cart items will be loaded here -->
+    </div>
+    
+    <div class="border-t border-gray-200 p-6 space-y-4">
+      <div class="flex items-center justify-between text-xl font-bold">
+        <span>Subtotal:</span>
+        <span class="text-spirit-primary" data-enhanced-cart-target="subtotal">
+          $0.00
+        </span>
+      </div>
+      
+      <button class="w-full spirit-button py-4 text-lg"
+              data-action="click->enhanced-cart#checkout">
+        Proceed to Checkout
+      </button>
+      
+      <button class="w-full px-4 py-2 text-gray-600 hover:text-gray-900 font-medium"
+              data-action="click->enhanced-cart#closeDrawer">
+        Continue Shopping
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<% content_for :head do %>
+  <%= stylesheet_link_tag 'enhanced_components', media: 'all' %>
+<% end %>

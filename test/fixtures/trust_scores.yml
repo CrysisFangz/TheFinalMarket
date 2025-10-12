@@ -1,0 +1,26 @@
+# Trust score fixtures for testing
+
+high_trust_user:
+  user: one
+  score: 85
+  trust_level: trusted
+  factors: { factors: [{ description: "Account age: 365 days", points: 10 }, { description: "Email verified", points: 5 }] }
+  calculation_details: { account_age_days: 365, verification_score: 10, total_activity: 50 }
+  created_at: <%= 1.day.ago %>
+
+low_trust_user:
+  user: two
+  score: 25
+  trust_level: low_trust
+  factors: { factors: [{ description: "Account age: 5 days", points: 2 }, { description: "3 fraud flags", points: -5 }] }
+  calculation_details: { account_age_days: 5, fraud_flags: 3 }
+  created_at: <%= 1.day.ago %>
+
+moderate_trust_user:
+  user: one
+  score: 55
+  trust_level: moderate_trust
+  factors: { factors: [{ description: "Account age: 90 days", points: 6 }] }
+  calculation_details: { account_age_days: 90 }
+  created_at: <%= 30.days.ago %>
+

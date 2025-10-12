@@ -1,0 +1,262 @@
+<div class="gamification-dashboard" data-controller="gamification"
+     data-gamification-user-id-value="<%= current_user.id %>"
+     data-gamification-current-points-value="<%= current_user.points %>"
+     data-gamification-current-coins-value="<%= current_user.coins %>"
+     data-gamification-current-level-value="<%= current_user.level %>"
+     data-gamification-next-level-points-value="<%= @stats[:next_level_points] %>">
+  
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+        Your Achievements
+      </h1>
+      <p class="text-gray-600 mt-2">Track your progress, complete challenges, and climb the leaderboards!</p>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <!-- Points Card -->
+      <div class="bg-gradient-to-br from-purple-500 to-purple-700 rounded-xl p-6 text-white shadow-lg">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-purple-200">Total Points</span>
+          <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+          </svg>
+        </div>
+        <div class="text-4xl font-bold" data-gamification-target="points">
+          <%= number_with_delimiter(current_user.points) %>
+        </div>
+      </div>
+
+      <!-- Coins Card -->
+      <div class="bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl p-6 text-white shadow-lg">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-yellow-200">Coins</span>
+          <span class="text-4xl">🪙</span>
+        </div>
+        <div class="text-4xl font-bold" data-gamification-target="coins">
+          <%= number_with_delimiter(current_user.coins) %>
+        </div>
+      </div>
+
+      <!-- Level Card -->
+      <div class="bg-gradient-to-br from-blue-500 to-indigo-700 rounded-xl p-6 text-white shadow-lg">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-blue-200">Level</span>
+          <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <div class="text-4xl font-bold" data-gamification-target="level">
+          <%= current_user.level %>
+        </div>
+        <div class="mt-2">
+          <div class="bg-blue-900 rounded-full h-2">
+            <div class="bg-white rounded-full h-2 transition-all duration-500" 
+                 data-gamification-target="progressBar"
+                 style="width: <%= @stats[:level_progress_percentage] %>%"></div>
+          </div>
+          <p class="text-xs text-blue-200 mt-1">
+            <%= @stats[:points_to_next_level] %> points to level <%= current_user.level + 1 %>
+          </p>
+        </div>
+      </div>
+
+      <!-- Streak Card -->
+      <div class="bg-gradient-to-br from-green-500 to-emerald-700 rounded-xl p-6 text-white shadow-lg">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-green-200">Login Streak</span>
+          <span class="text-4xl">🔥</span>
+        </div>
+        <div class="text-4xl font-bold">
+          <%= current_user.current_login_streak %> days
+        </div>
+        <p class="text-xs text-green-200 mt-2">
+          Best: <%= current_user.longest_login_streak %> days
+        </p>
+      </div>
+    </div>
+
+    <!-- Daily Challenges -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold text-gray-900">Daily Challenges</h2>
+        <span class="text-sm text-gray-500">
+          <%= @stats[:challenges_completed_today] %> / <%= @stats[:challenges_available_today] %> completed
+        </span>
+      </div>
+      
+      <div class="space-y-4" data-gamification-target="challengeList">
+        <% DailyChallenge.today.active.each do |challenge| %>
+          <% user_challenge = current_user.user_daily_challenges.find_by(daily_challenge: challenge) %>
+          <% progress = user_challenge&.progress_percentage || 0 %>
+          <% completed = user_challenge&.completed? || false %>
+          
+          <div class="border rounded-lg p-4 <%= completed ? 'bg-green-50 border-green-300' : 'border-gray-200' %>"
+               data-challenge-id="<%= challenge.id %>">
+            <div class="flex items-start justify-between">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-2">
+                  <h3 class="font-semibold text-gray-900"><%= challenge.title %></h3>
+                  <span class="px-2 py-1 text-xs rounded-full <%= difficulty_badge_class(challenge.difficulty) %>">
+                    <%= challenge.difficulty.titleize %>
+                  </span>
+                </div>
+                <p class="text-sm text-gray-600 mb-3"><%= challenge.description %></p>
+                
+                <div class="flex items-center gap-4">
+                  <div class="flex-1">
+                    <div class="bg-gray-200 rounded-full h-2">
+                      <div class="progress-bar bg-gradient-to-r from-purple-500 to-pink-500 rounded-full h-2 transition-all duration-500"
+                           style="width: <%= progress %>%"></div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">
+                      <%= user_challenge&.current_value || 0 %> / <%= challenge.target_value %>
+                    </p>
+                  </div>
+                  
+                  <div class="flex items-center gap-2 text-sm">
+                    <span class="text-purple-600 font-semibold">
+                      <%= challenge.reward_points %> pts
+                    </span>
+                    <% if challenge.reward_coins > 0 %>
+                      <span class="text-yellow-600 font-semibold">
+                        🪙 <%= challenge.reward_coins %>
+                      </span>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="ml-4">
+                <% if completed %>
+                  <span class="status inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                    ✓ Completed
+                  </span>
+                <% else %>
+                  <span class="status inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                    In Progress
+                  </span>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Recent Achievements & Leaderboards -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Recent Achievements -->
+      <div class="bg-white rounded-xl shadow-lg p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold text-gray-900">Recent Achievements</h2>
+          <%= link_to "View All", gamification_achievements_path, class: "text-purple-600 hover:text-purple-700 text-sm font-medium" %>
+        </div>
+        
+        <div class="space-y-4" data-gamification-target="achievementList">
+          <% @achievements.each do |user_achievement| %>
+            <% achievement = user_achievement.achievement %>
+            <div class="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                 data-achievement-id="<%= achievement.id %>">
+              <div class="flex-shrink-0">
+                <div class="w-16 h-16 rounded-full bg-gradient-to-br <%= tier_gradient(achievement.tier) %> flex items-center justify-center text-2xl">
+                  <%= achievement_icon(achievement) %>
+                </div>
+              </div>
+              <div class="flex-1">
+                <h3 class="font-semibold text-gray-900"><%= achievement.name %></h3>
+                <p class="text-sm text-gray-600"><%= achievement.description %></p>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="achievement-tier <%= achievement.tier %> text-xs px-2 py-1 rounded-full">
+                    <%= achievement.tier.titleize %>
+                  </span>
+                  <span class="text-xs text-purple-600 font-semibold">
+                    +<%= achievement.points %> pts
+                  </span>
+                </div>
+              </div>
+              <div class="text-xs text-gray-500">
+                <%= time_ago_in_words(user_achievement.earned_at) %> ago
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Leaderboards Preview -->
+      <div class="bg-white rounded-xl shadow-lg p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold text-gray-900">Leaderboards</h2>
+          <%= link_to "View All", gamification_leaderboards_path, class: "text-purple-600 hover:text-purple-700 text-sm font-medium" %>
+        </div>
+        
+        <div class="space-y-4">
+          <% @stats[:leaderboard_ranks].first(3).each do |leaderboard_data| %>
+            <div class="border border-gray-200 rounded-lg p-4">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="font-semibold text-gray-900"><%= leaderboard_data[:name] %></h3>
+                <% if leaderboard_data[:rank] %>
+                  <span class="px-3 py-1 rounded-full text-sm font-medium <%= rank_badge_class(leaderboard_data[:rank]) %>">
+                    #<%= leaderboard_data[:rank] %>
+                  </span>
+                <% else %>
+                  <span class="text-sm text-gray-500">Not ranked</span>
+                <% end %>
+              </div>
+              <p class="text-sm text-gray-600">
+                Your score: <span class="font-semibold"><%= number_with_delimiter(leaderboard_data[:score]) %></span>
+              </p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confetti Container -->
+  <div data-gamification-target="confetti" class="hidden fixed inset-0 pointer-events-none z-50"></div>
+
+  <!-- Level Up Modal -->
+  <div data-gamification-target="levelUpModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl p-8 max-w-md mx-4 text-center">
+      <div class="text-6xl mb-4">🎉</div>
+      <h2 class="text-3xl font-bold text-gray-900 mb-2">Level Up!</h2>
+      <p class="text-gray-600 mb-4">You've reached level <span class="new-level font-bold text-purple-600"></span>!</p>
+      <button data-action="click->gamification#closeLevelUpModal" 
+              class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+        Awesome!
+      </button>
+    </div>
+  </div>
+
+  <!-- Achievement Modal -->
+  <div data-gamification-target="achievementModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl p-8 max-w-md mx-4 text-center">
+      <div class="text-6xl mb-4">🏆</div>
+      <h2 class="text-3xl font-bold text-gray-900 mb-2">Achievement Unlocked!</h2>
+      <img class="achievement-icon w-24 h-24 mx-auto mb-4 rounded-full" src="" alt="">
+      <h3 class="achievement-name text-2xl font-bold text-purple-600 mb-2"></h3>
+      <p class="achievement-description text-gray-600 mb-4"></p>
+      <button data-action="click->gamification#closeAchievementModal" 
+              class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+        Continue
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  @keyframes floatUp {
+    0% {
+      opacity: 1;
+      transform: translate(-50%, -50%) translateY(0);
+    }
+    100% {
+      opacity: 0;
+      transform: translate(-50%, -50%) translateY(-100px);
+    }
+  }
+</style>
+

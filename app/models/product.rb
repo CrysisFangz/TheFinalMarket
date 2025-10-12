@@ -12,6 +12,15 @@ class Product < ApplicationRecord
   has_many :reviews, dependent: :destroy
   has_many :reviewers, through: :reviews, source: :user
 
+  # Dynamic Pricing associations
+  has_many :pricing_rules, dependent: :destroy
+  has_many :price_changes, dependent: :destroy
+  has_many :price_experiments, dependent: :destroy
+
+  # Internationalization associations
+  has_many :content_translations, as: :translatable, dependent: :destroy
+  belongs_to :origin_country, optional: true, class_name: 'Country', foreign_key: :origin_country_code, primary_key: :code
+
   # Elasticsearch configuration
   settings index: {
     number_of_shards: 1,

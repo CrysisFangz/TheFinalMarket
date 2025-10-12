@@ -19,10 +19,15 @@ Rails.application.configure do
   config.public_file_server.headers = { "cache-control" => "public, max-age=#{1.year.to_i}" }
 
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
-  # config.asset_host = "http://assets.example.com"
+  config.asset_host = ENV.fetch('CDN_HOST', nil)
 
   # Store uploaded files on the local file system (see config/storage.yml for options).
   config.active_storage.service = :local
+
+  # Enable HTTP/2 Server Push
+  config.action_dispatch.default_headers.merge!({
+    'Link' => '</assets/application.css>; rel=preload; as=style, </assets/application.js>; rel=preload; as=script'
+  })
 
   # Assume all access to the app is happening through a SSL-terminating reverse proxy.
   config.assume_ssl = true
@@ -47,7 +52,16 @@ Rails.application.configure do
   config.active_support.report_deprecations = false
 
   # Replace the default in-process memory cache store with a durable alternative.
-  config.cache_store = :solid_cache_store
+  # Use Redis for better performance and distributed caching
+  config.cache_store = :redis_cache_store, {
+    url: ENV.fetch('REDIS_URL', 'redis://localhost:6379/0'),
+    pool_size: 10,
+    pool_timeout: 5,
+    connect_timeout: 1,
+    read_timeout: 1,
+    write_timeout: 1,
+    reconnect_attempts: 3
+  }
 
   # Replace the default in-process and non-durable queuing backend for Active Job.
   config.active_job.queue_adapter = :solid_queue
