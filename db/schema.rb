@@ -611,8 +611,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_30_000007) do
     t.bigint "monthly_sales_cents", default: 0
     t.datetime "last_sales_update"
     t.string "bond_status", default: "none"
+    t.integer "failed_login_attempts", default: 0, null: false
+    t.datetime "locked_until"
+    t.datetime "last_login_at"
     t.index ["bond_status"], name: "index_users_on_bond_status"
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["failed_login_attempts"], name: "index_users_on_failed_login_attempts"
+    t.index ["locked_until"], name: "index_users_on_locked_until"
     t.index ["monthly_sales_cents"], name: "index_users_on_monthly_sales_cents"
     t.index ["seller_status"], name: "index_users_on_seller_status"
     t.index ["seller_tier"], name: "index_users_on_seller_tier"

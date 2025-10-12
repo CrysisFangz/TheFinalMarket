@@ -3,11 +3,14 @@ class User < ApplicationRecord
   include UserLeveling
   include SellerFeesConcern
   include SellerBondConcern
+  include PasswordSecurity
 
   has_many :seller_orders, class_name: 'Order', foreign_key: 'seller_id'
+  has_many :orders, foreign_key: 'user_id', dependent: :destroy
 
   has_secure_password
   has_one :wishlist, dependent: :destroy
+  has_many :wishlist_items, through: :wishlist
 
   enum role: { user: 0, moderator: 1, admin: 2 }
   enum user_type: { seeker: 'seeker', gem: 'gem' }
@@ -30,9 +33,12 @@ class User < ApplicationRecord
   validates :email, presence: true, length: { maximum: 255 },
                    format: { with: URI::MailTo::EMAIL_REGEXP },
                    uniqueness: { case_sensitive: false }
-  validates :password, presence: true, length: { minimum: 6 }
+  validates :password, presence: true, length: { minimum: 8 }, allow_nil: true
 
   before_save { self.email = email.downcase }
+
+  # Account security attributes
+  attr_accessor :failed_login_attempts, :locked_until
   
   has_one :cart, dependent: :destroy
   has_many :products, dependent: :destroy
@@ -74,6 +80,10 @@ class User < ApplicationRecord
       action: action,
       notifiable: notifiable
     )
+  end
+
+  def unread_notifications_count
+    notifications.where(read_at: nil).count
   end
 
   def gem?
@@ -144,6 +154,26 @@ class User < ApplicationRecord
     sold_orders.completed.sum(:total_amount)
   end
 
+  # Account security methods
+  def record_failed_login!
+    increment!(:failed_login_attempts, 1)
+    if failed_login_attempts >= 5
+      lock_account!(30.minutes)
+    end
+  end
+
+  def record_successful_login!
+    update_columns(failed_login_attempts: 0, locked_until: nil, last_login_at: Time.current)
+  end
+
+  def lock_account!(duration)
+    update_column(:locked_until, Time.current + duration)
+  end
+
+  def account_locked?
+    locked_until.present? && locked_until > Time.current
+  end
+
   private
 
   def set_default_role
@@ -161,12 +191,17 @@ class User < ApplicationRecord
     update(level: level + 1)
   end
 
-  # Cart methods
+  # Cart methods with race condition protection
   def add_to_cart(item, quantity = 1)
-    cart_items.find_or_initialize_by(item: item).tap do |cart_item|
+    ActiveRecord::Base.transaction do
+      cart_item = cart_items.lock.find_or_initialize_by(item: item)
       cart_item.quantity = cart_item.new_record? ? quantity : cart_item.quantity + quantity
-      cart_item.save
+      cart_item.save!
+      cart_item
     end
+  rescue ActiveRecord::RecordNotUnique
+    # Handle race condition where two requests try to create the same cart item
+    retry
   end
 
   def remove_from_cart(item, quantity = nil)

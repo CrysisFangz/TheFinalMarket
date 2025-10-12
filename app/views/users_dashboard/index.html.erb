@@ -1,0 +1,399 @@
+<%# app/views/dashboard/index.html.erb %>
+<%# Modern User Dashboard - Central Hub for Account Management %>
+
+<div class="dashboard-container" 
+     data-controller="dashboard scroll-animation" 
+     data-dashboard-user-id-value="<%= current_user.id %>">
+  
+  <!-- Welcome Header -->
+  <div class="dashboard-header" data-scroll-animation-target="animated">
+    <div class="header-content">
+      <div class="header-greeting">
+        <h1 class="greeting-text">
+          Welcome back, <span class="user-name"><%= current_user.name || "Friend" %></span>! 👋
+        </h1>
+        <p class="greeting-subtitle">
+          Here's what's happening with your account today
+        </p>
+      </div>
+      
+      <div class="header-actions">
+        <button class="btn-secondary-modern" data-action="click->dashboard#exportData" data-format="csv">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+          </svg>
+          Export Data
+        </button>
+        
+        <%= link_to edit_user_path(current_user), class: "btn-primary-modern" do %>
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          Settings
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Overview -->
+  <div class="stats-grid-dashboard" data-scroll-animation-target="animated">
+    <div class="stat-card-dashboard" data-dashboard-target="statCard">
+      <div class="stat-icon-container stat-blue">
+        <svg fill="currentColor" viewBox="0 0 20 20">
+          <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
+        </svg>
+      </div>
+      <div class="stat-details">
+        <div class="stat-value" data-stat-value="<%= current_user.orders.count %>">0</div>
+        <div class="stat-label">Total Orders</div>
+        <div class="stat-change positive">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+          </svg>
+          +12% this month
+        </div>
+      </div>
+      <%= link_to orders_path, class: "stat-action" do %>
+        View All →
+      <% end %>
+    </div>
+
+    <div class="stat-card-dashboard" data-dashboard-target="statCard">
+      <div class="stat-icon-container stat-green">
+        <svg fill="currentColor" viewBox="0 0 20 20">
+          <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/>
+          <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1v-5a1 1 0 00-.293-.707l-2-2A1 1 0 0015 7h-1z"/>
+        </svg>
+      </div>
+      <div class="stat-details">
+        <div class="stat-value" data-stat-value="<%= current_user.orders.where(status: [:processing, :shipped]).count %>">0</div>
+        <div class="stat-label">Active Shipments</div>
+        <div class="stat-change">
+          Arriving soon
+        </div>
+      </div>
+      <%= link_to orders_path(status: :shipped), class: "stat-action" do %>
+        Track →
+      <% end %>
+    </div>
+
+    <div class="stat-card-dashboard" data-dashboard-target="statCard">
+      <div class="stat-icon-container stat-purple">
+        <svg fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
+        </svg>
+      </div>
+      <div class="stat-details">
+        <div class="stat-value" data-stat-value="<%= current_user.wishlist_items.count %>">0</div>
+        <div class="stat-label">Wishlist Items</div>
+        <div class="stat-change">
+          3 on sale
+        </div>
+      </div>
+      <%= link_to wishlist_path, class: "stat-action" do %>
+        View →
+      <% end %>
+    </div>
+
+    <div class="stat-card-dashboard" data-dashboard-target="statCard">
+      <div class="stat-icon-container stat-orange">
+        <svg fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clip-rule="evenodd"/>
+        </svg>
+      </div>
+      <div class="stat-details">
+        <div class="stat-value" data-stat-value="<%= current_user.points || 0 %>">0</div>
+        <div class="stat-label">Reward Points</div>
+        <div class="stat-change">
+          Level <%= current_user.level || 1 %>
+        </div>
+      </div>
+      <%= link_to gamification_dashboard_path, class: "stat-action" do %>
+        Details →
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Main Dashboard Grid -->
+  <div class="dashboard-grid">
+    
+    <!-- Left Column -->
+    <div class="dashboard-column-main">
+      
+      <!-- Recent Orders Widget -->
+      <div class="widget-card" data-dashboard-target="widget" data-scroll-animation-target="animated">
+        <div class="widget-header">
+          <div class="widget-title">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+              <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+            </svg>
+            <h3>Recent Orders</h3>
+          </div>
+          <%= link_to orders_path, class: "widget-action" do %>
+            View All →
+          <% end %>
+        </div>
+
+        <div class="widget-content">
+          <% if current_user.orders.limit(3).any? %>
+            <div class="orders-list-compact">
+              <% current_user.orders.order(created_at: :desc).limit(3).each do |order| %>
+                <div class="order-item-compact">
+                  <div class="order-item-icon">
+                    <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3z"/>
+                    </svg>
+                  </div>
+                  <div class="order-item-details-compact">
+                    <div class="order-item-title">Order #<%= order.id %></div>
+                    <div class="order-item-meta">
+                      <%= order.created_at.strftime("%b %d, %Y") %> • 
+                      <%= order.order_items.sum(:quantity) %> items
+                    </div>
+                  </div>
+                  <div class="order-item-status">
+                    <span class="status-badge-compact status-<%= order.status %>">
+                      <%= order.status.titleize %>
+                    </span>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="empty-widget">
+              <svg class="w-16 h-16 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+              </svg>
+              <p class="empty-widget-text">No orders yet</p>
+              <%= link_to "Start Shopping", root_path, class: "btn-primary-modern btn-sm mt-3" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Activity Feed Widget -->
+      <div class="widget-card" data-dashboard-target="widget" data-scroll-animation-target="animated">
+        <div class="widget-header">
+          <div class="widget-title">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+            </svg>
+            <h3>Recent Activity</h3>
+          </div>
+          <div class="filter-pills">
+            <button class="filter-pill active" data-filter="all" data-action="click->dashboard#filterActivity">All</button>
+            <button class="filter-pill" data-filter="order" data-action="click->dashboard#filterActivity">Orders</button>
+            <button class="filter-pill" data-filter="review" data-action="click->dashboard#filterActivity">Reviews</button>
+          </div>
+        </div>
+
+        <div class="widget-content" data-dashboard-target="activityFeed">
+          <div class="activity-timeline">
+            <!-- Sample activities - in real app, these would come from database -->
+            <div class="activity-item" data-type="order">
+              <div class="activity-icon activity-icon-blue">
+                <svg fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3z"/>
+                </svg>
+              </div>
+              <div class="activity-content">
+                <div class="activity-title">Order placed successfully</div>
+                <div class="activity-meta">Order #12345 • 2 hours ago</div>
+              </div>
+            </div>
+
+            <div class="activity-item" data-type="review">
+              <div class="activity-icon activity-icon-purple">
+                <svg fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                </svg>
+              </div>
+              <div class="activity-content">
+                <div class="activity-title">Review submitted</div>
+                <div class="activity-meta">Wireless Headphones • Yesterday</div>
+              </div>
+            </div>
+
+            <div class="activity-item" data-type="wishlist">
+              <div class="activity-icon activity-icon-pink">
+                <svg fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <div class="activity-content">
+                <div class="activity-title">Item added to wishlist</div>
+                <div class="activity-meta">Smart Watch Pro • 2 days ago</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="dashboard-column-sidebar">
+      
+      <!-- Quick Actions Widget -->
+      <div class="widget-card" data-dashboard-target="widget" data-scroll-animation-target="animated">
+        <div class="widget-header">
+          <div class="widget-title">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.002z"/>
+            </svg>
+            <h3>Quick Actions</h3>
+          </div>
+        </div>
+
+        <div class="widget-content">
+          <div class="quick-actions-grid">
+            <%= link_to root_path, class: "quick-action-item" do %>
+              <div class="quick-action-icon">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+              </div>
+              <span>Shop Now</span>
+            <% end %>
+
+            <%= link_to orders_path, class: "quick-action-item" do %>
+              <div class="quick-action-icon">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+              </div>
+              <span>My Orders</span>
+            <% end %>
+
+            <%= link_to wishlist_path, class: "quick-action-item" do %>
+              <div class="quick-action-icon">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                </svg>
+              </div>
+              <span>Wishlist</span>
+            <% end %>
+
+            <%= link_to conversations_path, class: "quick-action-item" do %>
+              <div class="quick-action-icon">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                </svg>
+              </div>
+              <span>Messages</span>
+            <% end %>
+
+            <%= link_to notifications_index_path, class: "quick-action-item" do %>
+              <div class="quick-action-icon">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                </svg>
+              </div>
+              <span>Notifications</span>
+              <% if current_user.unread_notifications_count > 0 %>
+                <span class="notification-badge"><%= current_user.unread_notifications_count %></span>
+              <% end %>
+            <% end %>
+
+            <%= link_to edit_user_path(current_user), class: "quick-action-item" do %>
+              <div class="quick-action-icon">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+              </div>
+              <span>Settings</span>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gamification Widget -->
+      <% if current_user.points.present? && current_user.points > 0 %>
+        <div class="widget-card widget-gamification" data-dashboard-target="widget" data-scroll-animation-target="animated">
+          <div class="widget-header">
+            <div class="widget-title">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clip-rule="evenodd"/>
+              </svg>
+              <h3>Your Progress</h3>
+            </div>
+          </div>
+
+          <div class="widget-content">
+            <div class="gamification-stats">
+              <div class="level-badge">
+                <div class="level-number">Level <%= current_user.level || 1 %></div>
+                <div class="level-title">Active Shopper</div>
+              </div>
+
+              <div class="points-progress">
+                <div class="progress-bar-container">
+                  <div class="progress-bar-fill" style="width: <%= [(current_user.points % 1000) / 10, 100].min %>%"></div>
+                </div>
+                <div class="progress-label">
+                  <%= current_user.points %> / <%= ((current_user.level || 1) * 1000) %> points to next level
+                </div>
+              </div>
+
+              <div class="achievements-preview">
+                <div class="achievement-badge">🏆</div>
+                <div class="achievement-badge">⭐</div>
+                <div class="achievement-badge">💎</div>
+                <div class="achievement-badge locked">🔒</div>
+              </div>
+
+              <%= link_to gamification_dashboard_path, class: "btn-primary-modern w-full mt-4" do %>
+                View All Rewards →
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Account Security Widget -->
+      <div class="widget-card" data-dashboard-target="widget" data-scroll-animation-target="animated">
+        <div class="widget-header">
+          <div class="widget-title">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0110 1.944 11.954 11.954 0 0117.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            <h3>Account Security</h3>
+          </div>
+        </div>
+
+        <div class="widget-content">
+          <div class="security-checklist">
+            <div class="security-item <%= current_user.email_verified? ? 'completed' : '' %>">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+              <span>Email verified</span>
+            </div>
+
+            <div class="security-item <%= current_user.two_factor_enabled? ? 'completed' : '' %>">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <% if current_user.two_factor_enabled? %>
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                <% else %>
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                <% end %>
+              </svg>
+              <span>2FA enabled</span>
+            </div>
+
+            <div class="security-item completed">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+              <span>Strong password</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%= render "dashboard/styles" %>

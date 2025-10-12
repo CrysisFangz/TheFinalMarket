@@ -30,6 +30,11 @@ Rails.application.routes.draw do
     resources :pricing_rules, only: [:update, :destroy]
   end
 
+  # User Dashboard (Main Dashboard for All Users)
+  get 'dashboard', to: 'users_dashboard#index', as: :user_dashboard
+  get 'dashboard/stats', to: 'users_dashboard#stats', as: :dashboard_stats
+  get 'dashboard/activities', to: 'users_dashboard#activities', as: :dashboard_activities
+
   # Seller Dashboard
   namespace :dashboard do
     get 'overview'
@@ -195,6 +200,10 @@ Rails.application.routes.draw do
       delete :clear
     end
   end
+  
+  # User Orders
+  resources :orders, only: [:index, :show, :new, :create]
+  
   root 'products#index'
   
   resources :items do

@@ -26,8 +26,12 @@ class ProductsController < ApplicationController
       "price_asc"
     )
     
+    # Optimize N+1 queries with eager loading
     @products = ProductSearch.new(@search_params.merge(sort: @default_sort)).search
-    @products = @products.page(params[:page]).per(12)
+    @products = @products.includes(:categories, :tags, :user, :reviews)
+                         .with_attached_images
+                         .page(params[:page])
+                         .per(12)
 
     respond_to do |format|
       format.html
@@ -36,6 +40,11 @@ class ProductsController < ApplicationController
   end
 
   def show
+    # Eager load associations to prevent N+1 queries
+    @product = Product.includes(:categories, :tags, :user, reviews: :user)
+                      .with_attached_images
+                      .find(params[:id])
+    
     # A/B test the product page layout
     @layout_variant = ab_test(
       "product_page_layout",
@@ -61,6 +70,8 @@ class ProductsController < ApplicationController
 
     @similar_products = RecommendationService.new(current_user)
                          .similar_products(@product)
+                         .includes(:categories, :user)
+                         .with_attached_images
                          .limit(6)
 
     # Track view for A/B test

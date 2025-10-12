@@ -4,5 +4,34 @@
 			"path": "../.."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"zencoder.mcpServers": {
+			"sequential thinking": {
+				"command": "npx",
+				"args": [
+					"-y",
+					"@modelcontextprotocol/server-sequential-thinking"
+				]
+			},
+			"riza": {
+				"command": "npx",
+				"args": [
+					"@riza-io/riza-mcp"
+				],
+				"env": {
+					"RIZA_API_KEY": "your-api-key"
+				}
+			},
+			"tavily": {
+				"command": "npx",
+				"args": [
+					"-y",
+					"tavily-mcp@0.1.4"
+				],
+				"env": {
+					"TAVILY_API_KEY": "your-api-key-here"
+				}
+			}
+		}
+	}
 }

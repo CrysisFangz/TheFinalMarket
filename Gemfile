@@ -117,4 +117,4 @@ gem 'descriptive_statistics', '~> 2.5'  # Statistical calculations
 gem 'faker', '~> 3.2'
 
 # For debugging
-gem 'readapt', group :development
+gem 'readapt', group: :development
