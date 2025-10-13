@@ -1,0 +1,35 @@
+<%#
+  Dashboard Header Partial
+  Displays welcome message and primary actions
+  Optimized for performance and accessibility
+%>
+<div class="<%= dashboard_header_classes %>" data-scroll-animation-target="animated">
+  <div class="<%= header_content_classes %>">
+    <div class="<%= header_greeting_classes %>">
+      <h1 class="<%= greeting_text_classes %>">
+        <%= t('dashboard.welcome_back', name: user_greeting_name(current_user), default: "Welcome back, #{user_greeting_name(current_user)}! 👋") %>
+      </h1>
+      <p class="<%= greeting_subtitle_classes %>">
+        <%= t('dashboard.subtitle', default: "Here's what's happening with your account today") %>
+      </p>
+    </div>
+
+    <div class="<%= header_actions_classes %>">
+      <button
+        class="<%= dashboard_button_classes(:secondary) %>"
+        data-action="click->dashboard#exportData"
+        data-format="csv"
+        aria-label="<%= t('dashboard.export_data', default: 'Export your data as CSV') %>">
+        <%= render partial: 'shared/icons/download', locals: { css_class: 'w-5 h-5 mr-2' } %>
+        <%= t('dashboard.export_data', default: 'Export Data') %>
+      </button>
+
+      <%= link_to edit_user_path(current_user),
+          class: dashboard_button_classes(:primary),
+          'aria-label': t('dashboard.settings', default: 'Go to account settings') do %>
+        <%= render partial: 'shared/icons/settings', locals: { css_class: 'w-5 h-5 mr-2' } %>
+        <%= t('dashboard.settings', default: 'Settings') %>
+      <% end %>
+    </div>
+  </div>
+</div>

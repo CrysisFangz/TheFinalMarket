@@ -1,4 +1,183 @@
-.variant-edit
-  %h2.text-2xl.font-bold.mb-6 Edit Variant for #{@product.name}
+- content_for :title, t('variants.edit.title', product: @product&.name || 'Unknown Product')
+- content_for :meta_description, t('variants.edit.description', product: @product&.name || 'Unknown Product')
+- content_for :canonical_url, product_variant_url(@product, @variant) if @product && @variant
 
-  = render 'form'
+- unless @product
+  .error-container.bg-red-50.border-l-4.border-red-400.p-4.mb-6{role: "alert", "aria-live": "polite"}
+    .flex
+      .flex-shrink-0
+        %svg.w-5.h-5.text-red-400{"aria-hidden": "true", fill: "currentColor", viewBox: "0 0 20 20"}
+          %path{d: "M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"}
+      .ml-3
+        %h3.text-sm.font-medium.text-red-800= t('variants.errors.product_not_found')
+        %p.text-sm.text-red-700.mt-1= t('variants.errors.product_not_found_description')
+    .mt-4
+      = link_to t('common.back_to_products'), products_path, class: 'btn btn-secondary'
+
+- if @product && @variant
+  / Main content container with semantic structure
+  %main#variant-edit-main.variant-edit-container{role: "main", "aria-labelledby": "variant-edit-heading"}
+    / Skip to main content link for screen readers
+    %a.sr-only.sr-only-focusable{href: "#variant-edit-form"}= t('accessibility.skip_to_main_content')
+
+    / Breadcrumb navigation
+    %nav.breadcrumb-nav{"aria-label": t('navigation.breadcrumb')}
+      %ol.breadcrumb-list.flex.items-center.space-x-2.text-sm.text-gray-500.mb-6
+        %li.breadcrumb-item
+          = link_to t('navigation.products'), products_path, class: 'breadcrumb-link hover:text-gray-700'
+        %li.breadcrumb-separator{"aria-hidden": "true"} /
+        %li.breadcrumb-item
+          = link_to @product.name, @product, class: 'breadcrumb-link hover:text-gray-700', title: t('navigation.view_product')
+        %li.breadcrumb-separator{"aria-hidden": "true"} /
+        %li.breadcrumb-item
+          = link_to t('navigation.variants'), product_variants_path(@product), class: 'breadcrumb-link hover:text-gray-700'
+        %li.breadcrumb-separator{"aria-hidden": "true"} /
+        %li.breadcrumb-item.current{"aria-current": "page"}
+          %span.font-medium.text-gray-900= t('variants.edit.breadcrumb')
+
+    / Page header with context and actions
+    .page-header.mb-8
+      .flex.flex-col.lg:flex-row.lg:items-center.lg:justify-between.gap-4
+        .flex-1
+          %h1#variant-edit-heading.page-title.text-3xl.font-bold.text-gray-900.sm:text-4xl{itemprop: "name"}
+            = t('variants.edit.heading', product: @product.name)
+
+          %p.page-subtitle.text-lg.text-gray-600.mt-2{itemprop: "description"}
+            = t('variants.edit.subtitle')
+
+        / Quick actions
+        .flex.items-center.space-x-3
+          = link_to t('variants.actions.preview'),
+            product_variant_path(@product, @variant),
+            class: 'btn btn-outline',
+            target: '_blank',
+            rel: 'noopener noreferrer',
+            title: t('variants.actions.preview_title')
+
+          = link_to t('variants.actions.duplicate'),
+            new_product_variant_path(@product),
+            class: 'btn btn-outline',
+            title: t('variants.actions.duplicate_title')
+
+    / Progress indicator for multi-step forms (if applicable)
+    - if @variant.persisted?
+      .progress-section.mb-6
+        .bg-gray-200.rounded-full.h-2
+          .bg-blue-600.h-2.rounded-full.transition-all.duration-300.ease-out{style: "width: #{calculate_variant_completion_percentage(@variant)}%"}
+
+    / Main form container
+    .form-container.bg-white.shadow-sm.rounded-lg.border.border-gray-200
+      / Form header with status
+      .form-header.p-6.border-b.border-gray-200
+        .flex.items-center.justify-between
+          .flex.items-center.space-x-3
+            %div{class: form_status_classes(@variant)}
+              %svg.w-5.h-5{"aria-hidden": "true", fill: "currentColor", viewBox: "0 0 20 20"}
+                - if @variant.persisted?
+                  %path{d: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"}
+                - else
+                  %path{d: "M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"}
+
+            %div
+              %h2.form-title.text-lg.font-medium.text-gray-900
+                = @variant.persisted? ? t('variants.edit.form_title_existing') : t('variants.edit.form_title_new')
+              %p.form-description.text-sm.text-gray-500
+                = t('variants.edit.form_description')
+
+          / Form status badge
+          .flex.items-center.space-x-2
+            - if @variant.errors.any?
+              %span.status-badge.status-error= t('variants.status.has_errors', count: @variant.errors.count)
+            - elsif @variant.changed?
+              %span.status-badge.status-draft= t('variants.status.draft')
+            - else
+              %span.status-badge.status-saved= t('variants.status.saved')
+
+      / Form content with error summary
+      .form-content.p-6
+        / Error summary (displayed prominently at top)
+        - if @variant.errors.any?
+          .error-summary.bg-red-50.border.border-red-200.rounded-md.p-4.mb-6{role: "alert", "aria-live": "polite"}
+            %div
+              %h3.error-summary-title.text-sm.font-medium.text-red-800
+                = t('variants.errors.form_errors_title')
+              %ul.error-summary-list.text-sm.text-red-700.mt-2.space-y-1
+                - @variant.errors.full_messages.each do |message|
+                  %li.error-message.flex.items-start
+                    %svg.w-4.h-4.text-red-400.mt-0.5.mr-2{"aria-hidden": "true", fill: "currentColor", viewBox: "0 0 20 20"}
+                      %path{d: "M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"}
+                    = message
+
+        / Main form
+        %div#variant-edit-form{role: "form", "aria-labelledby": "variant-edit-heading"}
+          = render 'form'
+
+    / Additional information and help
+    .info-section.mt-8.grid.grid-cols-1.lg:grid-cols-2.gap-6
+      / Help card
+      .help-card.bg-blue-50.rounded-lg.p-6
+        %div.flex
+          .flex-shrink-0
+            %svg.w-6.h-6.text-blue-600{"aria-hidden": "true", fill: "currentColor", viewBox: "0 0 24 24"}
+              %path{d: "M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"}
+          .ml-3
+            %h3.help-title.text-sm.font-medium.text-blue-800
+              = t('variants.help.title')
+            %p.help-description.text-sm.text-blue-700.mt-1
+              = t('variants.help.description')
+            = link_to t('variants.help.learn_more'), help_variants_path, class: 'help-link', target: '_blank'
+
+      / Related actions card
+      .actions-card.bg-gray-50.rounded-lg.p-6
+        %h3.actions-title.text-sm.font-medium.text-gray-900.mb-3
+          = t('variants.actions.related_title')
+        .space-y-2
+          = link_to t('variants.actions.view_product'),
+            @product,
+            class: 'action-link block text-sm text-gray-700 hover:text-gray-900'
+
+          = link_to t('variants.actions.manage_variants'),
+            product_variants_path(@product),
+            class: 'action-link block text-sm text-gray-700 hover:text-gray-900'
+
+          = link_to t('variants.actions.product_analytics'),
+            product_analytics_path(@product),
+            class: 'action-link block text-sm text-gray-700 hover:text-gray-900'
+
+    / Auto-save indicator
+    .auto-save-indicator.fixed.bottom-4.right-4.bg-white.shadow-lg.rounded-lg.p-3.border{style: "display: none;"}
+      .flex.items-center.space-x-2
+        %svg.w-4.h-4.text-green-500.animate-spin{"aria-hidden": "true", fill: "none", viewBox: "0 0 24 24"}
+          %circle.cx-12.cy-12.r-10.stroke-current.stroke-2{"stroke-dasharray": "8 8"}
+        %span.text-sm.text-gray-600= t('variants.auto_save.saving')
+
+  / Loading overlay for turbo requests
+  .loading-overlay.fixed.inset-0.bg-gray-500.bg-opacity-75.flex.items-center.justify-center{style: "display: none;"}
+    .bg-white.rounded-lg.p-6.flex.items-center.space-x-3
+      %svg.w-6.h-6.text-blue-600.animate-spin{"aria-hidden": "true", fill: "none", viewBox: "0 0 24 24"}
+        %circle.cx-12.cy-12.r-10.stroke-current.stroke-2{"stroke-dasharray": "8 8"}
+      %span.text-gray-900= t('common.loading')
+
+/ Structured data for SEO
+- if @product && @variant
+  %script{type: "application/ld+json"}
+    = {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "name": @variant.name || "#{@product.name} - Variant",
+      "description": @variant.description || @product.description,
+      "brand": {
+        "@type": "Brand",
+        "name": @product.seller&.name || "Marketplace"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": @variant.price.to_s,
+        "priceCurrency": current_currency,
+        "availability": @variant.stock_quantity > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+        "seller": {
+          "@type": "Organization",
+          "name": @product.seller&.name || "Marketplace"
+        }
+      }
+    }.to_json

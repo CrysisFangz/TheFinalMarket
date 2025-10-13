@@ -1,0 +1,43 @@
+<%#
+  Account Security Widget Partial
+  Displays security status checklist for user account
+  Optimized for accessibility and clear visual feedback
+%>
+<div class="<%= widget_card_classes %>" data-dashboard-target="widget" data-scroll-animation-target="animated">
+  <%= render partial: 'dashboard/widget_header',
+             locals: {
+               title: t('dashboard.account_security', default: 'Account Security'),
+               icon: security_icon
+             } %>
+
+  <div class="<%= widget_content_classes %>">
+    <div class="<%= security_checklist_classes %>">
+      <!-- Email Verification Status -->
+      <%= render partial: 'dashboard/security_item',
+                 locals: {
+                   type: :email_verified,
+                   user: current_user,
+                   icon: email_verified_icon(current_user&.email_verified?),
+                   text: t('dashboard.security.email_verified', default: 'Email verified')
+                 } %>
+
+      <!-- Two-Factor Authentication Status -->
+      <%= render partial: 'dashboard/security_item',
+                 locals: {
+                   type: :two_factor_enabled,
+                   user: current_user,
+                   icon: two_factor_icon(current_user&.two_factor_enabled?),
+                   text: t('dashboard.security.two_factor', default: '2FA enabled')
+                 } %>
+
+      <!-- Password Strength Status -->
+      <%= render partial: 'dashboard/security_item',
+                 locals: {
+                   type: :strong_password,
+                   user: current_user,
+                   icon: password_icon,
+                   text: t('dashboard.security.strong_password', default: 'Strong password')
+                 } %>
+    </div>
+  </div>
+</div>

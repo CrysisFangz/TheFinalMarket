@@ -1,0 +1,37 @@
+<%#
+  Dashboard Header Partial
+  Displays welcome message and primary actions
+  Optimized for performance and accessibility
+%>
+<div class="dashboard-header" data-scroll-animation-target="animated" role="banner">
+  <div class="header-content">
+    <div class="header-greeting">
+      <h1 class="greeting-text">
+        <%= t('dashboard.welcome_back') %>
+        <span class="user-name" aria-label="<%= t('dashboard.user_name_aria', name: current_user.name || 'Friend') %>">
+          <%= current_user.name || "Friend" %>
+        </span>! 👋
+      </h1>
+      <p class="greeting-subtitle" role="complementary">
+        <%= t('dashboard.subtitle') %>
+      </p>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn-secondary-modern"
+              data-action="click->dashboard#exportData"
+              data-format="csv"
+              aria-label="<%= t('dashboard.export_data') %>">
+        <%= icon('clipboard-list', aria_label: t('dashboard.export_icon')) %>
+        <%= t('dashboard.export_data') %>
+      </button>
+
+      <%= link_to edit_user_path(current_user),
+          class: "btn-primary-modern",
+          aria: { label: t('dashboard.settings_aria') } do %>
+        <%= icon('cog-6-tooth', aria_label: t('dashboard.settings_icon')) %>
+        <%= t('dashboard.settings') %>
+      <% end %>
+    </div>
+  </div>
+</div>

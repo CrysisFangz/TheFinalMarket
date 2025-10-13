@@ -1,0 +1,14 @@
+<%#
+  Achievement Badge Partial
+  Displays individual achievement with lock status
+  Supports different achievement types and states
+%>
+<%
+  type ||= :default
+  locked ||= false
+%>
+<div class="<%= achievement_badge_classes(locked) %>"
+     role="img"
+     aria-label="<%= t("dashboard.achievement.#{type}", default: "#{type.to_s.titleize} achievement#{locked ? ' (locked)' : ''}") %>">
+  <%= achievement_icon_for_type(type, locked) %>
+</div>

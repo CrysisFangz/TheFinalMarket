@@ -1,0 +1,26 @@
+<%#
+  Widget Header Partial
+  Reusable header component for dashboard widgets
+  Supports icons, titles, and action buttons
+%>
+<%
+  title ||= 'Widget Title'
+  icon ||= nil
+  action_link ||= nil
+  action_text ||= 'View →'
+  additional_classes ||= ''
+%>
+<div class="<%= widget_header_classes(additional_classes) %>">
+  <div class="<%= widget_title_classes %>">
+    <% if icon %>
+      <%= icon %>
+    <% end %>
+    <h3><%= title %></h3>
+  </div>
+
+  <% if action_link %>
+    <%= link_to action_link, class: widget_action_classes, 'aria-label': "#{title} - #{action_text}" do %>
+      <%= action_text %>
+    <% end %>
+  <% end %>
+</div>

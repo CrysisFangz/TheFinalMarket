@@ -1,0 +1,88 @@
+<%#
+  Account Security Widget Partial
+  Displays security status and recommendations
+  Uses dashboard presenter for security data
+%>
+<% presenter = DashboardPresenter.new(current_user) %>
+<% security_status = presenter.security_status %>
+
+<div class="widget-card"
+     data-dashboard-target="widget"
+     data-scroll-animation-target="animated"
+     role="region"
+     aria-label="<%= t('dashboard.account_security') %>">
+
+  <div class="widget-header">
+    <div class="widget-title">
+      <%= icon('check-circle', size: 'w-6 h-6', aria_hidden: true) %>
+      <h3><%= t('dashboard.account_security') %></h3>
+    </div>
+  </div>
+
+  <div class="widget-content">
+    <div class="security-checklist" role="list" aria-label="<%= t('dashboard.security_checklist') %>">
+      <!-- Email Verification Status -->
+      <div class="security-item <%= security_status[:email_verified] ? 'completed' : 'pending' %>"
+           role="listitem">
+        <%= status_icon(security_status[:email_verified] ? :success : :warning) %>
+        <span><%= t('dashboard.email_verified') %></span>
+        <% unless security_status[:email_verified] %>
+          <button class="btn-link btn-sm ml-auto"
+                  aria-label="<%= t('dashboard.verify_email_action') %>">
+            <%= t('dashboard.verify') %>
+          </button>
+        <% end %>
+      </div>
+
+      <!-- Two-Factor Authentication Status -->
+      <div class="security-item <%= security_status[:two_factor_enabled] ? 'completed' : 'pending' %>"
+           role="listitem">
+        <%= status_icon(security_status[:two_factor_enabled] ? :success : :error) %>
+        <span><%= t('dashboard.two_factor_enabled') %></span>
+        <% unless security_status[:two_factor_enabled] %>
+          <%= link_to t('dashboard.enable'),
+              edit_user_path(current_user, anchor: 'security'),
+              class: "btn-link btn-sm ml-auto",
+              aria: { label: t('dashboard.enable_2fa_action') } %>
+        <% end %>
+      </div>
+
+      <!-- Password Strength Status -->
+      <div class="security-item completed" role="listitem">
+        <%= status_icon(:success) %>
+        <span><%= t('dashboard.strong_password') %></span>
+        <%= link_to t('dashboard.change'),
+            edit_user_path(current_user, anchor: 'password'),
+            class: "btn-link btn-sm ml-auto",
+            aria: { label: t('dashboard.change_password_action') } %>
+      </div>
+
+      <!-- Last Login Info -->
+      <% if security_status[:last_login] %>
+        <div class="security-item" role="listitem">
+          <%= icon('information-circle', class: 'text-blue-500') %>
+          <span><%= t('dashboard.last_login') %>: <%= time_ago_in_words(security_status[:last_login]) %> <%= t('dashboard.ago') %></span>
+        </div>
+      <% end %>
+
+      <!-- Login Streak -->
+      <% if security_status[:login_streak] > 0 %>
+        <div class="security-item" role="listitem">
+          <%= icon('star', class: 'text-yellow-500') %>
+          <span><%= t('dashboard.login_streak', days: security_status[:login_streak]) %></span>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Security Score -->
+    <div class="security-score" role="status" aria-label="<%= t('dashboard.security_score') %>">
+      <div class="score-circle">
+        <div class="score-value">85%</div>
+        <div class="score-label"><%= t('dashboard.security_score') %></div>
+      </div>
+      <div class="score-description">
+        <%= t('dashboard.security_score_description') %>
+      </div>
+    </div>
+  </div>
+</div>

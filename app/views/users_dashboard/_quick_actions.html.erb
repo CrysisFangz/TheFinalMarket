@@ -1,0 +1,39 @@
+<%#
+  Quick Actions Widget Partial
+  Provides easy access to common user actions
+  Uses dashboard presenter for dynamic badge display
+%>
+<% presenter = DashboardPresenter.new(current_user) %>
+<% quick_actions = presenter.quick_actions %>
+
+<div class="widget-card" data-dashboard-target="widget" data-scroll-animation-target="animated" role="region" aria-label="<%= t('dashboard.quick_actions') %>">
+  <div class="widget-header">
+    <div class="widget-title">
+      <%= icon('bars-3', size: 'w-6 h-6', aria_hidden: true) %>
+      <h3><%= t('dashboard.quick_actions') %></h3>
+    </div>
+  </div>
+
+  <div class="widget-content">
+    <div class="quick-actions-grid" role="list" aria-label="<%= t('dashboard.quick_actions_list') %>">
+      <% quick_actions.each do |action| %>
+        <%= link_to action[:path],
+            class: "quick-action-item",
+            aria: { label: t("dashboard.actions.#{action[:title].downcase.tr(' ', '_')}_aria", default: action[:title]) },
+            role: "listitem" do %>
+          <div class="quick-action-icon" aria-hidden="true">
+            <%= icon(action[:icon], aria_hidden: true) %>
+          </div>
+          <span><%= action[:title] %></span>
+          <% if action[:badge] %>
+            <span class="notification-badge"
+                  role="status"
+                  aria-label="<%= t('dashboard.notification_count', count: action[:badge]) %>">
+              <%= action[:badge] %>
+            </span>
+          <% end %>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>

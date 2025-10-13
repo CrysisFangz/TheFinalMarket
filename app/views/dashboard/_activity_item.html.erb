@@ -1,0 +1,32 @@
+<%#
+  Activity Item Partial
+  Displays a single activity in the activity feed
+  Supports different activity types with appropriate styling
+%>
+<%
+  activity ||= nil
+  return unless activity
+
+  activity_type = activity[:type] || 'default'
+  title = activity[:title] || 'Activity'
+  meta = activity[:meta] || 'Unknown time'
+  icon = activity[:icon]
+%>
+<div class="<%= activity_item_classes(activity_type) %>">
+  <div class="<%= activity_icon_classes(activity_type) %>">
+    <% if icon %>
+      <%= icon %>
+    <% else %>
+      <%= activity_icon_for_type(activity_type) %>
+    <% end %>
+  </div>
+
+  <div class="<%= activity_content_classes %>">
+    <div class="<%= activity_title_classes %>">
+      <%= title %>
+    </div>
+    <div class="<%= activity_meta_classes %>">
+      <%= meta %>
+    </div>
+  </div>
+</div>

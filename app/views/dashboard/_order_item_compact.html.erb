@@ -1,0 +1,30 @@
+<%#
+  Order Item Compact Partial
+  Displays a single order in compact format
+  Optimized for dashboard display with proper error handling
+%>
+<%
+  order ||= nil
+  return unless order
+%>
+<div class="<%= order_item_compact_classes %>">
+  <div class="<%= order_item_icon_classes %>">
+    <%= render partial: 'shared/icons/shopping_bag', locals: { css_class: 'w-8 h-8' } %>
+  </div>
+
+  <div class="<%= order_item_details_compact_classes %>">
+    <div class="<%= order_item_title_classes %>">
+      <%= t('dashboard.order_number', number: order.id, default: "Order ##{order.id}") %>
+    </div>
+    <div class="<%= order_item_meta_classes %>">
+      <%= safe_date_format(order.created_at) %> •
+      <%= format_order_item_count(order) %>
+    </div>
+  </div>
+
+  <div class="<%= order_item_status_classes %>">
+    <span class="<%= order_status_classes(order.status) %>" role="status" aria-label="<%= t("orders.status.#{order.status}", default: order.status.titleize) %>">
+      <%= t("orders.status.#{order.status}", default: order.status.titleize) %>
+    </span>
+  </div>
+</div>

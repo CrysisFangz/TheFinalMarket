@@ -1,0 +1,72 @@
+<%#
+  Activity Feed Widget Partial
+  Displays recent user activities with filtering capabilities
+  Uses dashboard presenter for optimized data aggregation
+%>
+<% presenter = DashboardPresenter.new(current_user) %>
+<% activities = presenter.recent_activities %>
+
+<div class="widget-card" data-dashboard-target="widget" data-scroll-animation-target="animated" role="region" aria-label="<%= t('dashboard.recent_activity') %>">
+  <div class="widget-header">
+    <div class="widget-title">
+      <%= icon('bell', size: 'w-6 h-6', aria_hidden: true) %>
+      <h3><%= t('dashboard.recent_activity') %></h3>
+    </div>
+    <div class="filter-pills" role="tablist" aria-label="<%= t('dashboard.activity_filters') %>">
+      <button class="filter-pill active"
+              data-filter="all"
+              data-action="click->dashboard#filterActivity"
+              role="tab"
+              aria-selected="true"
+              aria-controls="activity-feed">
+        <%= t('dashboard.all_activities') %>
+      </button>
+      <button class="filter-pill"
+              data-filter="order"
+              data-action="click->dashboard#filterActivity"
+              role="tab"
+              aria-selected="false"
+              aria-controls="activity-feed">
+        <%= t('dashboard.orders') %>
+      </button>
+      <button class="filter-pill"
+              data-filter="review"
+              data-action="click->dashboard#filterActivity"
+              role="tab"
+              aria-selected="false"
+              aria-controls="activity-feed">
+        <%= t('dashboard.reviews') %>
+      </button>
+    </div>
+  </div>
+
+  <div class="widget-content" data-dashboard-target="activityFeed" role="tabpanel" id="activity-feed">
+    <% if activities.any? %>
+      <div class="activity-timeline" role="list" aria-label="<%= t('dashboard.activity_timeline') %>">
+        <% activities.each do |activity| %>
+          <div class="activity-item"
+               data-type="<%= activity[:type] %>"
+               role="listitem">
+            <div class="activity-icon activity-icon-<%= activity_icon_color(activity[:type]) %>"
+                 aria-hidden="true">
+              <%= icon(activity[:icon], aria_hidden: true) %>
+            </div>
+            <div class="activity-content">
+              <div class="activity-title">
+                <%= activity[:title] %>
+              </div>
+              <div class="activity-meta">
+                <%= activity[:meta] %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="empty-widget" role="status" aria-label="<%= t('dashboard.no_activity') %>">
+        <%= icon('bell', size: 'w-16 h-16', class: 'mx-auto text-gray-300', aria_hidden: true) %>
+        <p class="empty-widget-text"><%= t('dashboard.no_activity_message') %></p>
+      </div>
+    <% end %>
+  </div>
+</div>

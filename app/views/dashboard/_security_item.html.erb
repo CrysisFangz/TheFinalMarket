@@ -1,0 +1,19 @@
+<%#
+  Security Item Partial
+  Individual security checklist item with status indicator
+  Provides clear visual feedback for security features
+%>
+<%
+  type ||= :default
+  user ||= nil
+  icon ||= nil
+  text ||= 'Security Feature'
+%>
+<div class="<%= security_status_classes(type, user) %>">
+  <% if icon %>
+    <%= icon %>
+  <% else %>
+    <%= security_icon_for_type(type, user) %>
+  <% end %>
+  <span><%= text %></span>
+</div>

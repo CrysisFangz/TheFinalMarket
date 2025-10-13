@@ -1,0 +1,59 @@
+<%#
+  Quick Actions Widget Partial
+  Provides shortcuts to common user actions
+  Optimized for accessibility and user experience
+%>
+<div class="<%= widget_card_classes %>" data-dashboard-target="widget" data-scroll-animation-target="animated">
+  <%= render partial: 'dashboard/widget_header',
+             locals: {
+               title: t('dashboard.quick_actions', default: 'Quick Actions'),
+               icon: quick_actions_icon
+             } %>
+
+  <div class="<%= widget_content_classes %>">
+    <div class="<%= quick_actions_grid_classes %>">
+      <%= render partial: 'dashboard/quick_action_item',
+                 locals: {
+                   link: root_path,
+                   icon: shop_icon,
+                   text: t('dashboard.shop_now', default: 'Shop Now')
+                 } %>
+
+      <%= render partial: 'dashboard/quick_action_item',
+                 locals: {
+                   link: orders_path,
+                   icon: orders_icon,
+                   text: t('dashboard.my_orders', default: 'My Orders')
+                 } %>
+
+      <%= render partial: 'dashboard/quick_action_item',
+                 locals: {
+                   link: wishlist_path,
+                   icon: wishlist_icon,
+                   text: t('dashboard.wishlist', default: 'Wishlist')
+                 } %>
+
+      <%= render partial: 'dashboard/quick_action_item',
+                 locals: {
+                   link: conversations_path,
+                   icon: messages_icon,
+                   text: t('dashboard.messages', default: 'Messages')
+                 } %>
+
+      <%= render partial: 'dashboard/quick_action_item',
+                 locals: {
+                   link: notifications_index_path,
+                   icon: notifications_icon,
+                   text: t('dashboard.notifications', default: 'Notifications'),
+                   badge: notification_badge_content(current_user)
+                 } %>
+
+      <%= render partial: 'dashboard/quick_action_item',
+                 locals: {
+                   link: edit_user_path(current_user),
+                   icon: settings_icon,
+                   text: t('dashboard.settings', default: 'Settings')
+                 } %>
+    </div>
+  </div>
+</div>

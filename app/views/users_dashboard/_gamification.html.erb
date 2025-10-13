@@ -1,0 +1,67 @@
+<%#
+  Gamification Widget Partial
+  Displays user's progress, level, and achievements
+  Conditionally rendered based on user points
+%>
+<% presenter = DashboardPresenter.new(current_user) %>
+<% gamification_data = presenter.gamification_data %>
+
+<% if gamification_data.present? %>
+  <div class="widget-card widget-gamification"
+       data-dashboard-target="widget"
+       data-scroll-animation-target="animated"
+       role="region"
+       aria-label="<%= t('dashboard.gamification_progress') %>">
+
+    <div class="widget-header">
+      <div class="widget-title">
+        <%= icon('star', size: 'w-6 h-6', aria_hidden: true) %>
+        <h3><%= t('dashboard.your_progress') %></h3>
+      </div>
+    </div>
+
+    <div class="widget-content">
+      <div class="gamification-stats">
+        <!-- Level Badge -->
+        <div class="level-badge" role="status" aria-label="<%= t('dashboard.current_level', level: gamification_data[:level]) %>">
+          <div class="level-number"><%= t('dashboard.level', level: gamification_data[:level]) %></div>
+          <div class="level-title"><%= t('dashboard.active_shopper') %></div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="points-progress" role="progressbar" aria-label="<%= t('dashboard.points_progress') %>">
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill"
+                 style="width: <%= gamification_data[:progress_percentage] %>%"
+                 aria-valuenow="<%= gamification_data[:progress_percentage] %>"
+                 aria-valuemin="0"
+                 aria-valuemax="100">
+            </div>
+          </div>
+          <div class="progress-label">
+            <%= t('dashboard.points_to_next',
+                  current: gamification_data[:points],
+                  total: gamification_data[:points_for_next_level]) %>
+          </div>
+        </div>
+
+        <!-- Achievement Badges -->
+        <div class="achievements-preview" role="list" aria-label="<%= t('dashboard.achievements') %>">
+          <% gamification_data[:achievements].each_with_index do |achievement, index| %>
+            <div class="achievement-badge <%= 'locked' unless achievement[:unlocked] %>"
+                 role="listitem"
+                 aria-label="<%= achievement[:unlocked] ? t('dashboard.achievement_unlocked') : t('dashboard.achievement_locked') %>">
+              <%= achievement[:icon] %>
+            </div>
+          <% end %>
+        </div>
+
+        <!-- View All Rewards Button -->
+        <%= link_to t('dashboard.view_all_rewards'),
+            gamification_dashboard_path,
+            class: "btn-primary-modern w-full mt-4",
+            aria: { label: t('dashboard.view_all_rewards_action') } %>
+      </div>
+    </div>
+  </div>
+<% end %>

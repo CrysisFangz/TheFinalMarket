@@ -1,0 +1,54 @@
+<%#
+  Activity Feed Widget Partial
+  Displays recent user activities with filtering capabilities
+  Optimized for performance with proper error handling
+%>
+<div class="<%= widget_card_classes %>" data-dashboard-target="widget" data-scroll-animation-target="animated">
+  <div class="<%= widget_header_classes %>">
+    <div class="<%= widget_title_classes %>">
+      <%= render partial: 'shared/icons/clock', locals: { css_class: 'w-6 h-6' } %>
+      <h3><%= t('dashboard.recent_activity', default: 'Recent Activity') %></h3>
+    </div>
+
+    <div class="<%= filter_pills_classes %>">
+      <button
+        class="<%= filter_pill_classes(true) %>"
+        data-filter="all"
+        data-action="click->dashboard#filterActivity"
+        aria-pressed="true">
+        <%= t('dashboard.filters.all', default: 'All') %>
+      </button>
+      <button
+        class="<%= filter_pill_classes %>"
+        data-filter="order"
+        data-action="click->dashboard#filterActivity"
+        aria-pressed="false">
+        <%= t('dashboard.filters.orders', default: 'Orders') %>
+      </button>
+      <button
+        class="<%= filter_pill_classes %>"
+        data-filter="review"
+        data-action="click->dashboard#filterActivity"
+        aria-pressed="false">
+        <%= t('dashboard.filters.reviews', default: 'Reviews') %>
+      </button>
+    </div>
+  </div>
+
+  <div class="<%= widget_content_classes %>" data-dashboard-target="activityFeed">
+    <div class="<%= activity_timeline_classes %>">
+      <% activities = dashboard_activities_for(current_user) %>
+      <% if activities.any? %>
+        <% activities.each do |activity| %>
+          <%= render partial: 'dashboard/activity_item', locals: { activity: activity } %>
+        <% end %>
+      <% else %>
+        <%= render partial: 'dashboard/empty_widget',
+                   locals: {
+                     message: t('dashboard.no_activities', default: 'No recent activities'),
+                     icon: empty_activity_icon
+                   } %>
+      <% end %>
+    </div>
+  </div>
+</div>

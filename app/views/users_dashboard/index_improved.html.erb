@@ -1,0 +1,48 @@
+<%#
+  Enhanced User Dashboard - Ultra-Modern, High-Performance Dashboard
+  Implements modular design, comprehensive caching, and accessibility features
+%>
+<div class="dashboard-container"
+     data-controller="dashboard scroll-animation"
+     data-dashboard-user-id-value="<%= current_user.id %>"
+     role="main"
+     aria-label="<%= t('dashboard.main_content') %>">
+
+  <!-- Welcome Header Section -->
+  <%= render 'users_dashboard/header' %>
+
+  <!-- Stats Overview Section -->
+  <%= render 'users_dashboard/stats_overview' %>
+
+  <!-- Main Dashboard Grid Layout -->
+  <div class="dashboard-grid" role="region" aria-label="<%= t('dashboard.main_content_grid') %>">
+
+    <!-- Primary Content Column -->
+    <div class="dashboard-column-main" role="region" aria-label="<%= t('dashboard.primary_content') %>">
+
+      <!-- Recent Orders Widget -->
+      <%= render 'users_dashboard/recent_orders' %>
+
+      <!-- Activity Feed Widget -->
+      <%= render 'users_dashboard/activity_feed' %>
+
+    </div>
+
+    <!-- Sidebar Content Column -->
+    <div class="dashboard-column-sidebar" role="complementary" aria-label="<%= t('dashboard.sidebar_content') %>">
+
+      <!-- Quick Actions Widget -->
+      <%= render 'users_dashboard/quick_actions' %>
+
+      <!-- Gamification Progress Widget (Conditional) -->
+      <%= render 'users_dashboard/gamification' %>
+
+      <!-- Account Security Widget -->
+      <%= render 'users_dashboard/account_security' %>
+
+    </div>
+  </div>
+</div>
+
+<!-- Dashboard-specific styles and scripts -->
+<%= render "dashboard/styles" %>

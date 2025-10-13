@@ -1,0 +1,61 @@
+<%#
+  Gamification Widget Partial
+  Displays user's progress, level, and achievements
+  Only shown when user has points/gamification data
+%>
+<% stats = dashboard_stats_for(current_user) %>
+<% return unless stats.gamification_eligible %>
+
+<div class="<%= widget_gamification_classes %>" data-dashboard-target="widget" data-scroll-animation-target="animated">
+  <%= render partial: 'dashboard/widget_header',
+             locals: {
+               title: t('dashboard.your_progress', default: 'Your Progress'),
+               icon: progress_icon
+             } %>
+
+  <div class="<%= widget_content_classes %>">
+    <div class="<%= gamification_stats_classes %>">
+      <!-- Level Badge -->
+      <div class="<%= level_badge_classes %>">
+        <div class="<%= level_number_classes %>">
+          <%= t('dashboard.level_info', level: stats.user_level, default: "Level #{stats.user_level}") %>
+        </div>
+        <div class="<%= level_title_classes %>">
+          <%= t('dashboard.level_title', default: 'Active Shopper') %>
+        </div>
+      </div>
+
+      <!-- Points Progress -->
+      <div class="<%= points_progress_classes %>">
+        <div class="<%= progress_bar_classes %>">
+          <div
+            class="<%= progress_bar_fill_classes %>"
+            style="width: <%= calculate_progress_percentage(stats.reward_points, stats.user_level) %>%"
+            role="progressbar"
+            aria-valuenow="<%= stats.reward_points %>"
+            aria-valuemin="0"
+            aria-valuemax="<%= stats.user_level * 1000 %>"
+            aria-label="<%= t('dashboard.points_progress', current: stats.reward_points, max: stats.user_level * 1000, default: "#{stats.reward_points} out of #{stats.user_level * 1000} points to next level") %>">
+          </div>
+        </div>
+        <div class="<%= progress_label_classes %>">
+          <%= t('dashboard.points_to_next', points: stats.reward_points, max: stats.user_level * 1000, default: "#{stats.reward_points} / #{stats.user_level * 1000} points to next level") %>
+        </div>
+      </div>
+
+      <!-- Achievements Preview -->
+      <div class="<%= achievements_preview_classes %>">
+        <%= render partial: 'dashboard/achievement_badge', locals: { type: :trophy, locked: false } %>
+        <%= render partial: 'dashboard/achievement_badge', locals: { type: :star, locked: false } %>
+        <%= render partial: 'dashboard/achievement_badge', locals: { type: :diamond, locked: false } %>
+        <%= render partial: 'dashboard/achievement_badge', locals: { type: :locked, locked: true } %>
+      </div>
+
+      <%= link_to gamification_dashboard_path,
+          class: dashboard_button_classes(:primary, :medium, 'w-full mt-4'),
+          'aria-label': t('dashboard.view_all_rewards', default: 'View all rewards and achievements') do %>
+        <%= t('dashboard.view_all_rewards', default: 'View All Rewards →') %>
+      <% end %>
+    </div>
+  </div>
+</div>

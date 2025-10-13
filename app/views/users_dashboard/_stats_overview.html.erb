@@ -1,0 +1,102 @@
+<%#
+  Stats Overview Partial
+  Displays key metrics and statistics cards
+  Uses dashboard presenter for optimized data loading
+%>
+<% presenter = DashboardPresenter.new(current_user) %>
+<% stats = presenter.stats_overview %>
+
+<div class="stats-grid-dashboard" data-scroll-animation-target="animated" role="region" aria-label="<%= t('dashboard.stats_overview') %>">
+  <!-- Total Orders Stat Card -->
+  <div class="stat-card-dashboard" data-dashboard-target="statCard" role="article">
+    <div class="stat-icon-container stat-blue" aria-hidden="true">
+      <%= icon('shopping-cart', aria_hidden: true) %>
+    </div>
+    <div class="stat-details">
+      <div class="stat-value"
+           data-stat-value="<%= stats[:total_orders] %>"
+           aria-label="<%= t('dashboard.total_orders_count', count: stats[:total_orders]) %>">
+        <%= stats[:total_orders] %>
+      </div>
+      <div class="stat-label"><%= t('dashboard.total_orders') %></div>
+      <div class="stat-change positive" role="status" aria-label="<%= t('dashboard.orders_trend', percentage: stats[:orders_trend]) %>">
+        <%= icon('chevron-up', size: 'w-4 h-4', aria_hidden: true) %>
+        <%= t('dashboard.trend_increase', percentage: stats[:orders_trend]) %>
+      </div>
+    </div>
+    <%= link_to orders_path,
+        class: "stat-action",
+        aria: { label: t('dashboard.view_all_orders') } do %>
+      <%= t('dashboard.view_all') %> →
+    <% end %>
+  </div>
+
+  <!-- Active Shipments Stat Card -->
+  <div class="stat-card-dashboard" data-dashboard-target="statCard" role="article">
+    <div class="stat-icon-container stat-green" aria-hidden="true">
+      <%= icon('clipboard-list', aria_hidden: true) %>
+    </div>
+    <div class="stat-details">
+      <div class="stat-value"
+           data-stat-value="<%= stats[:active_shipments] %>"
+           aria-label="<%= t('dashboard.active_shipments_count', count: stats[:active_shipments]) %>">
+        <%= stats[:active_shipments] %>
+      </div>
+      <div class="stat-label"><%= t('dashboard.active_shipments') %></div>
+      <div class="stat-change" role="status">
+        <%= t('dashboard.arriving_soon') %>
+      </div>
+    </div>
+    <%= link_to orders_path(status: :shipped),
+        class: "stat-action",
+        aria: { label: t('dashboard.track_shipments') } do %>
+      <%= t('dashboard.track') %> →
+    <% end %>
+  </div>
+
+  <!-- Wishlist Items Stat Card -->
+  <div class="stat-card-dashboard" data-dashboard-target="statCard" role="article">
+    <div class="stat-icon-container stat-purple" aria-hidden="true">
+      <%= icon('heart', aria_hidden: true) %>
+    </div>
+    <div class="stat-details">
+      <div class="stat-value"
+           data-stat-value="<%= stats[:wishlist_items] %>"
+           aria-label="<%= t('dashboard.wishlist_count', count: stats[:wishlist_items]) %>">
+        <%= stats[:wishlist_items] %>
+      </div>
+      <div class="stat-label"><%= t('dashboard.wishlist_items') %></div>
+      <div class="stat-change" role="status">
+        <%= t('dashboard.items_on_sale', count: 3) %>
+      </div>
+    </div>
+    <%= link_to wishlist_path,
+        class: "stat-action",
+        aria: { label: t('dashboard.view_wishlist') } do %>
+      <%= t('dashboard.view') %> →
+    <% end %>
+  </div>
+
+  <!-- Reward Points Stat Card -->
+  <div class="stat-card-dashboard" data-dashboard-target="statCard" role="article">
+    <div class="stat-icon-container stat-orange" aria-hidden="true">
+      <%= icon('star', aria_hidden: true) %>
+    </div>
+    <div class="stat-details">
+      <div class="stat-value"
+           data-stat-value="<%= stats[:reward_points] %>"
+           aria-label="<%= t('dashboard.reward_points_count', points: stats[:reward_points]) %>">
+        <%= stats[:reward_points] %>
+      </div>
+      <div class="stat-label"><%= t('dashboard.reward_points') %></div>
+      <div class="stat-change" role="status">
+        <%= t('dashboard.level_info', level: stats[:level]) %>
+      </div>
+    </div>
+    <%= link_to gamification_dashboard_path,
+        class: "stat-action",
+        aria: { label: t('dashboard.view_rewards') } do %>
+      <%= t('dashboard.details') %> →
+    <% end %>
+  </div>
+</div>

@@ -1,75 +1,48 @@
-<div class="container">
-  <div class="row">
-    <div class="col-md-4">
-      <div class="card mb-4">
+<div class="user-profile-container">
+  <div class="row g-4">
+    <!-- User Information Sidebar -->
+    <div class="col-lg-4">
+      <div class="user-info-card card shadow-sm">
         <div class="card-body">
-          <h2 class="card-title"><%= @user.name %> <%= render 'shared/seller_badge', user: @user %></h2>
-          <div class="mb-3">
-            <%= level_badge(@user) %>
-            <% unless @user.level >= 6 %>
-              <div class="level-progress mt-2">
-                <div class="progress" style="height: 20px;">
-                  <div class="progress-bar" role="progressbar" 
-                       style="width: <%= @user.progress_to_next_level %>%;" 
-                       aria-valuenow="<%= @user.progress_to_next_level %>" 
-                       aria-valuemin="0" 
-                       aria-valuemax="100">
-                    <%= @user.progress_to_next_level.round %>%
-                  </div>
-                </div>
-                <small class="text-muted">
-                  <%= @user.points_to_next_level %> points to <%= @user.level < 6 ? level_name(@user.level + 1) : 'max level' %>
-                </small>
-              </div>
-            <% end %>
+          <!-- User Header -->
+          <div class="user-header mb-4">
+            <h1 class="user-name h3 mb-2">
+              <%= @user.name %>
+              <%= render 'shared/seller_badge', user: @user %>
+            </h1>
+            <div class="user-level-section">
+              <%= level_badge(@user) %>
+              <%= render_user_level_progress(@user) %>
+            </div>
           </div>
-          <p class="card-text"><strong>Email:</strong> <%= @user.email %></p>
-          <p class="card-text"><strong>Member since:</strong> <%= @user.created_at.strftime("%B %Y") %></p>
+
+          <!-- User Details -->
+          <div class="user-details">
+            <div class="detail-row mb-3">
+              <span class="detail-label">Email:</span>
+              <span class="detail-value"><%= @user.email %></span>
+            </div>
+            <div class="detail-row mb-3">
+              <span class="detail-label">Member since:</span>
+              <span class="detail-value">
+                <%= @user.created_at.strftime("%B %Y") %>
+              </span>
+            </div>
+          </div>
         </div>
       </div>
-      
-      <% if @user == current_user && !@user.gem? %>
-        <div class="card mb-4">
-          <div class="card-body">
-            <h5 class="card-title">Want to become a seller?</h5>
-            <p class="card-text">Apply to become a Gem and start selling your products!</p>
-            <%= link_to "Apply Now", new_seller_application_path, class: "btn btn-primary" %>
-          </div>
-        </div>
-      <% end %>
+
+      <!-- Seller Application Card -->
+      <%= render_seller_application_card if can_apply_as_seller? %>
     </div>
 
-    <div class="col-md-8">
+    <!-- Main Content Area -->
+    <div class="col-lg-8">
+      <!-- Seller Profile Section -->
       <%= render 'shared/seller_profile' if @user.gem? %>
 
-      <% if @user.gem? && @user.active? %>
-        <div class="products-section card">
-          <div class="card-header">
-            <h3>Products by <%= @user.name %></h3>
-          </div>
-          <div class="card-body">
-            <% if @user.products.any? %>
-              <div class="row">
-                <% @user.products.each do |product| %>
-                  <div class="col-md-4 mb-4">
-                    <div class="card h-100">
-                      <% if product.image.attached? %>
-                        <%= image_tag product.image, class: "card-img-top" %>
-                      <% end %>
-                      <div class="card-body">
-                        <h5 class="card-title"><%= link_to product.name, product_path(product) %></h5>
-                        <p class="card-text"><%= number_to_currency(product.price) %></p>
-                      </div>
-                    </div>
-                  </div>
-                <% end %>
-              </div>
-            <% else %>
-              <p class="text-muted">No products listed yet.</p>
-            <% end %>
-          </div>
-        </div>
-      <% end %>
+      <!-- Products Section -->
+      <%= render_user_products_section if @user.gem? && @user.active? %>
     </div>
   </div>
 </div>

@@ -5,217 +5,271 @@
 # application with cutting-edge performance, security, and scalability features.
 #
 # Architecture: Monolithic Rails with Microservices Capabilities
-# Performance Target: Sub-100ms response times, <512MB memory usage
+# Performance Target: Sub-50ms response times, <256MB memory usage
 # Security Standard: Zero-trust architecture with comprehensive audit trails
-# Scalability Goal: 10,000+ concurrent users with horizontal scaling
+# Scalability Goal: 50,000+ concurrent users with horizontal scaling
+# Monitoring: Real-time performance and error tracking
 # =============================================================================
 
 source "https://rubygems.org"
 
 # =============================================================================
-# CORE RAILS STACK
+# CORE RAILS STACK - Latest stable versions for maximum performance
 # =============================================================================
 # Modern Rails framework with edge optimizations and performance enhancements
 gem "rails", "~> 8.0.2", ">= 8.0.2.1"
 
-# High-performance PostgreSQL adapter with advanced features
-gem "pg", "~> 1.5"
+# High-performance PostgreSQL adapter with advanced features and query optimization
+gem "pg", "~> 1.6"
 
-# Ultra-fast web server optimized for Rails
-gem "puma", "~> 6.4", ">= 6.4.2"
+# Ultra-fast web server optimized for Rails with advanced clustering
+gem "puma", "~> 7.0", ">= 7.0.3"
 
 # =============================================================================
-# SECURITY & AUTHENTICATION
+# SECURITY & AUTHENTICATION - Enterprise-grade security suite
 # =============================================================================
 # Advanced authorization system with policy-based access control
-gem "pundit", "~> 2.4"
+gem "pundit", "~> 2.5"
 
-# Rate limiting and DDoS protection
+# Rate limiting and DDoS protection with advanced threat detection
 gem "rack-attack", "~> 6.7"
 
-# CORS protection for API endpoints
+# CORS protection for API endpoints with fine-grained control
 gem "rack-cors", "~> 2.0"
 
 # Security vulnerability scanning and audit trails
-gem "brakeman", "~> 6.1", require: false
+gem "brakeman", "~> 7.1", require: false
 gem "bundler-audit", "~> 0.9", require: false
 
-# Two-factor authentication with TOTP
+# Database-level security and safe migrations
+gem "strong_migrations", "~> 2.0"
+gem "active_record_doctor", "~> 1.13", require: false
+
+# Two-factor authentication with TOTP and advanced security features
 gem "rotp", "~> 6.3"
 gem "rqrcode", "~> 2.2"
 
-# Secure credential management
+# Secure credential management with encryption at rest
 gem "encrypted_strings", "~> 0.3"
+gem "lockbox", "~> 1.3"  # Additional encryption utilities
 
 # =============================================================================
-# PERFORMANCE & MONITORING
+# PERFORMANCE & MONITORING - Advanced observability stack
 # =============================================================================
-# Advanced Performance Monitoring and Error Tracking
+# Production-ready performance monitoring with detailed insights
 gem "skylight", "~> 6.0"
-gem "sentry-rails", "~> 5.16"
-gem "sentry-ruby", "~> 5.16"
+gem "sentry-rails", "~> 5.20"
+gem "sentry-ruby", "~> 5.20"
 
-# Memory profiling and optimization
+# Memory profiling and optimization with leak detection
 gem "memory_profiler", "~> 1.0"
 gem "heap-profiler", "~> 0.6"
+gem "derailed_benchmarks", "~> 2.1", require: false
 
-# Boot time optimization
+# Boot time optimization with advanced caching strategies
 gem "bootsnap", "~> 1.18", require: false
 
-# HTTP acceleration and compression
+# HTTP acceleration and compression with edge caching
 gem "thruster", "~> 0.1", require: false
 
+# Development performance monitoring
+gem "rack-mini-profiler", "~> 3.3", require: false
+
 # =============================================================================
-# BACKGROUND JOBS & QUEUING
+# BACKGROUND JOBS & QUEUING - High-throughput job processing
 # =============================================================================
 # High-performance background job processing with advanced features
 gem "sidekiq", "~> 7.3"
 gem "sidekiq-cron", "~> 1.12"
-gem "sidekiq-scheduler", "~> 5.0"
 
-# Redis for caching and background job storage
-gem "redis", "~> 5.2"
+# Redis for caching and background job storage with clustering support
+gem "redis", "~> 5.4"
 gem "hiredis", "~> 0.6"  # Faster Redis client
 
+# Rails 8 optimized job system with advanced monitoring
+gem "solid_queue", "~> 1.2"
+gem "mission_control-jobs", "~> 0.3"
+
 # =============================================================================
-# DATABASE & SEARCH
+# DATABASE & SEARCH - Advanced data layer optimization
 # =============================================================================
 # Advanced search capabilities with Elasticsearch integration
 gem "elasticsearch-model", "~> 8.0"
 gem "elasticsearch-rails", "~> 8.0"
-gem "searchkick", "~> 5.3"
+gem "searchkick", "~> 5.4"
 
-# Advanced database query optimization
+# Database query optimization and health monitoring
 gem "activerecord-enhancedsqlite3-adapter", "~> 0.8"  # If using SQLite3
+gem "database_consistency", "~> 1.7", require: false
+
+# Advanced caching strategies
+gem "solid_cache", "~> 1.0"
 
 # =============================================================================
-# API & INTEGRATION
+# API & INTEGRATION - Robust external service integration
 # =============================================================================
-# API versioning and documentation
+# API versioning and documentation with OpenAPI 3.0 support
 gem "versionist", "~> 2.0"
 gem "grape", "~> 2.1"
 gem "grape-entity", "~> 1.0"
+gem "grape-swagger", "~> 2.1"
 
-# Circuit breaker for external service resilience
+# Circuit breaker for external service resilience with advanced patterns
 gem "circuitbox", "~> 2.0"
 gem "typhoeus", "~> 1.4"  # HTTP client for external APIs
+gem "httparty", "~> 0.22"  # Alternative HTTP client with better error handling
 
-# Webhook signature verification
-gem "jwt", "~> 2.8"
+# Webhook signature verification with multiple algorithm support
+gem "jwt", "~> 2.10"
+
+# Health checks for external services
+gem "health_check", "~> 3.1"
+gem "okcomputer", "~> 1.18"
 
 # =============================================================================
-# UI/UX & FRONTEND
+# UI/UX & FRONTEND - Modern, accessible, high-performance frontend
 # =============================================================================
-# Modern CSS framework with advanced components
-gem "bootstrap", "~> 5.3.3"
+# Modern CSS framework with advanced components and accessibility features
+gem "bootstrap", "~> 5.3.5"
 
-# Modern asset pipeline with Dart Sass support
-gem "propshaft", "~> 0.8"
+# Modern asset pipeline with Dart Sass support and advanced optimization
+gem "propshaft", "~> 1.2"
 gem "dartsass-rails", "~> 0.5.1"
 
-# Hotwire for SPA-like reactivity
+# Hotwire for SPA-like reactivity with enhanced performance
 gem "turbo-rails", "~> 2.0"
 gem "stimulus-rails", "~> 1.3"
 
-# Enhanced form handling
+# Enhanced form handling with real-time validation
 gem "turbo_boost-streams", "~> 0.1"
 gem "cocoon", "~> 1.2"
 
-# Reusable UI components
-gem "view_component", "~> 3.12"
+# Reusable UI components with advanced theming
+gem "view_component", "~> 3.23"
 gem "view_component-contrib", "~> 0.2"
 
-# =============================================================================
-# BUSINESS LOGIC
-# =============================================================================
-# Payment processing with Square
-gem "square.rb", "~> 42.0"
+# Advanced CSS processing and optimization
+gem "cssbundling-rails", "~> 1.4"
+gem "jsbundling-rails", "~> 1.3"
 
-# Money and currency handling
+# =============================================================================
+# BUSINESS LOGIC - Enterprise-grade business features
+# =============================================================================
+# Payment processing with Square and advanced fraud detection
+gem "square.rb", "~> 42.2"
+
+# Money and currency handling with multi-currency support
 gem "money-rails", "~> 1.15"
 gem "eu_central_bank", "~> 1.7"
 
-# Advanced pagination
-gem "pagy", "~> 9.0"
+# Advanced pagination with SEO optimization
+gem "pagy", "~> 9.1"
 
-# Business intelligence and analytics
+# Business intelligence and analytics with real-time processing
 gem "descriptive_statistics", "~> 2.5"
 
+# Advanced search and filtering
+gem "ransack", "~> 4.3"
+
 # =============================================================================
-# PWA & MOBILE
+# PWA & MOBILE - Progressive Web App and mobile optimization
 # =============================================================================
-# Progressive Web App support
+# Progressive Web App support with advanced caching strategies
 gem "web-push", "~> 3.0"
 gem "pwa", "~> 2.0"
 
-# Mobile API optimization
+# Mobile API optimization with device detection
 gem "rack-mobile-detect", "~> 0.4"
+gem "mobile-fu", "~> 1.4"
 
 # =============================================================================
-# DEVELOPMENT & TESTING
+# DEVELOPMENT & TESTING - Comprehensive development toolkit
 # =============================================================================
 group :development, :test do
-  # Advanced debugging and profiling
-  gem "debug", "~> 1.9", platforms: %i[ mri mingw mswin x64_mingw ], require: "debug/prelude"
-  gem "readapt", "~> 0.3"
+  # Advanced debugging and profiling with enhanced introspection
+  gem "debug", "~> 1.11", platforms: %i[ mri mingw mswin x64_mingw ], require: "debug/prelude"
+  gem "readapt", "~> 2.0"
 
-  # Code quality and style enforcement
-  gem "rubocop-rails-omakase", "~> 1.0", require: false
-  gem "rubocop-performance", "~> 1.21", require: false
+  # Code quality and style enforcement with advanced linting
+  gem "rubocop-rails-omakase", "~> 1.1", require: false
+  gem "rubocop-performance", "~> 1.26", require: false
   gem "rubocop-rspec", "~> 3.0", require: false
+  gem "rubocop-thread_safety", "~> 0.5", require: false
 
-  # Security scanning in development
+  # Security scanning in development with comprehensive coverage
   gem "dawnscanner", "~> 2.3", require: false
+
+  # Performance testing and benchmarking
+  gem "benchmark-ips", "~> 2.13"
+  gem "stackprof", "~> 0.2"
 end
 
 group :development do
-  # Enhanced console with advanced features
+  # Enhanced console with advanced features and better introspection
   gem "web-console", "~> 4.2"
   gem "awesome_print", "~> 1.9"
   gem "pry-rails", "~> 0.3"
   gem "pry-byebug", "~> 3.10"
+  gem "pry-stack_explorer", "~> 0.6"
 end
 
 group :test do
-  # Comprehensive testing suite
+  # Comprehensive testing suite with advanced features
   gem "capybara", "~> 3.40"
-  gem "selenium-webdriver", "~> 4.17"
+  gem "selenium-webdriver", "~> 4.35"
   gem "webdrivers", "~> 5.3"
   gem "cuprite", "~> 0.15"  # Headless Chrome testing
 
-  # API testing
-  gem "rspec-rails", "~> 6.1"
+  # API testing with comprehensive coverage
+  gem "rspec-rails", "~> 7.0"
   gem "factory_bot_rails", "~> 6.4"
-  gem "faker", "~> 3.4"
+  gem "faker", "~> 3.5"
+  gem "shoulda-matchers", "~> 6.2"
+  gem "webmock", "~> 3.23"
+  gem "vcr", "~> 6.2"
+
+  # Performance and load testing
+  gem "test-prof", "~> 1.3"
 end
 
 # =============================================================================
-# PRODUCTION & DEPLOYMENT
+# PRODUCTION & DEPLOYMENT - Zero-downtime, scalable deployment
 # =============================================================================
-# Zero-downtime deployment
-gem "kamal", "~> 2.0", require: false
+# Zero-downtime deployment with advanced orchestration
+gem "kamal", "~> 2.7", require: false
 
-# Platform-specific optimizations
+# Platform-specific optimizations for all deployment targets
 gem "tzinfo-data", "~> 1.2024", platforms: %i[ mingw mswin x64_mingw jruby ]
 
-# Active Storage enhancements
-gem "image_processing", "~> 1.13"
+# Active Storage enhancements with advanced image processing
+gem "image_processing", "~> 1.14"
 gem "ruby-vips", "~> 2.2"
 
+# Rails 8 optimized caching and database connection handling
+gem "solid_cable", "~> 3.0"
+
 # =============================================================================
-# ENTERPRISE FEATURES
+# ENTERPRISE FEATURES - Advanced enterprise capabilities
 # =============================================================================
-# Feature flags for gradual rollouts
+# Feature flags for gradual rollouts with advanced targeting
 gem "flipper", "~> 1.3"
 gem "flipper-ui", "~> 1.3"
 gem "flipper-active_record", "~> 1.3"
 
-# Advanced enums with metadata
+# Advanced enums with metadata and validation
 gem "enumerize", "~> 2.8"
 
-# Blockchain integration (optional)
-# gem "eth", "~> 0.5"  # Uncommented for production use
-
-# Advanced statistical analysis
+# Advanced statistical analysis with machine learning capabilities
 gem "statsd-instrument", "~> 3.7"
 gem "datadog", "~> 2.1"
+
+# Advanced logging and audit trails
+gem "lograge", "~> 0.14"
+gem "request_store", "~> 1.7"
+
+# Blockchain integration (optional) - Ready for Web3 features
+# gem "eth", "~> 0.5"  # Uncommented for production use
+
+# Advanced internationalization with performance optimization
+gem "fast_gettext", "~> 2.4"
+gem "i18n-js", "~> 4.2"

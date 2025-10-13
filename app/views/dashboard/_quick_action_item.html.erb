@@ -1,0 +1,24 @@
+<%#
+  Quick Action Item Partial
+  Individual action item for the quick actions widget
+  Supports badges for notifications and proper accessibility
+%>
+<%
+  link ||= '#'
+  icon ||= nil
+  text ||= 'Action'
+  badge ||= nil
+%>
+<%= link_to link, class: quick_action_item_classes, 'aria-label': text do %>
+  <% if icon %>
+    <div class="<%= quick_action_item_classes %>-icon">
+      <%= icon %>
+    </div>
+  <% end %>
+  <span><%= text %></span>
+  <% if badge.present? %>
+    <span class="<%= notification_badge_classes %>" aria-label="<%= t('dashboard.unread_count', count: badge, default: "#{badge} unread items") %>">
+      <%= badge %>
+    </span>
+  <% end %>
+<% end %>

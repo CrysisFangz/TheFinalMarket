@@ -1,0 +1,33 @@
+<%#
+  Recent Orders Widget Partial
+  Displays user's recent orders with optimized queries
+  Includes empty state handling and proper error boundaries
+%>
+<div class="<%= widget_card_classes %>" data-dashboard-target="widget" data-scroll-animation-target="animated">
+  <%= render partial: 'dashboard/widget_header',
+             locals: {
+               title: t('dashboard.recent_orders', default: 'Recent Orders'),
+               icon: order_icon,
+               action_link: orders_path,
+               action_text: t('dashboard.view_all', default: 'View All →')
+             } %>
+
+  <div class="<%= widget_content_classes %>">
+    <% if stats.recent_orders.any? %>
+      <div class="<%= orders_list_compact_classes %>">
+        <% stats.recent_orders.each do |order| %>
+          <%= render partial: 'dashboard/order_item_compact', locals: { order: order } %>
+        <% end %>
+      </div>
+    <% else %>
+      <%= render partial: 'dashboard/empty_widget',
+                 locals: {
+                   icon: empty_orders_icon,
+                   message: t('dashboard.no_orders', default: 'No orders yet'),
+                   action_link: root_path,
+                   action_text: t('dashboard.start_shopping', default: 'Start Shopping'),
+                   action_class: dashboard_button_classes(:primary, :small, 'mt-3')
+                 } %>
+    <% end %>
+  </div>
+</div>

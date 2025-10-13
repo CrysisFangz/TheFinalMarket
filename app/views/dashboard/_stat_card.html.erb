@@ -1,0 +1,49 @@
+<%#
+  Dashboard Stat Card Partial
+  Reusable component for displaying individual statistics
+  Supports different types with appropriate styling and icons
+%>
+<%
+  stat_type ||= :default
+  icon_svg ||= nil
+  value ||= '0'
+  label ||= 'Stat Label'
+  change ||= nil
+  link ||= nil
+  link_text ||= 'View →'
+%>
+
+<div class="<%= stat_card_classes(stat_type) %>">
+  <div class="<%= stat_icon_container_classes(stat_type) %>">
+    <% if icon_svg %>
+      <%= icon_svg %>
+    <% else %>
+      <!-- Default icon based on stat type -->
+      <%= stat_icon_for_type(stat_type) %>
+    <% end %>
+  </div>
+
+  <div class="<%= stat_details_classes %>">
+    <div class="<%= stat_value_classes %>" data-stat-value="<%= value %>">
+      <%= format_stat_value(value) %>
+    </div>
+    <div class="<%= stat_label_classes %>">
+      <%= label %>
+    </div>
+
+    <% if change %>
+      <div class="<%= stat_change_classes(change[:type]) %>">
+        <% if change[:icon] %>
+          <%= change[:icon] %>
+        <% end %>
+        <%= change[:text] %>
+      </div>
+    <% end %>
+  </div>
+
+  <% if link %>
+    <%= link_to link, class: stat_action_classes, 'aria-label': "#{label} - #{link_text}" do %>
+      <%= link_text %>
+    <% end %>
+  <% end %>
+</div>

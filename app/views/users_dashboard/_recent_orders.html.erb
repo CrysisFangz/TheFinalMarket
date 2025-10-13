@@ -1,0 +1,60 @@
+<%#
+  Recent Orders Widget Partial
+  Displays user's most recent orders in a compact format
+  Includes error handling and empty states
+%>
+<% presenter = DashboardPresenter.new(current_user) %>
+<% recent_orders = presenter.recent_orders %>
+
+<div class="widget-card" data-dashboard-target="widget" data-scroll-animation-target="animated" role="region" aria-label="<%= t('dashboard.recent_orders') %>">
+  <div class="widget-header">
+    <div class="widget-title">
+      <%= icon('clipboard-list', size: 'w-6 h-6', aria_hidden: true) %>
+      <h3><%= t('dashboard.recent_orders') %></h3>
+    </div>
+    <%= link_to orders_path,
+        class: "widget-action",
+        aria: { label: t('dashboard.view_all_orders') } do %>
+      <%= t('dashboard.view_all') %> →
+    <% end %>
+  </div>
+
+  <div class="widget-content">
+    <% if recent_orders.any? %>
+      <div class="orders-list-compact" role="list" aria-label="<%= t('dashboard.recent_orders_list') %>">
+        <% recent_orders.each do |order| %>
+          <div class="order-item-compact" role="listitem">
+            <div class="order-item-icon" aria-hidden="true">
+              <%= icon('shopping-bag', size: 'w-8 h-8', aria_hidden: true) %>
+            </div>
+            <div class="order-item-details-compact">
+              <div class="order-item-title">
+                <%= t('dashboard.order_number', id: order[:id]) %>
+              </div>
+              <div class="order-item-meta">
+                <%= order[:formatted_date] %> •
+                <%= t('dashboard.items_count', count: order[:total_items]) %>
+              </div>
+            </div>
+            <div class="order-item-status">
+              <span class="status-badge-compact status-<%= order[:status] %>"
+                    role="status"
+                    aria-label="<%= t('dashboard.order_status', status: order[:status_title]) %>">
+                <%= order[:status_title] %>
+              </span>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="empty-widget" role="status" aria-label="<%= t('dashboard.no_orders') %>">
+        <%= icon('shopping-bag', size: 'w-16 h-16', class: 'mx-auto text-gray-300', aria_hidden: true) %>
+        <p class="empty-widget-text"><%= t('dashboard.no_orders_message') %></p>
+        <%= link_to t('dashboard.start_shopping'),
+            root_path,
+            class: "btn-primary-modern btn-sm mt-3",
+            aria: { label: t('dashboard.start_shopping_action') } %>
+      </div>
+    <% end %>
+  </div>
+</div>

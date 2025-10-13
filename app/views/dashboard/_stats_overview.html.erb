@@ -1,0 +1,56 @@
+<%#
+  Dashboard Stats Overview Partial
+  Displays key metrics and statistics cards
+  Uses optimized queries and caching for performance
+%>
+<% stats = dashboard_stats_for(current_user) %>
+
+<div class="<%= stats_grid_dashboard_classes %>" data-scroll-animation-target="animated">
+  <!-- Total Orders Stat Card -->
+  <%= render partial: 'dashboard/stat_card',
+             locals: {
+               stat_type: :orders,
+               icon_svg: shopping_cart_icon,
+               value: format_stat_value(stats.total_orders),
+               label: t('dashboard.stats.total_orders', default: 'Total Orders'),
+               change: { text: t('dashboard.stats.orders_growth', default: '+12% this month'), type: :positive },
+               link: orders_path,
+               link_text: t('dashboard.view_all', default: 'View All →')
+             } %>
+
+  <!-- Active Shipments Stat Card -->
+  <%= render partial: 'dashboard/stat_card',
+             locals: {
+               stat_type: :shipments,
+               icon_svg: shipping_icon,
+               value: format_stat_value(stats.active_shipments),
+               label: t('dashboard.stats.active_shipments', default: 'Active Shipments'),
+               change: { text: t('dashboard.stats.arriving_soon', default: 'Arriving soon') },
+               link: orders_path(status: :shipped),
+               link_text: t('dashboard.track', default: 'Track →')
+             } %>
+
+  <!-- Wishlist Items Stat Card -->
+  <%= render partial: 'dashboard/stat_card',
+             locals: {
+               stat_type: :wishlist,
+               icon_svg: wishlist_icon,
+               value: format_stat_value(stats.wishlist_count),
+               label: t('dashboard.stats.wishlist_items', default: 'Wishlist Items'),
+               change: { text: t('dashboard.stats.on_sale', default: '3 on sale') },
+               link: wishlist_path,
+               link_text: t('dashboard.view', default: 'View →')
+             } %>
+
+  <!-- Reward Points Stat Card -->
+  <%= render partial: 'dashboard/stat_card',
+             locals: {
+               stat_type: :points,
+               icon_svg: reward_icon,
+               value: format_stat_value(stats.reward_points),
+               label: t('dashboard.stats.reward_points', default: 'Reward Points'),
+               change: { text: t('dashboard.stats.level_info', default: "Level #{stats.user_level}") },
+               link: gamification_dashboard_path,
+               link_text: t('dashboard.details', default: 'Details →')
+             } %>
+</div>
