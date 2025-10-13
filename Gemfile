@@ -108,7 +108,7 @@ gem 'rotp', '~> 6.3'  # TOTP for 2FA
 gem 'rqrcode', '~> 2.2'  # QR code generation
 
 # For blockchain and crypto
-gem 'eth', '~> 0.5'  # Ethereum integration (optional)
+# gem 'eth', '~> 0.5'  # Ethereum integration (optional) - Commented out due to native extension build issues with rbsecp256k1
 
 # For data analysis
 gem 'descriptive_statistics', '~> 2.5'  # Statistical calculations

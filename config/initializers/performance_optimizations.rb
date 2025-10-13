@@ -18,8 +18,8 @@ Rails.application.configure do
   config.active_record.cache_versioning = true
   config.active_record.collection_cache_versioning = true
   
-  # Enable automatic query logging for slow queries
-  config.active_record.warn_on_records_fetched_greater_than = 1000
+  # Enable automatic query logging for slow queries (Rails 8 removed warn_on_records_fetched_greater_than)
+  # config.active_record.warn_on_records_fetched_greater_than = 1000
   
   # Enable parallel testing
   config.active_support.test_parallelization_threshold = 50
@@ -165,17 +165,21 @@ end
 
 # Memory profiling (development only)
 if Rails.env.development?
-  require 'memory_profiler'
-  
-  # Profile memory usage for specific actions
-  module MemoryProfiling
-    def profile_memory(&block)
-      report = MemoryProfiler.report(&block)
-      report.pretty_print
+  begin
+    require 'memory_profiler'
+    
+    # Profile memory usage for specific actions
+    module MemoryProfiling
+      def profile_memory(&block)
+        report = MemoryProfiler.report(&block)
+        report.pretty_print
+      end
     end
+    
+    ActionController::Base.include MemoryProfiling
+  rescue LoadError
+    # memory_profiler gem not available
   end
-  
-  ActionController::Base.include MemoryProfiling
 end
 
 # Request timeout

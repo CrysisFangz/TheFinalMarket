@@ -5,6 +5,8 @@
 #
 # Documentation: https://github.com/rack/rack-attack
 
+return unless defined?(Rack::Attack)
+
 class Rack::Attack
   # Configure cache store for tracking requests
   # In production, use Redis for better performance across multiple servers
