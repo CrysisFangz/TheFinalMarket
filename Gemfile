@@ -64,7 +64,7 @@ end
 gem 'pundit', '~> 2.3'
 
 # View components for reusable UI elements
-gem 'view_component', '~> 3.10'
+gem 'view_component', '~> 4.0'
 
 # PWA and offline support
 gem 'web-push', '~> 3.0'
