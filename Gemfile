@@ -96,7 +96,7 @@ gem 'jwt', '~> 2.7'         # For webhook verification
 gem 'encrypted_strings', '~> 0.3'
 
 # For background job processing with retries
-gem 'sidekiq', '~> 7.2'
+gem 'sidekiq', '~> 8.0'
 gem 'sidekiq-cron', '~> 1.10'
 gem "dartsass-rails", "~> 0.5.1"
 
