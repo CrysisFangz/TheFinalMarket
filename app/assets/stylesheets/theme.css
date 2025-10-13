@@ -1,65 +1,475 @@
+/* =================================================================
+   ANIMAL SPIRIT THEME SYSTEM
+   =================================================================
+   A mystical design system inspired by animal spirits and nature,
+   featuring deep purples, spiritual energy colors, and organic forms.
+
+   Design Philosophy:
+   - Deep mystical purples represent spiritual wisdom and intuition
+   - Warm orange accents symbolize creative energy and vitality
+   - Soft light tones evoke ethereal, otherworldly atmospheres
+   - Natural earth tones ground the design in nature's wisdom
+
+   Last Updated: 2025-10-13
+   Version: 2.0.0 - Performance & Accessibility Improvements
+   ================================================================= */
+
+/* =================================================================
+   CSS CUSTOM PROPERTIES (DESIGN TOKENS)
+   ================================================================= */
 :root {
-  /* Custom theme colors inspired by Animal Spirit */
-  --color-spirit-primary: #6B4FA9;     /* Deep mystical purple */
-  --color-spirit-secondary: #9C7BE3;   /* Lighter spiritual purple */
-  --color-spirit-accent: #FFB156;      /* Warm spirit energy orange */
-  --color-spirit-light: #F0E7FF;      /* Soft ethereal light purple */
-  --color-spirit-dark: #2D1B4F;       /* Deep mystical night */
-  --color-nature-green: #4CAF50;      /* Forest green */
-  --color-nature-brown: #8D6E63;      /* Earth brown */
-  
-  /* Animation properties */
-  --spirit-glow: 0 0 15px var(--color-spirit-secondary);
+  /* =============================================
+     PRIMARY COLOR PALETTE - Spiritual & Mystical
+     ============================================= */
+  --spirit-primary: #6B4FA9;      /* Deep mystical purple - main brand color */
+  --spirit-primary-rgb: 107, 79, 169;
+  --spirit-secondary: #9C7BE3;    /* Lighter spiritual purple - hover states */
+  --spirit-secondary-rgb: 156, 123, 227;
+  --spirit-accent: #FFB156;       /* Warm spirit energy orange - call-to-action */
+  --spirit-accent-rgb: 255, 177, 86;
+
+  /* =============================================
+     NEUTRAL & BACKGROUND COLORS
+     ============================================= */
+  --spirit-light: #F0E7FF;        /* Soft ethereal light purple - backgrounds */
+  --spirit-light-rgb: 240, 231, 255;
+  --spirit-dark: #2D1B4F;         /* Deep mystical night - dark mode/text */
+  --spirit-dark-rgb: 45, 27, 79;
+
+  /* =============================================
+     NATURE-INSPIRED ACCENTS
+     ============================================= */
+  --nature-green: #4CAF50;        /* Forest green - success states */
+  --nature-green-rgb: 76, 175, 80;
+  --nature-brown: #8D6E63;        /* Earth brown - warning/info states */
+  --nature-brown-rgb: 141, 110, 99;
+
+  /* =============================================
+     SEMANTIC COLOR TOKENS
+     ============================================= */
+  --color-success: var(--nature-green);
+  --color-warning: var(--nature-brown);
+  --color-error: #F44336;         /* Fallback error red */
+  --color-info: var(--spirit-secondary);
+
+  /* =============================================
+     TYPOGRAPHY SCALE
+     ============================================= */
+  --font-family-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-family-heading: Georgia, 'Times New Roman', serif;
+
+  --font-size-xs: 0.75rem;        /* 12px */
+  --font-size-sm: 0.875rem;       /* 14px */
+  --font-size-base: 1rem;         /* 16px */
+  --font-size-lg: 1.125rem;       /* 18px */
+  --font-size-xl: 1.25rem;        /* 20px */
+  --font-size-2xl: 1.5rem;        /* 24px */
+  --font-size-3xl: 1.875rem;      /* 30px */
+
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* =============================================
+     SPACING SCALE (BASED ON 4PX GRID)
+     ============================================= */
+  --space-1: 0.25rem;             /* 4px */
+  --space-2: 0.5rem;              /* 8px */
+  --space-3: 0.75rem;             /* 12px */
+  --space-4: 1rem;                /* 16px */
+  --space-5: 1.25rem;             /* 20px */
+  --space-6: 1.5rem;              /* 24px */
+  --space-8: 2rem;                /* 32px */
+  --space-10: 2.5rem;             /* 40px */
+  --space-12: 3rem;               /* 48px */
+
+  /* =============================================
+     SHADOW SYSTEM
+     ============================================= */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+  /* =============================================
+     SPIRITUAL EFFECTS & ANIMATIONS
+     ============================================= */
+  --spirit-glow: 0 0 20px var(--spirit-secondary);
+  --spirit-glow-subtle: 0 0 10px var(--spirit-secondary);
+  --spirit-gradient-primary: linear-gradient(135deg, var(--spirit-primary), var(--spirit-secondary));
+  --spirit-gradient-accent: linear-gradient(135deg, var(--spirit-accent), var(--nature-brown));
+
+  /* =============================================
+     ANIMATION TIMINGS
+     ============================================= */
+  --duration-fast: 150ms;
+  --duration-base: 300ms;
+  --duration-slow: 500ms;
+
+  --easing-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --easing-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --easing-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* =============================================
+     BREAKPOINTS (FOR REFERENCE)
+     ============================================= */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+
+  /* =============================================
+     Z-INDEX SCALE
+     ============================================= */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
 }
 
-/* Custom Tailwind classes */
-@layer components {
-  .spirit-gradient {
-    background: linear-gradient(135deg, var(--color-spirit-primary), var(--color-spirit-secondary));
-  }
-  
-  .spirit-button {
-    @apply px-4 py-2 rounded-lg font-medium transition-all duration-300;
-    background: var(--color-spirit-primary);
-    color: var(--color-spirit-light);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  .spirit-button:hover {
-    background: var(--color-spirit-secondary);
-    box-shadow: var(--spirit-glow);
-    transform: translateY(-1px);
-  }
-
-  .spirit-card {
-    @apply bg-white rounded-lg p-4 transition-all duration-300;
-    border: 2px solid var(--color-spirit-light);
-  }
-
-  .spirit-card:hover {
-    border-color: var(--color-spirit-secondary);
-    box-shadow: var(--spirit-glow);
-  }
-
-  .spirit-input {
-    @apply rounded-lg border-2 px-3 py-2 transition-all duration-300;
-    border-color: var(--color-spirit-light);
-  }
-
-  .spirit-input:focus {
-    border-color: var(--color-spirit-secondary);
-    box-shadow: var(--spirit-glow);
-    outline: none;
-  }
+/* =================================================================
+   BASE STYLES & NORMALIZE
+   ================================================================= */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
-/* Custom animations */
-@keyframes spirit-pulse {
-  0% { opacity: 0.6; }
-  50% { opacity: 1; }
-  100% { opacity: 0.6; }
+html {
+  line-height: 1.15;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  color: var(--spirit-dark);
+  background-color: #ffffff; /* Fallback for older browsers */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* =================================================================
+   UTILITY CLASSES
+   ================================================================= */
+
+/* =============================================
+   SPIRITUAL ENERGY EFFECTS
+   ============================================= */
+.spirit-glow {
+  box-shadow: var(--spirit-glow);
+}
+
+.spirit-glow-subtle {
+  box-shadow: var(--spirit-glow-subtle);
+}
+
+.spirit-gradient {
+  background: var(--spirit-gradient-primary);
+}
+
+.spirit-gradient-accent {
+  background: var(--spirit-gradient-accent);
+}
+
+/* =============================================
+   ANIMATION UTILITIES
+   ============================================= */
+.spirit-float {
+  transform: translateY(0px);
+  animation: spirit-float 3s ease-in-out infinite;
 }
 
 .spirit-pulse {
-  animation: spirit-pulse 2s infinite;
+  animation: spirit-pulse 2s ease-in-out infinite;
+}
+
+/* =================================================================
+   COMPONENT STYLES
+   ================================================================= */
+
+/* =============================================
+   SPIRIT BUTTON COMPONENT
+   ============================================= */
+.spirit-button {
+  /* Base styles */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+
+  /* Spacing & Typography */
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.5;
+  text-decoration: none;
+  white-space: nowrap;
+
+  /* Visual styles */
+  border: 2px solid transparent;
+  border-radius: 0.5rem;
+  background: var(--spirit-primary);
+  color: var(--spirit-light);
+
+  /* Effects */
+  box-shadow: var(--shadow-sm);
+  transition: all var(--duration-base) var(--easing-ease-out);
+  cursor: pointer;
+
+  /* Hardware acceleration for smooth animations */
+  will-change: transform, background-color, box-shadow;
+  transform: translate3d(0, 0, 0);
+}
+
+.spirit-button:hover {
+  background: var(--spirit-secondary);
+  box-shadow: var(--spirit-glow);
+  transform: translate3d(0, -2px, 0);
+}
+
+.spirit-button:active {
+  transform: translate3d(0, 0, 0);
+  box-shadow: var(--shadow-sm);
+}
+
+.spirit-button:focus {
+  outline: 2px solid var(--spirit-secondary);
+  outline-offset: 2px;
+}
+
+.spirit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* =============================================
+   SPIRIT CARD COMPONENT
+   ============================================= */
+.spirit-card {
+  /* Base styles */
+  display: block;
+
+  /* Spacing & Layout */
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+
+  /* Visual styles */
+  background: #ffffff; /* Fallback for older browsers */
+  border: 2px solid var(--spirit-light);
+  border-radius: 0.5rem;
+
+  /* Effects */
+  box-shadow: var(--shadow-sm);
+  transition: all var(--duration-base) var(--easing-ease-out);
+
+  /* Hardware acceleration */
+  will-change: border-color, box-shadow, transform;
+  transform: translate3d(0, 0, 0);
+}
+
+.spirit-card:hover {
+  border-color: var(--spirit-secondary);
+  box-shadow: var(--spirit-glow);
+  transform: translate3d(0, -2px, 0);
+}
+
+.spirit-card:focus-within {
+  border-color: var(--spirit-secondary);
+  box-shadow: var(--spirit-glow-subtle);
+}
+
+/* =============================================
+   SPIRIT INPUT COMPONENT
+   ============================================= */
+.spirit-input {
+  /* Base styles */
+  display: block;
+  width: 100%;
+
+  /* Spacing & Typography */
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+
+  /* Visual styles */
+  border: 2px solid var(--spirit-light);
+  border-radius: 0.5rem;
+  background: #ffffff; /* Fallback for older browsers */
+  color: var(--spirit-dark);
+
+  /* Effects */
+  transition: all var(--duration-base) var(--easing-ease-out);
+
+  /* Hardware acceleration */
+  will-change: border-color, box-shadow;
+  transform: translate3d(0, 0, 0);
+}
+
+.spirit-input::placeholder {
+  color: var(--nature-brown);
+  opacity: 0.7;
+}
+
+.spirit-input:hover {
+  border-color: var(--spirit-primary);
+}
+
+.spirit-input:focus {
+  border-color: var(--spirit-secondary);
+  box-shadow: var(--spirit-glow-subtle);
+  outline: none;
+}
+
+.spirit-input:invalid {
+  border-color: var(--color-error);
+}
+
+.spirit-input:valid {
+  border-color: var(--color-success);
+}
+
+/* =============================================
+   RESPONSIVE DESIGN UTILITIES
+   ============================================= */
+@media (max-width: 640px) {
+  .spirit-button {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-size-xs);
+  }
+
+  .spirit-card {
+    padding: var(--space-3);
+    margin-bottom: var(--space-3);
+  }
+
+  .spirit-input {
+    padding: var(--space-2);
+    font-size: var(--font-size-sm);
+  }
+}
+
+/* =================================================================
+   KEYFRAME ANIMATIONS
+   ================================================================= */
+
+/* =============================================
+   SPIRIT PULSE ANIMATION
+   Optimized for performance with GPU acceleration
+   ============================================= */
+@keyframes spirit-pulse {
+  0% {
+    opacity: 0.6;
+    transform: scale3d(1, 1, 1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale3d(1.02, 1.02, 1);
+  }
+  100% {
+    opacity: 0.6;
+    transform: scale3d(1, 1, 1);
+  }
+}
+
+/* =============================================
+   SPIRIT FLOAT ANIMATION
+   Subtle floating effect for mystical elements
+   ============================================= */
+@keyframes spirit-float {
+  0%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -10px, 0);
+  }
+}
+
+/* =================================================================
+   ACCESSIBILITY & FALLBACKS
+   ================================================================= */
+
+/* =============================================
+   REDUCED MOTION SUPPORT
+   ============================================= */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .spirit-float {
+    animation: none;
+  }
+
+  .spirit-pulse {
+    animation: none;
+  }
+}
+
+/* =============================================
+   HIGH CONTRAST MODE SUPPORT
+   ============================================= */
+@media (prefers-contrast: high) {
+  .spirit-button {
+    border: 2px solid currentColor;
+  }
+
+  .spirit-card {
+    border-width: 3px;
+  }
+
+  .spirit-input {
+    border-width: 3px;
+  }
+}
+
+/* =============================================
+   DARK MODE SUPPORT (OPTIONAL)
+   ============================================= */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: var(--spirit-dark);
+    color: var(--spirit-light);
+  }
+
+  .spirit-card {
+    background: rgba(45, 27, 79, 0.9);
+    color: var(--spirit-light);
+  }
+
+  .spirit-input {
+    background: rgba(45, 27, 79, 0.9);
+    color: var(--spirit-light);
+  }
+}
+
+/* =============================================
+   PRINT STYLES
+   ============================================= */
+@media print {
+  .spirit-glow,
+  .spirit-glow-subtle {
+    box-shadow: none;
+  }
+
+  .spirit-button {
+    background: none !important;
+    color: black !important;
+    border: 2px solid black !important;
+  }
 }

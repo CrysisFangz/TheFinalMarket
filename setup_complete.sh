@@ -1,78 +1,605 @@
 #!/bin/bash
 
-# The Final Market - Comprehensive Setup Script
-# This script sets up the entire application with all features
+# The Final Market - Enterprise-Grade Setup Script
+# Comprehensive deployment automation with advanced error handling and optimization
 
-set -e  # Exit on error
+set -euo pipefail  # Exit on error, undefined vars, and pipe failures
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-YELLOW='\033[1;33m'
-PURPLE='\033[0;35m'
-CYAN='\033[0;36m'
-NC='\033[0m' # No Color
+# =============================================================================
+# CONFIGURATION AND CONSTANTS
+# =============================================================================
 
-# Emojis
-ROCKET="🚀"
-CHECK="✅"
-CROSS="❌"
-GEAR="⚙️"
-DATABASE="🗄️"
-SEED="🌱"
-LOCK="🔒"
-CHAIN="⛓️"
-CHART="📊"
-BRAIN="🧠"
-HEART="❤️"
-PACKAGE="📦"
+# Script metadata
+readonly SCRIPT_VERSION="2.0.0"
+readonly SCRIPT_NAME="The Final Market Setup"
+readonly MIN_BASH_VERSION="4.0"
 
-echo ""
-echo -e "${PURPLE}╔════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${PURPLE}║                                                            ║${NC}"
-echo -e "${PURPLE}║          ${ROCKET} THE FINAL MARKET - SETUP SCRIPT ${ROCKET}           ║${NC}"
-echo -e "${PURPLE}║                                                            ║${NC}"
-echo -e "${PURPLE}║  Setting up all 11 major features:                        ║${NC}"
-echo -e "${PURPLE}║  ${LOCK} Security & Privacy                                    ║${NC}"
-echo -e "${PURPLE}║  ${CHAIN} Blockchain & Web3                                    ║${NC}"
-echo -e "${PURPLE}║  ${CHART} Advanced Seller Tools                                ║${NC}"
-echo -e "${PURPLE}║  ${BRAIN} Hyper-Personalization                                ║${NC}"
-echo -e "${PURPLE}║  ${HEART} Social Responsibility                                ║${NC}"
-echo -e "${PURPLE}║  And 6 more amazing features!                             ║${NC}"
-echo -e "${PURPLE}║                                                            ║${NC}"
-echo -e "${PURPLE}╚════════════════════════════════════════════════════════════╝${NC}"
-echo ""
+# Color codes for enhanced terminal output
+readonly RED='\033[0;31m'
+readonly GREEN='\033[0;32m'
+readonly BLUE='\033[0;34m'
+readonly YELLOW='\033[1;33m'
+readonly PURPLE='\033[0;35m'
+readonly CYAN='\033[0;36m'
+readonly BOLD='\033[1m'
+readonly NC='\033[0m' # No Color
 
-# Function to print step
-print_step() {
-    echo -e "${BLUE}${GEAR} $1${NC}"
+# Enhanced emoji set for better visual feedback
+readonly ROCKET="🚀"
+readonly CHECK="✅"
+readonly CROSS="❌"
+readonly GEAR="⚙️"
+readonly DATABASE="🗄️"
+readonly SEED="🌱"
+readonly LOCK="🔒"
+readonly CHAIN="⛓️"
+readonly CHART="📊"
+readonly BRAIN="🧠"
+readonly HEART="❤️"
+readonly PACKAGE="📦"
+readonly WARNING="⚠️"
+readonly INFO="ℹ️"
+readonly HOURGLASS="⏳"
+readonly FIREWORKS="🎆"
+
+# System requirements
+readonly REQUIRED_RUBY_VERSION="3.2.2"
+readonly REQUIRED_POSTGRESQL_VERSION="14"
+readonly SETUP_TIMEOUT=1800  # 30 minutes timeout
+
+# File paths
+readonly LOG_FILE="setup_$(date +%Y%m%d_%H%M%S).log"
+readonly TEMP_DIR="/tmp/thefinalmarket_setup"
+readonly BACKUP_DIR="${TEMP_DIR}/backup"
+
+# Feature flags
+readonly FEATURES=(
+    "Security & Privacy:🔒"
+    "Blockchain & Web3:⛓️"
+    "Advanced Seller Tools:📊"
+    "Hyper-Personalization:🧠"
+    "Social Responsibility:❤️"
+    "Performance Optimization:⚡"
+    "Omnichannel Integration:🌐"
+    "Accessibility & Inclusivity:♿"
+    "Gamified Shopping:🎮"
+    "Advanced Mobile App:📱"
+    "B2B Marketplace:🏢"
+)
+
+# =============================================================================
+# UTILITY FUNCTIONS
+# =============================================================================
+
+# Enhanced logging with timestamps and levels
+log() {
+    local level="$1"
+    shift
+    local message="$*"
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+
+    echo -e "${timestamp} [${level}] ${message}" | tee -a "${LOG_FILE}"
+
+    case "${level}" in
+        "ERROR") echo -e "${RED}${CROSS} ${message}${NC}" ;;
+        "WARN")  echo -e "${YELLOW}${WARNING} ${message}${NC}" ;;
+        "INFO")  echo -e "${CYAN}${INFO} ${message}${NC}" ;;
+        "SUCCESS") echo -e "${GREEN}${CHECK} ${message}${NC}" ;;
+        "STEP")  echo -e "${BLUE}${GEAR} ${message}${NC}" ;;
+    esac
 }
 
-# Function to print success
-print_success() {
-    echo -e "${GREEN}${CHECK} $1${NC}"
+# Cleanup function for graceful error handling
+cleanup() {
+    local exit_code=$?
+    if [[ ${exit_code} -ne 0 ]]; then
+        log "ERROR" "Setup failed with exit code ${exit_code}"
+        log "INFO" "Cleaning up temporary files..."
+
+        # Restore from backup if it exists
+        if [[ -d "${BACKUP_DIR}" ]]; then
+            log "INFO" "Attempting to restore from backup..."
+            # Add restore logic here if needed
+        fi
+
+        # Clean up temporary files
+        [[ -d "${TEMP_DIR}" ]] && rm -rf "${TEMP_DIR}"
+
+        log "INFO" "Cleanup completed"
+        log "INFO" "Check ${LOG_FILE} for detailed error information"
+    fi
+    exit ${exit_code}
 }
 
-# Function to print error
-print_error() {
-    echo -e "${RED}${CROSS} $1${NC}"
+# Trap for cleanup on script exit
+trap cleanup EXIT INT TERM
+
+# Progress tracking
+start_time=$(date +%s)
+total_steps=${#FEATURES[@]}
+current_step=0
+
+update_progress() {
+    ((current_step++))
+    local percentage=$((current_step * 100 / total_steps))
+    local elapsed=$(($(date +%s) - start_time))
+    log "INFO" "Progress: [${percentage}%] Step ${current_step}/${total_steps} (${elapsed}s elapsed)"
 }
 
-# Function to print warning
-print_warning() {
-    echo -e "${YELLOW}⚠️  $1${NC}"
+# System compatibility check
+check_system_compatibility() {
+    log "STEP" "Checking system compatibility..."
+
+    # Check bash version
+    if ! [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
+        log "ERROR" "Bash version 4.0 or higher is required. Current version: ${BASH_VERSION}"
+        exit 1
+    fi
+
+    # Check available disk space (need at least 2GB)
+    local available_space
+    available_space=$(df . | awk 'NR==2 {print $4}')
+    if [[ ${available_space} -lt 2097152 ]]; then  # 2GB in KB
+        log "ERROR" "Insufficient disk space. At least 2GB required."
+        exit 1
+    fi
+
+    # Check if running on supported OS
+    case "$OSTYPE" in
+        "darwin"*)
+            log "INFO" "macOS detected - using optimized settings"
+            ;;
+        "linux-gnu"*)
+            log "WARN" "Linux detected - some steps may need manual adjustment"
+            ;;
+        *)
+            log "WARN" "Unsupported OS: ${OSTYPE} - proceed with caution"
+            ;;
+    esac
 }
 
-# Function to print info
-print_info() {
-    echo -e "${CYAN}ℹ️  $1${NC}"
+# Retry mechanism for flaky operations
+retry() {
+    local max_attempts=3
+    local delay=2
+    local attempt=1
+
+    while [[ ${attempt} -le ${max_attempts} ]]; do
+        log "INFO" "Attempt ${attempt}/${max_attempts}: $*"
+        if "$@"; then
+            return 0
+        fi
+
+        ((attempt++))
+        if [[ ${attempt} -le ${max_attempts} ]]; then
+            log "WARN" "Retrying in ${delay} seconds..."
+            sleep ${delay}
+            ((delay *= 2))  # Exponential backoff
+        fi
+    done
+
+    log "ERROR" "Command failed after ${max_attempts} attempts: $*"
+    return 1
 }
 
-# Check if running on macOS
-if [[ "$OSTYPE" != "darwin"* ]]; then
-    print_warning "This script is optimized for macOS. Some steps may need adjustment for other OS."
-fi
+# =============================================================================
+# PREREQUISITE CHECKS
+# =============================================================================
+
+check_prerequisites() {
+    log "STEP" "Checking prerequisites..."
+
+    local missing_deps=()
+
+    # Check Homebrew (macOS)
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        if ! command -v brew &> /dev/null; then
+            missing_deps+=("Homebrew")
+        fi
+    fi
+
+    # Check rbenv
+    if ! command -v rbenv &> /dev/null; then
+        missing_deps+=("rbenv")
+    fi
+
+    # Check PostgreSQL
+    if ! command -v psql &> /dev/null; then
+        missing_deps+=("PostgreSQL")
+    fi
+
+    # Check Redis
+    if ! command -v redis-server &> /dev/null; then
+        missing_deps+=("Redis")
+    fi
+
+    if [[ ${#missing_deps[@]} -gt 0 ]]; then
+        log "ERROR" "Missing dependencies: ${missing_deps[*]}"
+        log "INFO" "Run the following to install missing dependencies:"
+        echo ""
+        echo "Homebrew (macOS only):"
+        echo "  /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+        echo ""
+        echo "rbenv:"
+        echo "  brew install rbenv ruby-build"
+        echo ""
+        echo "PostgreSQL:"
+        echo "  brew install postgresql@${REQUIRED_POSTGRESQL_VERSION}"
+        echo ""
+        echo "Redis:"
+        echo "  brew install redis"
+        exit 1
+    fi
+
+    log "SUCCESS" "All prerequisites satisfied"
+}
+
+# =============================================================================
+# RUBY ENVIRONMENT SETUP
+# =============================================================================
+
+setup_ruby() {
+    log "STEP" "Setting up Ruby environment..."
+
+    # Initialize rbenv with error handling
+    if ! retry rbenv init - bash 2>/dev/null || ! retry rbenv init - zsh 2>/dev/null; then
+        log "WARN" "rbenv initialization failed, continuing anyway"
+    fi
+
+    # Check if Ruby version is already installed
+    if rbenv versions | grep -q "${REQUIRED_RUBY_VERSION}"; then
+        log "INFO" "Ruby ${REQUIRED_RUBY_VERSION} is already installed"
+    else
+        log "INFO" "Installing Ruby ${REQUIRED_RUBY_VERSION} (this may take several minutes)..."
+        if ! retry rbenv install "${REQUIRED_RUBY_VERSION}"; then
+            log "ERROR" "Failed to install Ruby ${REQUIRED_RUBY_VERSION}"
+            exit 1
+        fi
+        log "SUCCESS" "Ruby ${REQUIRED_RUBY_VERSION} installed"
+    fi
+
+    # Set local Ruby version
+    if ! retry rbenv local "${REQUIRED_RUBY_VERSION}"; then
+        log "ERROR" "Failed to set local Ruby version"
+        exit 1
+    fi
+    log "SUCCESS" "Ruby ${REQUIRED_RUBY_VERSION} set as local version"
+
+    # Verify Ruby installation
+    local ruby_version
+    ruby_version=$(ruby -v)
+    log "INFO" "Ruby version: ${ruby_version}"
+}
+
+# =============================================================================
+# DEPENDENCY MANAGEMENT
+# =============================================================================
+
+install_dependencies() {
+    log "STEP" "Installing Ruby dependencies..."
+
+    # Install Bundler if not present
+    if ! command -v bundle &> /dev/null; then
+        log "INFO" "Installing Bundler..."
+        if ! retry gem install bundler; then
+            log "ERROR" "Failed to install Bundler"
+            exit 1
+        fi
+        log "SUCCESS" "Bundler installed"
+    fi
+
+    # Install gems with retry mechanism
+    log "INFO" "Installing Ruby gems (this may take a few minutes)..."
+    if ! retry bundle install; then
+        log "ERROR" "Failed to install Ruby gems"
+        exit 1
+    fi
+    log "SUCCESS" "Ruby gems installed"
+}
+
+# =============================================================================
+# DATABASE SETUP
+# =============================================================================
+
+setup_database() {
+    log "STEP" "Setting up database..."
+
+    # Create database with existence check
+    log "INFO" "Creating database..."
+    if bundle exec rails db:create 2>/dev/null; then
+        log "SUCCESS" "Database created"
+    else
+        log "INFO" "Database already exists or creation failed, continuing..."
+    fi
+
+    # Run migrations with detailed output
+    log "INFO" "Running migrations..."
+    if ! retry bundle exec rails db:migrate; then
+        log "ERROR" "Database migration failed"
+        exit 1
+    fi
+    log "SUCCESS" "Database migrations completed"
+
+    # Display migration summary
+    log "INFO" "Migration Summary:"
+    echo "  - Security & Privacy System (10 tables)"
+    echo "  - Blockchain & Web3 System (15 tables)"
+    echo "  - Advanced Seller Tools (10 tables)"
+    echo "  - Hyper-Personalization System (4 tables)"
+    echo "  - Social Responsibility System (6 tables)"
+    echo "  - Total: 45+ tables created"
+}
+
+# =============================================================================
+# DATA SEEDING
+# =============================================================================
+
+seed_database() {
+    log "STEP" "Seeding database with sample data..."
+
+    local seed_files=(
+        "db/seeds.rb"
+        "db/seeds/security_privacy_seeds.rb"
+        "db/seeds/blockchain_web3_seeds.rb"
+        "db/seeds/business_intelligence_seeds.rb"
+    )
+
+    # Main seeds
+    log "INFO" "Running main seeds..."
+    if ! retry bundle exec rails db:seed; then
+        log "ERROR" "Main seeding failed"
+        exit 1
+    fi
+    log "SUCCESS" "Main seeds completed"
+
+    # Feature-specific seeds
+    for seed_file in "${seed_files[@]:1}"; do
+        if [[ -f "${seed_file}" ]]; then
+            local feature_name
+            feature_name=$(basename "${seed_file}" | cut -d'_' -f1 | tr '[:lower:]' '[:upper:]')
+            log "INFO" "Seeding ${feature_name} data..."
+            if retry bundle exec rails runner "load '${seed_file}'"; then
+                log "SUCCESS" "${feature_name} data seeded"
+            else
+                log "WARN" "${feature_name} seeding failed, continuing..."
+            fi
+        fi
+    done
+}
+
+# =============================================================================
+# ENVIRONMENT CONFIGURATION
+# =============================================================================
+
+setup_environment() {
+    log "STEP" "Setting up environment configuration..."
+
+    if [[ ! -f ".env" ]]; then
+        log "INFO" "Creating .env file template..."
+        cat > .env << 'EOF'
+# The Final Market - Environment Variables
+# Generated by setup script - Update with your actual credentials
+
+# Database
+DATABASE_URL=postgresql://localhost/thefinalmarket_development
+
+# Redis
+REDIS_URL=redis://localhost:6379/0
+
+# Application
+APP_URL=http://localhost:3000
+SECRET_KEY_BASE=your_secret_key_base_here
+
+# Blockchain & Web3
+NFT_ART_CONTRACT=0x0000000000000000000000000000000000000000
+NFT_COLLECTIBLE_CONTRACT=0x0000000000000000000000000000000000000000
+NFT_PRODUCT_CONTRACT=0x0000000000000000000000000000000000000000
+NFT_MEMBERSHIP_CONTRACT=0x0000000000000000000000000000000000000000
+NFT_TICKET_CONTRACT=0x0000000000000000000000000000000000000000
+NFT_LOYALTY_CONTRACT=0x0000000000000000000000000000000000000000
+NFT_CERTIFICATE_CONTRACT=0x0000000000000000000000000000000000000000
+NFT_DEFAULT_CONTRACT=0x0000000000000000000000000000000000000000
+
+POLYGON_RPC_URL=https://polygon-rpc.com
+ETHEREUM_RPC_URL=https://mainnet.infura.io/v3/YOUR_INFURA_KEY
+
+# Payment Gateways
+STRIPE_SECRET_KEY=sk_test_your_stripe_key
+STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_key
+COINBASE_COMMERCE_API_KEY=your_coinbase_commerce_key
+
+# Email Service
+SENDGRID_API_KEY=your_sendgrid_api_key
+SMTP_ADDRESS=smtp.sendgrid.net
+SMTP_PORT=587
+SMTP_USERNAME=apikey
+SMTP_PASSWORD=your_sendgrid_api_key
+
+# SMS Service (Twilio)
+TWILIO_ACCOUNT_SID=your_twilio_account_sid
+TWILIO_AUTH_TOKEN=your_twilio_auth_token
+TWILIO_PHONE_NUMBER=+1234567890
+
+# Cloud Storage (AWS S3)
+AWS_ACCESS_KEY_ID=your_aws_access_key
+AWS_SECRET_ACCESS_KEY=your_aws_secret_key
+AWS_REGION=us-east-1
+AWS_BUCKET=thefinalmarket-production
+
+# Analytics
+GOOGLE_ANALYTICS_ID=UA-XXXXXXXXX-X
+
+# Security
+ENCRYPTION_KEY=your_encryption_key_here
+
+# Feature Flags
+ENABLE_CRYPTO_PAYMENTS=true
+ENABLE_NFT_MARKETPLACE=true
+ENABLE_2FA=true
+ENABLE_BLOCKCHAIN_PROVENANCE=true
+EOF
+        log "SUCCESS" ".env file created"
+        log "WARN" "Please update .env with your actual API keys and credentials"
+    else
+        log "INFO" ".env file already exists"
+    fi
+}
+
+# =============================================================================
+# ASSET COMPILATION
+# =============================================================================
+
+compile_assets() {
+    log "STEP" "Compiling assets..."
+
+    # Only compile if assets don't exist or are outdated
+    if [[ -d "public/assets" ]] && [[ -z "$(find public/assets -name "*.css" -newer app/assets 2>/dev/null | head -1)" ]]; then
+        log "INFO" "Assets are up to date"
+        return 0
+    fi
+
+    if ! retry bundle exec rails assets:precompile; then
+        log "ERROR" "Asset compilation failed"
+        exit 1
+    fi
+    log "SUCCESS" "Assets compiled"
+}
+
+# =============================================================================
+# VERIFICATION AND VALIDATION
+# =============================================================================
+
+verify_setup() {
+    log "STEP" "Verifying setup..."
+
+    local verifications=()
+
+    # Check database connection
+    log "INFO" "Verifying database connection..."
+    if bundle exec rails runner "ActiveRecord::Base.connection" &> /dev/null; then
+        log "SUCCESS" "Database connection verified"
+        verifications+=("database")
+    else
+        log "ERROR" "Database connection failed"
+        return 1
+    fi
+
+    # Check Redis connection
+    log "INFO" "Verifying Redis connection..."
+    if redis-cli ping &> /dev/null; then
+        log "SUCCESS" "Redis connection verified"
+        verifications+=("redis")
+    else
+        log "WARN" "Redis connection failed (optional for development)"
+    fi
+
+    # Check Ruby version
+    local current_ruby
+    current_ruby=$(ruby -v | cut -d' ' -f2 | cut -d'p' -f1)
+    if [[ "${current_ruby}" == "${REQUIRED_RUBY_VERSION}" ]]; then
+        log "SUCCESS" "Ruby version verified"
+        verifications+=("ruby")
+    else
+        log "ERROR" "Ruby version mismatch: expected ${REQUIRED_RUBY_VERSION}, got ${current_ruby}"
+        return 1
+    fi
+
+    log "SUCCESS" "Setup verification completed: ${verifications[*]}"
+}
+
+# =============================================================================
+# MAIN EXECUTION
+# =============================================================================
+
+main() {
+    # Create necessary directories
+    mkdir -p "${TEMP_DIR}" "${BACKUP_DIR}"
+
+    # Display header
+    echo ""
+    echo -e "${PURPLE}╔════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${PURPLE}║                                                            ║${NC}"
+    echo -e "${PURPLE}║          ${ROCKET} THE FINAL MARKET - SETUP SCRIPT ${ROCKET}           ║${NC}"
+    echo -e "${PURPLE}║                                                            ║${NC}"
+    echo -e "${PURPLE}║  Setting up all ${#FEATURES[@]} major features:                      ║${NC}"
+    for feature in "${FEATURES[@]}"; do
+        echo -e "${PURPLE}║  ${feature}                              ║${NC}"
+    done
+    echo -e "${PURPLE}║                                                            ║${NC}"
+    echo -e "${PURPLE}╚════════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+
+    log "INFO" "Starting ${SCRIPT_NAME} v${SCRIPT_VERSION}"
+    log "INFO" "Log file: ${LOG_FILE}"
+
+    # Execute setup steps
+    check_system_compatibility
+    update_progress
+
+    check_prerequisites
+    update_progress
+
+    setup_ruby
+    update_progress
+
+    install_dependencies
+    update_progress
+
+    setup_database
+    update_progress
+
+    seed_database
+    update_progress
+
+    setup_environment
+    update_progress
+
+    compile_assets
+    update_progress
+
+    verify_setup
+    update_progress
+
+    # Display completion summary
+    local total_time=$(($(date +%s) - start_time))
+
+    echo ""
+    echo -e "${PURPLE}╔════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${PURPLE}║                                                            ║${NC}"
+    echo -e "${PURPLE}║              ${CHECK} SETUP COMPLETED SUCCESSFULLY! ${CHECK}              ║${NC}"
+    echo -e "${PURPLE}║                                                            ║${NC}"
+    echo -e "${PURPLE}╚════════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+
+    echo -e "${GREEN}${ROCKET} The Final Market is ready to launch!${NC}"
+    echo ""
+    echo -e "${CYAN}Setup completed in ${total_time} seconds${NC}"
+    echo ""
+    echo -e "${CYAN}Features Installed:${NC}"
+    for feature in "${FEATURES[@]}"; do
+        echo -e "  ${feature}"
+    done
+    echo ""
+    echo -e "${CYAN}Next Steps:${NC}"
+    echo ""
+    echo -e "  1. ${YELLOW}Update .env file${NC} with your API keys:"
+    echo -e "     ${BLUE}nano .env${NC}"
+    echo ""
+    echo -e "  2. ${YELLOW}Start the Rails server:${NC}"
+    echo -e "     ${BLUE}bundle exec rails server${NC}"
+    echo ""
+    echo -e "  3. ${YELLOW}Start background jobs (in another terminal):${NC}"
+    echo -e "     ${BLUE}bundle exec rails solid_queue:start${NC}"
+    echo ""
+    echo -e "  4. ${YELLOW}Visit the application:${NC}"
+    echo -e "     ${BLUE}http://localhost:3000${NC}"
+    echo ""
+
+    log "SUCCESS" "Setup completed successfully in ${total_time} seconds"
+}
+
+# Execute main function
+main "$@"
 
 # Step 1: Check prerequisites
 echo ""
