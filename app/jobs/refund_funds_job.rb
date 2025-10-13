@@ -1,31 +1,29 @@
 class RefundFundsJob < ApplicationJob
   queue_as :payments
 
-  def perform(escrow_transaction)
-    # Call Square API to refund the payment
-    payment_service = SquarePaymentService.new
+  def perform(escrow_transaction, amount = nil)
+    # Use the safe, idempotent refund method from the model
+    # This method includes all safety checks, validations, and audit logging
+    # If amount is nil, it will refund the full amount
+    result = escrow_transaction.refund(amount)
 
-    result = payment_service.refund_payment(
-      amount: escrow_transaction.amount,
-      payment_id: escrow_transaction.payment_transaction.square_payment_id,
-      idempotency_key: "refund_#{escrow_transaction.id}"
-    )
-
-    if result.success?
-      # Record refund ID and mark as refunded
-      escrow_transaction.payment_transaction.update!(square_refund_id: result.refund_id)
-      escrow_transaction.complete_refund!
-
-      # Notify buyer
-      NotificationService.notify(
-        user: escrow_transaction.buyer_account.user,
-        title: "Refund Processed",
-        body: "A refund of #{escrow_transaction.amount.format} has been processed to your payment method."
-      )
+    if result
+      # Success - funds refunded or already refunded (idempotent)
+      Rails.logger.info("[ESCROW JOB] Successfully processed refund for transaction #{escrow_transaction.id}")
+      
+      # Notify buyer if this was a new refund
+      if escrow_transaction.status == 'refunded'
+        NotificationService.notify(
+          user: escrow_transaction.sender,
+          title: "Refund Processed",
+          body: "A refund has been processed to your account."
+        )
+      end
     else
-      # Log error and retry
-      Rails.logger.error("Failed to process refund for escrow transaction #{escrow_transaction.id}: #{result.error}")
-      raise result.error # This will trigger a retry based on Active Job's retry mechanism
+      # Log errors and let the job retry
+      error_messages = escrow_transaction.errors.full_messages.join(', ')
+      Rails.logger.error("[ESCROW JOB ERROR] Failed to process refund for transaction #{escrow_transaction.id}: #{error_messages}")
+      raise StandardError, "Failed to process refund: #{error_messages}"
     end
   end
 

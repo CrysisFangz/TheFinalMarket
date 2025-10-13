@@ -11,6 +11,9 @@ class User < ApplicationRecord
   has_secure_password
   has_one :wishlist, dependent: :destroy
   has_many :wishlist_items, through: :wishlist
+  
+  # ActiveStorage attachment for avatar
+  has_one_attached :avatar
 
   enum role: { user: 0, moderator: 1, admin: 2 }
   enum user_type: { seeker: 'seeker', gem: 'gem' }
@@ -36,9 +39,6 @@ class User < ApplicationRecord
   validates :password, presence: true, length: { minimum: 8 }, allow_nil: true
 
   before_save { self.email = email.downcase }
-
-  # Account security attributes
-  attr_accessor :failed_login_attempts, :locked_until
   
   has_one :cart, dependent: :destroy
   has_many :products, dependent: :destroy
@@ -140,9 +140,17 @@ class User < ApplicationRecord
     unlocked_features.exists?(feature_name: feature_name)
   end
 
+  def avatar_url_for_display
+    if avatar.attached?
+      Rails.application.routes.url_helpers.rails_blob_path(avatar, only_path: true)
+    else
+      avatar_url.presence || '/assets/default-avatar.png'
+    end
+  end
+  
   def profile_completion_percentage
-    fields = [name, email, avatar_url, bio, location]
-    completed = fields.compact.count
+    fields = [name, email, (avatar.attached? || avatar_url.present?), bio, location]
+    completed = fields.select { |f| f.present? }.count
     (completed.to_f / fields.count * 100).round
   end
 

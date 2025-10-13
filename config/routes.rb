@@ -5,6 +5,9 @@ Rails.application.routes.draw do
 
   # Seller Area
   namespace :seller do
+    # Seller Dashboard
+    root to: 'dashboard#index', as: :dashboard
+    
     resources :orders, only: [:index, :show] do
       member do
         patch :ship
@@ -124,6 +127,11 @@ Rails.application.routes.draw do
     request.env['warden'].user&.admin? 
   }
 
+  # Main shopping routes
+  resources :categories
+  resources :deals, only: [:index, :show]
+  resource :cart, only: [:show], controller: 'carts'
+
   resources :tags, except: [:new, :edit] do
     get :autocomplete, on: :collection
   end
@@ -237,12 +245,13 @@ Rails.application.routes.draw do
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Internationalization routes
-  namespace :settings do
-    post 'update_currency', to: 'internationalization#update_currency'
-    post 'update_locale', to: 'internationalization#update_locale'
-    post 'update_timezone', to: 'internationalization#update_timezone'
-  end
+  # Settings routes
+  get 'settings', to: 'settings#index', as: :settings
+  post 'settings/update_profile', to: 'settings#update_profile', as: :settings_update_profile
+  post 'settings/update_password', to: 'settings#update_password', as: :settings_update_password
+  post 'settings/update_notifications', to: 'settings#update_notifications', as: :settings_update_notifications
+  post 'settings/update_privacy', to: 'settings#update_privacy', as: :settings_update_privacy
+  post 'settings/update_preferences', to: 'settings#update_preferences', as: :settings_update_preferences
 
   # Shipping calculator
   post 'shipping/calculate', to: 'shipping#calculate'

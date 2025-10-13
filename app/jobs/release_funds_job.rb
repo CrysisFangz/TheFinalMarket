@@ -1,33 +1,28 @@
 class ReleaseFundsJob < ApplicationJob
   queue_as :payments
 
-  def perform(escrow_transaction)
-    # Call Square API to transfer funds to seller's account
-    seller_account = escrow_transaction.seller_account
-    payment_service = SquarePaymentService.new
+  def perform(escrow_transaction, admin_approved: false)
+    # Use the safe, idempotent release_funds method from the model
+    # This method includes all safety checks, validations, and audit logging
+    result = escrow_transaction.release_funds(admin_approved: admin_approved)
 
-    result = payment_service.transfer_to_seller(
-      amount: escrow_transaction.amount,
-      destination_account_id: seller_account.square_account_id,
-      source_transaction_id: escrow_transaction.payment_transaction.square_payment_id,
-      idempotency_key: "release_#{escrow_transaction.id}"
-    )
-
-    if result.success?
-      # Record transfer ID and mark as released
-      escrow_transaction.payment_transaction.update!(square_transfer_id: result.transfer_id)
-      escrow_transaction.complete_release!
-
-      # Notify seller
-      NotificationService.notify(
-        user: escrow_transaction.seller_account.user,
-        title: "Payment Released",
-        body: "Payment of #{escrow_transaction.amount.format} has been released to your account."
-      )
+    if result
+      # Success - funds released or already released (idempotent)
+      Rails.logger.info("[ESCROW JOB] Successfully released funds for transaction #{escrow_transaction.id}")
+      
+      # Notify seller if this was a new release
+      if escrow_transaction.status == 'released'
+        NotificationService.notify(
+          user: escrow_transaction.receiver,
+          title: "Payment Released",
+          body: "Payment has been released to your account."
+        )
+      end
     else
-      # Log error and retry
-      Rails.logger.error("Failed to release funds for escrow transaction #{escrow_transaction.id}: #{result.error}")
-      raise result.error # This will trigger a retry based on Active Job's retry mechanism
+      # Log errors and let the job retry
+      error_messages = escrow_transaction.errors.full_messages.join(', ')
+      Rails.logger.error("[ESCROW JOB ERROR] Failed to release funds for transaction #{escrow_transaction.id}: #{error_messages}")
+      raise StandardError, "Failed to release funds: #{error_messages}"
     end
   end
 

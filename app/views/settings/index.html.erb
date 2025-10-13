@@ -1,0 +1,479 @@
+<%# app/views/settings/index.html.erb %>
+
+<% content_for :title, "Account Settings - The Final Market" %>
+
+<div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-purple-50 py-12">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    
+    <%# Header %>
+    <div class="mb-8">
+      <div class="flex items-center gap-3 mb-2">
+        <%= link_to user_dashboard_path, class: "text-gray-400 hover:text-gray-600" do %>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        <% end %>
+        <h1 class="text-4xl font-extrabold bg-gradient-to-r from-purple-600 via-pink-500 to-red-500 bg-clip-text text-transparent">
+          Account Settings
+        </h1>
+      </div>
+      <p class="text-gray-600">Manage your account preferences and settings</p>
+    </div>
+
+    <%# Settings Content %>
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8" data-controller="settings-tabs">
+      
+      <%# Settings Navigation %>
+      <div class="lg:col-span-1">
+        <nav class="glass rounded-2xl p-4 sticky top-24">
+          <button type="button"
+                  class="settings-tab-button active w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all"
+                  data-settings-tabs-target="button"
+                  data-tab="profile"
+                  data-action="click->settings-tabs#switchTab">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            <span class="font-semibold">Profile</span>
+          </button>
+
+          <button type="button"
+                  class="settings-tab-button w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all"
+                  data-settings-tabs-target="button"
+                  data-tab="security"
+                  data-action="click->settings-tabs#switchTab">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            <span class="font-semibold">Security</span>
+          </button>
+
+          <button type="button"
+                  class="settings-tab-button w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all"
+                  data-settings-tabs-target="button"
+                  data-tab="notifications"
+                  data-action="click->settings-tabs#switchTab">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+            <span class="font-semibold">Notifications</span>
+          </button>
+
+          <button type="button"
+                  class="settings-tab-button w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all"
+                  data-settings-tabs-target="button"
+                  data-tab="privacy"
+                  data-action="click->settings-tabs#switchTab">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+            <span class="font-semibold">Privacy</span>
+          </button>
+
+          <button type="button"
+                  class="settings-tab-button w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all"
+                  data-settings-tabs-target="button"
+                  data-tab="preferences"
+                  data-action="click->settings-tabs#switchTab">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span class="font-semibold">Preferences</span>
+          </button>
+        </nav>
+      </div>
+
+      <%# Settings Panels %>
+      <div class="lg:col-span-3">
+        
+        <%# Profile Tab %>
+        <div class="settings-tab-content active" data-settings-tabs-target="panel" data-panel="profile">
+          <div class="glass rounded-2xl p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Profile Information</h2>
+            
+            <%= form_with model: @user, url: settings_update_profile_path, class: "space-y-6" do |f| %>
+              
+              <%# Avatar Upload %>
+              <div class="flex items-center gap-6">
+                <div class="relative">
+                  <% if @user.avatar&.attached? %>
+                    <%= image_tag @user.avatar.variant(resize_to_limit: [120, 120]), 
+                        class: "w-24 h-24 rounded-full object-cover ring-4 ring-purple-100" %>
+                  <% else %>
+                    <div class="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-3xl font-bold ring-4 ring-purple-100">
+                      <%= @user.name.first.upcase %>
+                    </div>
+                  <% end %>
+                  <label for="user_avatar" class="absolute bottom-0 right-0 bg-purple-600 text-white p-2 rounded-full cursor-pointer hover:bg-purple-700 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </label>
+                  <%= f.file_field :avatar, class: "hidden", id: "user_avatar" %>
+                </div>
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-900"><%= @user.name %></h3>
+                  <p class="text-sm text-gray-600"><%= @user.email %></p>
+                </div>
+              </div>
+
+              <%# Name %>
+              <div>
+                <%= f.label :name, class: "block text-sm font-semibold text-gray-700 mb-2" %>
+                <%= f.text_field :name, class: "input-modern" %>
+              </div>
+
+              <%# Email %>
+              <div>
+                <%= f.label :email, class: "block text-sm font-semibold text-gray-700 mb-2" %>
+                <%= f.email_field :email, class: "input-modern" %>
+              </div>
+
+              <%# Phone %>
+              <div>
+                <%= f.label :phone, class: "block text-sm font-semibold text-gray-700 mb-2" %>
+                <%= f.telephone_field :phone, class: "input-modern" %>
+              </div>
+
+              <%# Bio %>
+              <div>
+                <%= f.label :bio, class: "block text-sm font-semibold text-gray-700 mb-2" %>
+                <%= f.text_area :bio, rows: 4, class: "input-modern" %>
+              </div>
+
+              <%# Submit Button %>
+              <div class="flex justify-end">
+                <%= f.submit "Save Changes", class: "btn-modern-primary" %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <%# Security Tab %>
+        <div class="settings-tab-content" data-settings-tabs-target="panel" data-panel="security">
+          <div class="glass rounded-2xl p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Security Settings</h2>
+            
+            <%= form_with model: @user, url: settings_update_password_path, class: "space-y-6" do |f| %>
+              
+              <%# Current Password %>
+              <div>
+                <%= f.label :current_password, class: "block text-sm font-semibold text-gray-700 mb-2" %>
+                <%= f.password_field :current_password, class: "input-modern", placeholder: "Enter your current password" %>
+              </div>
+
+              <%# New Password %>
+              <div>
+                <%= f.label :password, "New Password", class: "block text-sm font-semibold text-gray-700 mb-2" %>
+                <%= f.password_field :password, class: "input-modern", placeholder: "Enter new password" %>
+                <p class="mt-1 text-sm text-gray-500">Must be at least 8 characters long</p>
+              </div>
+
+              <%# Confirm Password %>
+              <div>
+                <%= f.label :password_confirmation, "Confirm New Password", class: "block text-sm font-semibold text-gray-700 mb-2" %>
+                <%= f.password_field :password_confirmation, class: "input-modern", placeholder: "Confirm new password" %>
+              </div>
+
+              <%# Submit Button %>
+              <div class="flex justify-end">
+                <%= f.submit "Update Password", class: "btn-modern-primary" %>
+              </div>
+            <% end %>
+
+            <%# Two-Factor Authentication %>
+            <div class="mt-8 pt-8 border-t border-gray-200">
+              <h3 class="text-lg font-bold text-gray-900 mb-4">Two-Factor Authentication</h3>
+              <p class="text-gray-600 mb-4">Add an extra layer of security to your account</p>
+              <button class="btn-modern-secondary">Enable 2FA</button>
+            </div>
+          </div>
+        </div>
+
+        <%# Notifications Tab %>
+        <div class="settings-tab-content" data-settings-tabs-target="panel" data-panel="notifications">
+          <div class="glass rounded-2xl p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Notification Preferences</h2>
+            
+            <%= form_with model: @user, url: settings_update_notifications_path, class: "space-y-6" do |f| %>
+              
+              <%# Email Notifications %>
+              <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                <div>
+                  <h3 class="font-semibold text-gray-900">Email Notifications</h3>
+                  <p class="text-sm text-gray-600">Receive notifications via email</p>
+                </div>
+                <label class="toggle-modern">
+                  <%= f.check_box :email_notifications, class: "toggle-checkbox" %>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <%# Push Notifications %>
+              <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                <div>
+                  <h3 class="font-semibold text-gray-900">Push Notifications</h3>
+                  <p class="text-sm text-gray-600">Receive push notifications on your device</p>
+                </div>
+                <label class="toggle-modern">
+                  <%= f.check_box :push_notifications, class: "toggle-checkbox" %>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <%# Order Notifications %>
+              <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                <div>
+                  <h3 class="font-semibold text-gray-900">Order Updates</h3>
+                  <p class="text-sm text-gray-600">Get notified about order status changes</p>
+                </div>
+                <label class="toggle-modern">
+                  <%= f.check_box :order_notifications, class: "toggle-checkbox" %>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <%# Promotion Notifications %>
+              <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                <div>
+                  <h3 class="font-semibold text-gray-900">Promotions & Deals</h3>
+                  <p class="text-sm text-gray-600">Receive notifications about special offers</p>
+                </div>
+                <label class="toggle-modern">
+                  <%= f.check_box :promotion_notifications, class: "toggle-checkbox" %>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+
+              <%# Submit Button %>
+              <div class="flex justify-end">
+                <%= f.submit "Save Preferences", class: "btn-modern-primary" %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <%# Privacy Tab %>
+        <div class="settings-tab-content" data-settings-tabs-target="panel" data-panel="privacy">
+          <div class="glass rounded-2xl p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Privacy Settings</h2>
+            
+            <%= form_with model: @user, url: settings_update_privacy_path, class: "space-y-6" do |f| %>
+              
+              <%# Profile Visibility %>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-3">Profile Visibility</label>
+                <div class="space-y-3">
+                  <label class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100 transition-colors">
+                    <%= f.radio_button :profile_visibility, 'public', class: "radio-modern" %>
+                    <div>
+                      <span class="font-semibold text-gray-900">Public</span>
+                      <p class="text-sm text-gray-600">Anyone can see your profile</p>
+                    </div>
+                  </label>
+                  
+                  <label class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100 transition-colors">
+                    <%= f.radio_button :profile_visibility, 'private', class: "radio-modern" %>
+                    <div>
+                      <span class="font-semibold text-gray-900">Private</span>
+                      <p class="text-sm text-gray-600">Only you can see your profile</p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <%# Contact Information %>
+              <div class="space-y-4">
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                  <div>
+                    <h3 class="font-semibold text-gray-900">Show Email Address</h3>
+                    <p class="text-sm text-gray-600">Display your email on your public profile</p>
+                  </div>
+                  <label class="toggle-modern">
+                    <%= f.check_box :show_email, class: "toggle-checkbox" %>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                  <div>
+                    <h3 class="font-semibold text-gray-900">Show Phone Number</h3>
+                    <p class="text-sm text-gray-600">Display your phone on your public profile</p>
+                  </div>
+                  <label class="toggle-modern">
+                    <%= f.check_box :show_phone, class: "toggle-checkbox" %>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                  <div>
+                    <h3 class="font-semibold text-gray-900">Allow Messages</h3>
+                    <p class="text-sm text-gray-600">Let other users send you messages</p>
+                  </div>
+                  <label class="toggle-modern">
+                    <%= f.check_box :allow_messages, class: "toggle-checkbox" %>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <%# Submit Button %>
+              <div class="flex justify-end">
+                <%= f.submit "Save Privacy Settings", class: "btn-modern-primary" %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <%# Preferences Tab %>
+        <div class="settings-tab-content" data-settings-tabs-target="panel" data-panel="preferences">
+          <div class="glass rounded-2xl p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">App Preferences</h2>
+            
+            <div class="space-y-6">
+              <%# Currency %>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Currency</label>
+                <select class="input-modern">
+                  <option>USD - US Dollar</option>
+                  <option>EUR - Euro</option>
+                  <option>GBP - British Pound</option>
+                  <option>JPY - Japanese Yen</option>
+                </select>
+              </div>
+
+              <%# Language %>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Language</label>
+                <select class="input-modern">
+                  <option>English</option>
+                  <option>Spanish</option>
+                  <option>French</option>
+                  <option>German</option>
+                </select>
+              </div>
+
+              <%# Timezone %>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Timezone</label>
+                <select class="input-modern">
+                  <option>UTC</option>
+                  <option>America/New_York</option>
+                  <option>America/Los_Angeles</option>
+                  <option>Europe/London</option>
+                </select>
+              </div>
+
+              <%# Theme %>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-3">Theme</label>
+                <div class="grid grid-cols-3 gap-4">
+                  <label class="cursor-pointer">
+                    <input type="radio" name="theme" value="light" class="sr-only peer">
+                    <div class="p-4 border-2 border-gray-200 rounded-xl text-center peer-checked:border-purple-600 peer-checked:bg-purple-50 transition-all">
+                      <svg class="w-8 h-8 mx-auto mb-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                      </svg>
+                      <span class="font-semibold">Light</span>
+                    </div>
+                  </label>
+
+                  <label class="cursor-pointer">
+                    <input type="radio" name="theme" value="dark" class="sr-only peer">
+                    <div class="p-4 border-2 border-gray-200 rounded-xl text-center peer-checked:border-purple-600 peer-checked:bg-purple-50 transition-all">
+                      <svg class="w-8 h-8 mx-auto mb-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                      </svg>
+                      <span class="font-semibold">Dark</span>
+                    </div>
+                  </label>
+
+                  <label class="cursor-pointer">
+                    <input type="radio" name="theme" value="auto" class="sr-only peer" checked>
+                    <div class="p-4 border-2 border-gray-200 rounded-xl text-center peer-checked:border-purple-600 peer-checked:bg-purple-50 transition-all">
+                      <svg class="w-8 h-8 mx-auto mb-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                      </svg>
+                      <span class="font-semibold">Auto</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <%# Submit Button %>
+              <div class="flex justify-end">
+                <button type="submit" class="btn-modern-primary">Save Preferences</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .settings-tab-button {
+    @apply text-gray-600 hover:bg-purple-50 hover:text-purple-600;
+  }
+
+  .settings-tab-button.active {
+    @apply bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg;
+  }
+
+  .settings-tab-content {
+    @apply hidden;
+  }
+
+  .settings-tab-content.active {
+    @apply block animate-fade-in;
+  }
+
+  .toggle-modern {
+    @apply relative inline-block w-12 h-6;
+  }
+
+  .toggle-checkbox {
+    @apply sr-only;
+  }
+
+  .toggle-slider {
+    @apply absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition-all;
+  }
+
+  .toggle-slider:before {
+    @apply absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform;
+    content: '';
+  }
+
+  .toggle-checkbox:checked + .toggle-slider {
+    @apply bg-purple-600;
+  }
+
+  .toggle-checkbox:checked + .toggle-slider:before {
+    @apply transform translate-x-6;
+  }
+
+  .radio-modern {
+    @apply w-5 h-5 text-purple-600 focus:ring-purple-500;
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-out;
+  }
+</style>
