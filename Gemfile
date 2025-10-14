@@ -197,7 +197,7 @@ group :development, :test do
   gem "rubocop-thread_safety", "~> 0.5", require: false
 
   # Security scanning in development with comprehensive coverage
-  gem "dawnscanner", "~> 2.3", require: false
+  gem "dawnscanner", "~> 2.2", require: false
 
   # Performance testing and benchmarking
   gem "benchmark-ips", "~> 2.13"
@@ -216,8 +216,8 @@ end
 group :test do
   # Comprehensive testing suite with advanced features
   gem "capybara", "~> 3.40"
-  gem "selenium-webdriver", "~> 4.35"
-  gem "webdrivers", "~> 5.3"
+  gem "selenium-webdriver", "~> 4.10"
+  # gem "webdrivers", "~> 5.3"  # Deprecated - selenium-webdriver handles driver management
   gem "cuprite", "~> 0.15"  # Headless Chrome testing
 
   # API testing with comprehensive coverage
@@ -242,8 +242,8 @@ gem "kamal", "~> 2.7", require: false
 gem "tzinfo-data", "~> 1.2024", platforms: %i[ mingw mswin x64_mingw jruby ]
 
 # Active Storage enhancements with advanced image processing
-gem "image_processing", "~> 1.14"
-gem "ruby-vips", "~> 2.2"
+gem "image_processing", "~> 1.14", require: false
+gem "ruby-vips", "~> 2.2", require: false
 
 # Rails 8 optimized caching and database connection handling
 gem "solid_cable", "~> 3.0"

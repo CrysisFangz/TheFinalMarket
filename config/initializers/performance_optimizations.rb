@@ -133,7 +133,7 @@ module PerformanceOptimizations
   end
 
   # ========================================================================
-  # Cache Management System
+  # Advanced Cache Management System with Analytics
   # ========================================================================
 
   class CacheManager
@@ -242,6 +242,245 @@ module PerformanceOptimizations
       rescue StandardError => e
         Rails.logger.error("Failed to preload popular products: #{e.message}")
         []
+      end
+
+      # Advanced cache warming with intelligent preloading
+      def warm_cache_intelligently
+        return unless Rails.env.production?
+
+        Rails.logger.info("Starting intelligent cache warming...")
+
+        warm_critical_paths
+        warm_user_specific_caches
+        warm_business_intelligence_caches
+        warm_search_caches
+
+        Rails.logger.info("Intelligent cache warming completed")
+      rescue StandardError => e
+        Rails.logger.error("Cache warming failed: #{e.message}")
+      end
+
+      # Cache analytics and monitoring
+      def cache_analytics
+        return unless defined?(Redis)
+
+        analytics = {
+          redis_info: redis_pool.with { |redis| redis.info },
+          cache_stats: calculate_cache_stats,
+          hit_rates: calculate_hit_rates,
+          memory_usage: calculate_memory_usage,
+          recommendations: generate_cache_recommendations
+        }
+
+        Rails.logger.info("Cache Analytics: #{analytics.inspect}")
+        analytics
+      rescue StandardError => e
+        Rails.logger.error("Cache analytics failed: #{e.message}")
+        {}
+      end
+
+      # Intelligent cache invalidation based on data changes
+      def smart_invalidate_cache(changed_model, action)
+        return unless defined?(Redis)
+
+        Rails.logger.info("Smart cache invalidation for #{changed_model.name} #{action}")
+
+        case changed_model.name
+        when 'Product'
+          invalidate_product_caches
+        when 'Category'
+          invalidate_category_caches
+        when 'User'
+          invalidate_user_caches
+        when 'Order'
+          invalidate_order_caches
+        end
+
+        record_cache_invalidation(changed_model, action)
+      rescue StandardError => e
+        Rails.logger.error("Smart cache invalidation failed: #{e.message}")
+      end
+
+      private
+
+      def warm_critical_paths
+        # Warm most frequently accessed data
+        preload_categories
+        preload_popular_products
+
+        # Warm navigation and layout data
+        Rails.cache.fetch('navigation_data', expires_in: 30.minutes) do
+          {
+            categories: Category.active.to_a,
+            featured_products: Product.featured.limit(10).to_a,
+            recent_products: Product.recent.limit(10).to_a
+          }
+        end
+      end
+
+      def warm_user_specific_caches
+        # Warm personalized data for active users
+        User.active.limit(100).find_each do |user|
+          Rails.cache.fetch("user_recommendations:#{user.id}", expires_in: 2.hours) do
+            user.recommended_products.limit(10).to_a
+          end
+        end
+      end
+
+      def warm_business_intelligence_caches
+        # Warm BI and analytics data
+        Rails.cache.fetch('daily_sales_summary', expires_in: 1.hour) do
+          Order.where(created_at: Date.current.all_day).group_by_hour_of_day(:created_at).sum(:total_cents)
+        end
+
+        Rails.cache.fetch('popular_categories', expires_in: 6.hours) do
+          Category.joins(:products).group('categories.id').order('COUNT(products.id) DESC').limit(10).to_a
+        end
+      end
+
+      def warm_search_caches
+        # Warm search-related caches
+        Rails.cache.fetch('search_suggestions', expires_in: 12.hours) do
+          Product.pluck(:name).uniq.first(100)
+        end
+      end
+
+      def calculate_cache_stats
+        return {} unless defined?(Redis)
+
+        redis_pool.with do |redis|
+          info = redis.info
+
+          {
+            connected_clients: info['connected_clients'].to_i,
+            used_memory: info['used_memory'].to_i,
+            used_memory_peak: info['used_memory_peak'].to_i,
+            keyspace_hits: info['keyspace_hits'].to_i,
+            keyspace_misses: info['keyspace_misses'].to_i,
+            evicted_keys: info['evicted_keys'].to_i,
+            expired_keys: info['expired_keys'].to_i
+          }
+        end
+      rescue StandardError => e
+        Rails.logger.error("Failed to calculate cache stats: #{e.message}")
+        {}
+      end
+
+      def calculate_hit_rates
+        return {} unless defined?(Redis)
+
+        redis_pool.with do |redis|
+          info = redis.info
+
+          hits = info['keyspace_hits'].to_i
+          misses = info['keyspace_misses'].to_i
+          total = hits + misses
+
+          if total > 0
+            {
+              hit_rate: (hits.to_f / total * 100).round(2),
+              miss_rate: (misses.to_f / total * 100).round(2),
+              total_requests: total
+            }
+          else
+            { hit_rate: 0.0, miss_rate: 0.0, total_requests: 0 }
+          end
+        end
+      rescue StandardError => e
+        Rails.logger.error("Failed to calculate hit rates: #{e.message}")
+        {}
+      end
+
+      def calculate_memory_usage
+        return {} unless defined?(Redis)
+
+        redis_pool.with do |redis|
+          info = redis.info
+
+          used_memory = info['used_memory'].to_i
+          max_memory = info['maxmemory'].to_i
+
+          if max_memory > 0
+            {
+              used_bytes: used_memory,
+              max_bytes: max_memory,
+              usage_percentage: (used_memory.to_f / max_memory * 100).round(2),
+              fragmentation_ratio: info['mem_fragmentation_ratio'].to_f
+            }
+          else
+            { used_bytes: used_memory, usage_percentage: 0.0 }
+          end
+        end
+      rescue StandardError => e
+        Rails.logger.error("Failed to calculate memory usage: #{e.message}")
+        {}
+      end
+
+      def generate_cache_recommendations
+        recommendations = []
+
+        if (stats = calculate_hit_rates) && stats[:hit_rate] < 70
+          recommendations << "Low cache hit rate (#{stats[:hit_rate]}%). Consider increasing cache TTL or warming more data."
+        end
+
+        if (memory = calculate_memory_usage) && memory[:usage_percentage] > 80
+          recommendations << "High memory usage (#{memory[:usage_percentage]}%). Consider cache optimization or Redis tuning."
+        end
+
+        if (stats = calculate_cache_stats) && stats[:evicted_keys] > 1000
+          recommendations << "High eviction rate. Consider increasing Redis memory or optimizing cache keys."
+        end
+
+        recommendations
+      end
+
+      def invalidate_product_caches
+        # Invalidate product-related caches
+        Rails.cache.delete_matched('product_card:*')
+        Rails.cache.delete_matched('popular_products')
+        Rails.cache.delete_matched('search_suggestions')
+        Rails.cache.delete('navigation_data')
+      end
+
+      def invalidate_category_caches
+        # Invalidate category-related caches
+        Rails.cache.delete_matched('categories:*')
+        Rails.cache.delete('navigation_data')
+        Rails.cache.delete('popular_categories')
+      end
+
+      def invalidate_user_caches
+        # Invalidate user-related caches
+        Rails.cache.delete_matched('user_profile:*')
+        Rails.cache.delete_matched('user_recommendations:*')
+      end
+
+      def invalidate_order_caches
+        # Invalidate order-related caches
+        Rails.cache.delete_matched('daily_sales_summary')
+        Rails.cache.delete_matched('user_recommendations:*')
+      end
+
+      def record_cache_invalidation(changed_model, action)
+        # Record cache invalidation for analytics
+        CacheInvalidation.create!(
+          model_name: changed_model.name,
+          action: action,
+          invalidated_at: Time.current,
+          cache_keys_affected: estimate_affected_keys(changed_model, action)
+        )
+      rescue StandardError => e
+        Rails.logger.error("Failed to record cache invalidation: #{e.message}")
+      end
+
+      def estimate_affected_keys(changed_model, action)
+        case changed_model.name
+        when 'Product' then 5
+        when 'Category' then 10
+        when 'User' then 3
+        when 'Order' then 2
+        else 1
+        end
       end
     end
   end
@@ -428,9 +667,113 @@ module PerformanceOptimizations
         if Rails.env.development?
           ActiveRecord::Base.logger = Logger.new(STDOUT) if ActiveRecord::Base.logger.nil?
         end
+
+        # Enable advanced query optimizations
+        enable_advanced_query_optimizations
       rescue StandardError => e
         Rails.logger.error("Failed to enable query optimizations: #{e.message}")
         # Continue without query optimizations
+      end
+
+      def enable_advanced_query_optimizations
+        # Configure statement timeout
+        ActiveRecord::Base.connection.execute("SET statement_timeout = #{Configuration.for_environment[:request_timeout] * 1000}")
+
+        # Enable query result caching for frequently accessed data
+        enable_query_result_caching
+
+        # Configure connection pool monitoring
+        enable_connection_pool_monitoring
+
+        # Enable slow query detection
+        enable_slow_query_detection
+
+        Rails.logger.info("Advanced query optimizations enabled")
+      rescue StandardError => e
+        Rails.logger.error("Failed to enable advanced query optimizations: #{e.message}")
+      end
+
+      def enable_query_result_caching
+        # Cache query results for expensive queries
+        expensive_queries = [
+          'SELECT COUNT(*) FROM products WHERE category_id = ?',
+          'SELECT AVG(rating) FROM reviews WHERE product_id = ?',
+          'SELECT SUM(total_cents) FROM orders WHERE user_id = ? AND status = ?'
+        ]
+
+        expensive_queries.each do |pattern|
+          Rails.cache.fetch("query_pattern:#{Digest::MD5.hexdigest(pattern)}", expires_in: 1.hour) do
+            pattern
+          end
+        end
+      rescue StandardError => e
+        Rails.logger.error("Failed to enable query result caching: #{e.message}")
+      end
+
+      def enable_connection_pool_monitoring
+        # Monitor connection pool usage
+        ActiveRecord::Base.connection_pool.instance_eval do
+          @monitor_thread ||= Thread.new do
+            loop do
+              begin
+                sleep 30.seconds
+
+                pool_size = size
+                available = @available.length
+                checked_out = @checked_out.length
+                usage_percentage = ((checked_out.to_f / pool_size) * 100).round(2)
+
+                # Record connection pool metrics
+                EnhancedMonitoring::PerformanceMonitor.record_performance_metric(
+                  'database.connection_pool.usage',
+                  usage_percentage,
+                  'percentage',
+                  { pool_size: pool_size, available: available, checked_out: checked_out }
+                )
+
+                # Alert if usage is too high
+                if usage_percentage > 80
+                  Rails.logger.warn("High database connection pool usage: #{usage_percentage}%")
+                end
+              rescue StandardError => e
+                Rails.logger.error("Connection pool monitoring error: #{e.message}")
+                break
+              end
+            end
+          end
+        end
+      rescue StandardError => e
+        Rails.logger.error("Failed to enable connection pool monitoring: #{e.message}")
+      end
+
+      def enable_slow_query_detection
+        # Enable slow query logging
+        ActiveRecord::Base.connection.class.class_eval do
+          def log(sql, name = nil, &block)
+            start_time = Time.current
+
+            result = super(sql, name, &block)
+
+            duration = Time.current - start_time
+
+            # Log slow queries
+            if duration > 0.5.seconds
+              Rails.logger.warn("Slow query detected: #{duration.round(3)}s - #{sql.truncate(200)}")
+
+              # Record slow query metric
+              EnhancedMonitoring::PerformanceMonitor.record_performance_metric(
+                'database.query.slow',
+                duration * 1000,
+                'ms',
+                { query: sql.truncate(100), duration_ms: (duration * 1000).round(2) }
+              )
+            end
+
+            result
+          end
+        end
+      rescue StandardError => e
+        Rails.logger.error("Failed to enable slow query detection: #{e.message}")
       end
     end
   end
@@ -769,6 +1112,15 @@ begin
   # Preload critical data after initialization
   Rails.application.config.after_initialize do
     PerformanceOptimizations::CacheManager.preload_critical_data
+
+    # Schedule intelligent cache warming for production
+    if Rails.env.production?
+      PerformanceOptimizations::CacheManager.delay.warm_cache_intelligently
+
+      # Schedule periodic cache analytics
+      PerformanceOptimizations::CacheManager.delay(run_at: 1.hour.from_now).cache_analytics
+      PerformanceOptimizations::CacheManager.delay(run_at: 1.hour.from_now, repeat: true).cache_analytics
+    end
   end
 
   Rails.logger.info("All performance optimizations successfully initialized")

@@ -48,10 +48,17 @@ class CreateActiveStorageTables < ActiveRecord::Migration[7.0]
 
   private
     def primary_and_foreign_key_types
-      config = Rails.configuration.generators
-      setting = config.options[config.orm][:primary_key_type]
-      primary_key_type = setting || :primary_key
-      foreign_key_type = setting || :bigint
+      # Handle case when Rails might not be fully loaded (standalone migrations)
+      if defined?(Rails) && Rails.respond_to?(:configuration)
+        config = Rails.configuration.generators
+        setting = config.options[config.orm][:primary_key_type]
+        primary_key_type = setting || :primary_key
+        foreign_key_type = setting || :bigint
+      else
+        # Defaults for PostgreSQL/standalone execution
+        primary_key_type = :primary_key
+        foreign_key_type = :bigint
+      end
       [ primary_key_type, foreign_key_type ]
     end
 end

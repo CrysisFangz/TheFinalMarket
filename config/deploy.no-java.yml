@@ -1,0 +1,126 @@
+# Java-Free Deployment Configuration for The Final Market
+# This configuration runs without Elasticsearch/Java dependencies
+
+# Name of your application. Used to uniquely configure containers.
+service: the-final-market
+
+# Name of the container image.
+image: thefinalmarket/the-final-market
+
+# Deploy to these servers.
+servers:
+  web:
+    - 138.197.204.240
+  job:
+    hosts:
+      - 138.197.204.240
+    cmd: bin/jobs
+
+# Enable SSL auto certification via Let's Encrypt
+proxy:
+  ssl: true
+  host: thefinalmarket.com,www.thefinalmarket.com
+  redirect-www: true
+
+# Credentials for your image host.
+registry:
+  server: registry.digitalocean.com
+  username: thefinalmarket
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+
+# Inject ENV variables into containers (secrets come from .kamal/secrets).
+env:
+  secret:
+    - RAILS_MASTER_KEY
+    - DATABASE_URL
+    - REDIS_URL
+    - KAMAL_REGISTRY_PASSWORD
+    # Elasticsearch disabled for Java-free deployment
+    # - ELASTICSEARCH_URL
+  clear:
+    # Production environment settings
+    RAILS_ENV: production
+    RAILS_SERVE_STATIC_FILES: true
+    RAILS_LOG_LEVEL: warn
+
+    # Performance optimizations
+    WEB_CONCURRENCY: 4
+    SOLID_QUEUE_IN_PUMA: true
+    JOB_CONCURRENCY: 2
+
+    # Security settings
+    FORCE_SSL: true
+
+    # Search fallback (PostgreSQL full-text search instead of Elasticsearch)
+    SEARCH_ENGINE: postgresql
+
+    # Disable Elasticsearch features
+    ELASTICSEARCH_ENABLED: false
+
+# Aliases are triggered with "bin/kamal <alias>".
+aliases:
+  console: app exec --interactive --reuse "bin/rails console"
+  shell: app exec --interactive --reuse "bash"
+  logs: app logs -f --tail 100
+  dbc: app exec --interactive --reuse "bin/rails dbconsole"
+  status: app status
+  restart: app restart
+
+# Use a persistent storage volume for database files and local Active Storage files.
+volumes:
+  - "the_final_market_storage:/rails/storage"
+  - "the_final_market_uploads:/rails/public/uploads"
+
+# Bridge fingerprinted assets between versions.
+asset_path: /rails/public/assets
+
+# Configure the image builder.
+builder:
+  arch: amd64
+  remote: ssh://docker@138.197.204.240
+  args:
+    RUBY_VERSION: 3.4.1
+  secrets:
+    - GITHUB_TOKEN
+    - RAILS_MASTER_KEY
+
+# Use a non-root SSH user for security
+ssh:
+  user: deploy
+
+# Accessory services (Java-free configuration)
+accessories:
+  db:
+    image: postgres:15
+    host: 138.197.204.241
+    port: "5432"
+    env:
+      clear:
+        POSTGRES_DB: the_final_market_production
+        POSTGRES_USER: thefinalmarket
+      secret:
+        - POSTGRES_PASSWORD
+    files:
+      - config/postgresql/production.conf:/etc/postgresql/postgresql.conf
+      - config/postgresql/production.sql:/docker-entrypoint-initdb.d/setup.sql
+    directories:
+      - data:/var/lib/postgresql/data
+  redis:
+    image: redis:7.2
+    host: 138.197.204.241
+    port: 6379
+    directories:
+      - data:/data
+  # Elasticsearch removed for Java-free deployment
+  # elasticsearch:
+  #   image: elasticsearch:8.11.0
+  #   host: 138.197.204.241
+  #   port: 9200
+  #   env:
+  #     clear:
+  #       "discovery.type": single-node
+  #       "xpack.security.enabled": false
+  #       "ES_JAVA_OPTS": "-Xms512m -Xmx512m"
+  #   directories:
+  #     - data:/usr/share/elasticsearch/data
