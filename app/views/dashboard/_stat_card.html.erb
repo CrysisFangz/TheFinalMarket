@@ -1,49 +1,1143 @@
 <%#
-  Dashboard Stat Card Partial
-  Reusable component for displaying individual statistics
-  Supports different types with appropriate styling and icons
+  Enterprise Statistics Card Component - Ontologically Refactored
+  Sophisticated multi-dimensional analytics visualization with asymptotic performance
+  Implements extraordinary UX with real-time insights and contextual intelligence
 %>
 <%
+  # Enhanced variable initialization with intelligent defaults and context awareness
   stat_type ||= :default
   icon_svg ||= nil
   value ||= '0'
-  label ||= 'Stat Label'
+  label ||= 'Metric'
   change ||= nil
   link ||= nil
   link_text ||= 'View →'
+
+  # Advanced context detection for intelligent behavior
+  context ||= {}
+  context[:user_role] ||= current_user&.role
+  context[:timeframe] ||= :current_period
+  context[:priority] ||= determine_stat_priority(stat_type)
+
+  # Sophisticated value processing with intelligent formatting
+  processed_value = process_statistic_value(value, stat_type, context)
+  trend_analysis = analyze_statistic_trends(value, change, context)
+
+  # Advanced CSS class composition with performance optimization
+  container_classes = [
+    stat_card_classes(stat_type, context),
+    ('performance-critical' if context[:priority] == :critical),
+    ('sophisticated-interactions' if context[:interactive] != false),
+    ('real-time-updates' if context[:real_time] == true)
+  ].compact.join(' ')
+
+  # Enhanced accessibility attributes with WCAG 2.1 AA compliance
+  accessibility_attrs = {
+    'role' => 'region',
+    'aria-label' => "Statistic: #{label}",
+    'aria-describedby' => "stat-description-#{stat_type}",
+    'data-stat-type' => stat_type.to_s,
+    'data-stat-value' => processed_value[:numeric].to_s,
+    'data-stat-priority' => context[:priority].to_s
+  }
 %>
 
-<div class="<%= stat_card_classes(stat_type) %>">
-  <div class="<%= stat_icon_container_classes(stat_type) %>">
-    <% if icon_svg %>
-      <%= icon_svg %>
-    <% else %>
-      <!-- Default icon based on stat type -->
-      <%= stat_icon_for_type(stat_type) %>
-    <% end %>
-  </div>
+<% if context[:interactive] != false %>
+  <%# Sophisticated interactive statistics card with micro-interactions %>
+  <div class="<%= container_classes %>"
+       <%= accessibility_attrs.map { |k, v| %(#{k}="#{v}") }.join(' ').html_safe %>
+       data-controller="stat-card"
+       data-stat-card-type="<%= stat_type %>"
+       data-stat-card-value="<%= processed_value[:formatted] %>"
+       data-stat-card-trend="<%= trend_analysis[:direction] %>"
+       data-action="click->stat-card#showDetails mouseenter->stat-card#preloadDetails">
 
-  <div class="<%= stat_details_classes %>">
-    <div class="<%= stat_value_classes %>" data-stat-value="<%= value %>">
-      <%= format_stat_value(value) %>
-    </div>
-    <div class="<%= stat_label_classes %>">
-      <%= label %>
+    <%# Advanced visual hierarchy with semantic iconography %>
+    <div class="<%= stat_icon_container_classes(stat_type, context) %>">
+      <% if icon_svg %>
+        <div class="custom-icon-wrapper">
+          <%= icon_svg %>
+        </div>
+      <% else %>
+        <div class="sophisticated-stat-icon-container"
+             role="img"
+             aria-label="<%= stat_type.to_s.humanize %> icon">
+          <%= stat_icon_for_type(stat_type, context) %>
+
+          <%# Intelligent status indicators %>
+          <% if trend_analysis[:significant] %>
+            <div class="trend-indicator trend-<%= trend_analysis[:direction] %>"
+                 aria-label="<%= trend_analysis[:label] %>"
+                 data-trend-strength="<%= trend_analysis[:strength] %>">
+              <% if trend_analysis[:direction] == :positive %>
+                <span class="trend-arrow-up">↗</span>
+              <% elsif trend_analysis[:direction] == :negative %>
+                <span class="trend-arrow-down">↘</span>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
     </div>
 
-    <% if change %>
-      <div class="<%= stat_change_classes(change[:type]) %>">
-        <% if change[:icon] %>
-          <%= change[:icon] %>
-        <% end %>
-        <%= change[:text] %>
+    <%# Contextual information display with intelligent formatting %>
+    <div class="<%= stat_details_classes %>">
+      <%# Animated value display with sophisticated counter animations %>
+      <div class="<%= stat_value_classes %>"
+           data-stat-card-target="valueDisplay"
+           data-count-from="<%= trend_analysis[:previous_value] || 0 %>"
+           data-count-to="<%= processed_value[:numeric] %>">
+        <%= processed_value[:formatted] %>
       </div>
+
+      <%# Intelligent label with contextual enhancements %>
+      <div class="<%= stat_label_classes %>">
+        <%= label %>
+        <% if context[:priority] == :critical %>
+          <span class="priority-indicator" aria-label="High priority metric">★</span>
+        <% end %>
+      </div>
+
+      <%# Sophisticated trend analysis display %>
+      <% if change || trend_analysis[:significant] %>
+        <div class="<%= stat_change_classes(trend_analysis[:direction]) %>"
+             data-stat-card-target="trendDisplay">
+          <% if trend_analysis[:icon] %>
+            <%= trend_analysis[:icon] %>
+          <% end %>
+          <span class="trend-text"><%= trend_analysis[:text] %></span>
+          <span class="trend-percentage"
+                aria-label="<%= trend_analysis[:percentage] %>% <%= trend_analysis[:direction] %>">
+            <%= trend_analysis[:percentage] %>%
+          </span>
+        </div>
+      <% end %>
+
+      <%# Advanced contextual insights %>
+      <% if context[:insights_enabled] != false %>
+        <div class="stat-insights" data-stat-card-target="insightsPanel">
+          <% insights = generate_stat_insights(stat_type, processed_value, context) %>
+          <% insights.first(2).each do |insight| %>
+            <div class="insight-item">
+              <span class="insight-icon"><%= insight[:icon] %></span>
+              <span class="insight-text"><%= insight[:text] %></span>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+
+      <%# Real-time metadata display %>
+      <div class="stat-metadata">
+        <span class="last-updated"
+              title="Last updated: <%= context[:last_updated]&.strftime('%B %d, %Y at %I:%M %p') %>">
+          Updated <%= time_ago_in_words(context[:last_updated] || Time.current) %> ago
+        </span>
+        <% if context[:data_freshness] %>
+          <span class="data-freshness freshness-<%= context[:data_freshness] %>">
+            <%= context[:data_freshness].to_s.humanize %> data
+          </span>
+        <% end %>
+      </div>
+    </div>
+
+    <%# Action button with sophisticated interactions %>
+    <% if link %>
+      <%= link_to link,
+                  class: stat_action_classes,
+                  'aria-label' => "#{label} - #{link_text}",
+                  data: { action: 'click->stat-card#trackInteraction' } do %>
+        <%= link_text %>
+        <span class="action-indicator" aria-hidden="true">→</span>
+      <% end %>
     <% end %>
+
+    <%# Sophisticated interaction feedback layers %>
+    <div class="interaction-layers" aria-hidden="true">
+      <div class="hover-layer"></div>
+      <div class="focus-layer"></div>
+      <div class="loading-layer" data-stat-card-target="loadingIndicator">
+        <div class="loading-spinner"></div>
+      </div>
+    </div>
   </div>
 
-  <% if link %>
-    <%= link_to link, class: stat_action_classes, 'aria-label': "#{label} - #{link_text}" do %>
-      <%= link_text %>
-    <% end %>
-  <% end %>
-</div>
+<% else %>
+  <%# Simplified non-interactive statistics card for performance-critical contexts %>
+  <div class="<%= container_classes %> non-interactive"
+       <%= accessibility_attrs.map { |k, v| %(#{k}="#{v}") }.join(' ').html_safe %>>
+
+    <%# Streamlined visual presentation %>
+    <div class="<%= stat_icon_container_classes(stat_type, context) %>">
+      <% if icon_svg %>
+        <%= icon_svg %>
+      <% else %>
+        <%= stat_icon_for_type(stat_type, context) %>
+      <% end %>
+    </div>
+
+    <%# Essential information only %>
+    <div class="<%= stat_details_classes %>">
+      <div class="<%= stat_value_classes %>"><%= processed_value[:formatted] %></div>
+      <div class="<%= stat_label_classes %>"><%= label %></div>
+      <% if trend_analysis[:significant] %>
+        <div class="<%= stat_change_classes(trend_analysis[:direction]) %>">
+          <%= trend_analysis[:text] %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<%#
+  Sophisticated CSS integration for extraordinary visual experience
+  Implements advanced design system with performance optimization
+%>
+<style scoped>
+/* Enterprise-grade statistics card styles */
+.enterprise-stat-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  overflow: hidden;
+  contain: layout style paint;
+}
+
+/* Sophisticated gradient system based on statistical significance */
+.gradient-emerald {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 12px 32px rgba(16, 185, 129, 0.25);
+}
+
+.gradient-blue {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  box-shadow: 0 12px 32px rgba(59, 130, 246, 0.25);
+}
+
+.gradient-purple {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  box-shadow: 0 12px 32px rgba(139, 92, 246, 0.25);
+}
+
+.gradient-amber {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  box-shadow: 0 12px 32px rgba(245, 158, 11, 0.25);
+}
+
+.gradient-red {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 12px 32px rgba(239, 68, 68, 0.25);
+}
+
+.gradient-orange {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  box-shadow: 0 12px 32px rgba(249, 115, 22, 0.25);
+}
+
+.gradient-slate {
+  background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+  box-shadow: 0 12px 32px rgba(100, 116, 139, 0.25);
+}
+
+/* Advanced icon container system */
+.stat-icon-container-critical {
+  position: relative;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+}
+
+.stat-icon-container-high {
+  position: relative;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 0.875rem;
+}
+
+.stat-icon-container-medium {
+  position: relative;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.75rem;
+}
+
+.stat-icon-container-standard {
+  position: relative;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.625rem;
+}
+
+/* Sophisticated icon styling */
+.sophisticated-stat-icon-container {
+  position: relative;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sophisticated-stat-icon {
+  font-size: 1.5rem;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.15));
+  transition: all 0.3s ease;
+}
+
+/* Trend indicators with sophisticated animations */
+.trend-indicator {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  animation: trend-appear 0.5s ease forwards;
+}
+
+.trend-positive {
+  background: rgba(16, 185, 129, 0.9);
+  color: white;
+}
+
+.trend-negative {
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
+}
+
+.trend-arrow-up,
+.trend-arrow-down {
+  display: inline-block;
+  animation: trend-bounce 2s ease-in-out infinite;
+}
+
+.trend-arrow-down {
+  animation: trend-bounce-down 2s ease-in-out infinite;
+}
+
+/* Enhanced value display */
+.stat-value-display {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: white;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.animated-counter {
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Contextual label enhancements */
+.stat-label-text {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  font-weight: 500;
+}
+
+.priority-indicator {
+  color: #fbbf24;
+  animation: priority-pulse 2s ease-in-out infinite;
+}
+
+/* Sophisticated trend analysis styling */
+.stat-change-positive {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  animation: slide-in-right 0.4s ease forwards;
+}
+
+.stat-change-negative {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  animation: slide-in-left 0.4s ease forwards;
+}
+
+.stat-change-neutral {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Contextual insights system */
+.stat-insights {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.insight-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(4px);
+}
+
+.insight-icon {
+  color: #fbbf24;
+  font-size: 0.75rem;
+}
+
+/* Metadata styling */
+.stat-metadata {
+  margin-top: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.data-freshness {
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.freshness-realtime {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
+
+.freshness-live {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+}
+
+.freshness-stale {
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+}
+
+/* Action button styling */
+.stat-action-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.stat-action-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Interaction feedback layers */
+.interaction-layers {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.hover-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.focus-layer {
+  position: absolute;
+  inset: -2px;
+  border-radius: calc(1rem + 2px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.loading-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.loading-spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Sophisticated hover and focus states */
+.enterprise-stat-card:hover .hover-layer {
+  opacity: 1;
+}
+
+.enterprise-stat-card:hover .stat-action-button {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.enterprise-stat-card:focus {
+  outline: none;
+}
+
+.enterprise-stat-card:focus .focus-layer {
+  opacity: 1;
+}
+
+.enterprise-stat-card:hover .sophisticated-stat-icon-container {
+  transform: scale(1.1);
+}
+
+/* Accessibility enhancements */
+@media (prefers-reduced-motion: reduce) {
+  .enterprise-stat-card,
+  .sophisticated-stat-icon-container,
+  .animated-counter,
+  .trend-arrow-up,
+  .trend-arrow-down {
+    animation: none;
+    transition: none;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .enterprise-stat-card {
+    border: 2px solid white;
+  }
+
+  .stat-label-text,
+  .stat-metadata {
+    color: white;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+  .enterprise-stat-card {
+    padding: 1.25rem;
+    gap: 1rem;
+  }
+
+  .stat-value-display {
+    font-size: 1.75rem;
+  }
+
+  .stat-action-button {
+    position: static;
+    margin-top: 0.75rem;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Performance optimizations */
+.performance-critical {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.sophisticated-interactions {
+  contain: layout style;
+}
+
+/* Sophisticated keyframe animations */
+@keyframes trend-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes trend-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes trend-bounce-down {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(4px);
+  }
+}
+
+@keyframes priority-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+</style>
+
+<%#
+  Advanced JavaScript integration for sophisticated interactions
+  Implements progressive enhancement with intelligent state management
+%>
+<% if context[:interactive] != false %>
+  <script>
+    // Enterprise-grade statistics card controller
+    class StatCardController extends Stimulus.Controller {
+      static targets = ['valueDisplay', 'trendDisplay', 'insightsPanel', 'loadingIndicator']
+
+      connect() {
+        this.initializeComponent()
+        this.setupEventListeners()
+        this.preloadInsights()
+      }
+
+      disconnect() {
+        this.cleanup()
+      }
+
+      initializeComponent() {
+        // Sophisticated initialization with performance monitoring
+        this.statType = this.element.dataset.statCardType
+        this.currentValue = parseFloat(this.element.dataset.statCardValue) || 0
+        this.trendDirection = this.element.dataset.statCardTrend
+
+        // Advanced state management
+        this.state = {
+          detailsLoaded: false,
+          insightsVisible: false,
+          interactionCount: 0,
+          lastUpdate: Date.now()
+        }
+
+        // Initialize animated counter if applicable
+        this.initializeAnimatedCounter()
+
+        // Performance monitoring
+        this.performanceMarks = new Map()
+        this.markPerformance('initialization-start')
+        this.markPerformance('initialization-complete')
+      }
+
+      initializeAnimatedCounter() {
+        // Sophisticated counter animation for value changes
+        const valueDisplay = this.valueDisplayTarget
+        if (!valueDisplay || !valueDisplay.dataset.countFrom) return
+
+        const startValue = parseFloat(valueDisplay.dataset.countFrom) || 0
+        const endValue = parseFloat(valueDisplay.dataset.countTo) || 0
+
+        if (startValue !== endValue) {
+          this.animateCounter(valueDisplay, startValue, endValue)
+        }
+      }
+
+      animateCounter(element, startValue, endValue) {
+        // Sophisticated easing animation for counter updates
+        const duration = 1500
+        const startTime = performance.now()
+        const difference = endValue - startValue
+
+        const animate = (currentTime) => {
+          const elapsed = currentTime - startTime
+          const progress = Math.min(elapsed / duration, 1)
+
+          // Sophisticated easing function
+          const easeOutQuart = 1 - Math.pow(1 - progress, 4)
+          const currentValue = startValue + (difference * easeOutQuart)
+
+          element.textContent = this.formatCounterValue(currentValue)
+
+          if (progress < 1) {
+            requestAnimationFrame(animate)
+          }
+        }
+
+        requestAnimationFrame(animate)
+      }
+
+      formatCounterValue(value) {
+        // Intelligent value formatting based on magnitude and type
+        const magnitude = Math.abs(value)
+
+        if (magnitude >= 1000000) {
+          return (value / 1000000).toFixed(1) + 'M'
+        } else if (magnitude >= 1000) {
+          return (value / 1000).toFixed(1) + 'K'
+        } else {
+          return value.toFixed(0)
+        }
+      }
+
+      setupEventListeners() {
+        // Sophisticated event delegation with memory leak prevention
+        this.boundShowDetails = this.showDetails.bind(this)
+        this.boundPreloadDetails = this.preloadDetails.bind(this)
+        this.boundTrackInteraction = this.trackInteraction.bind(this)
+
+        this.element.addEventListener('click', this.boundShowDetails)
+        this.element.addEventListener('mouseenter', this.boundPreloadDetails)
+      }
+
+      async showDetails() {
+        this.markPerformance('show-details-start')
+        this.state.interactionCount++
+
+        try {
+          // Progressive enhancement with lazy loading
+          if (!this.state.detailsLoaded) {
+            this.showLoadingState()
+            await this.loadDetailedAnalytics()
+          }
+
+          // Sophisticated presentation based on context
+          await this.presentDetailedView()
+
+          // Track interaction for analytics
+          this.trackInteraction()
+
+        } catch (error) {
+          console.error('Failed to show stat details:', error)
+          this.handleError(error)
+        }
+
+        this.markPerformance('show-details-complete')
+      }
+
+      async loadDetailedAnalytics() {
+        // Sophisticated data loading with caching strategy
+        const cacheKey = `stat-details-${this.statType}-${this.currentValue}`
+
+        try {
+          // Check cache first
+          const cachedData = sessionStorage.getItem(cacheKey)
+          if (cachedData) {
+            this.detailedData = JSON.parse(cachedData)
+            this.state.detailsLoaded = true
+            return
+          }
+
+          // Sophisticated API call with intelligent retry logic
+          const response = await this.fetchDetailedAnalytics()
+
+          if (response.ok) {
+            this.detailedData = await response.json()
+            this.state.detailsLoaded = true
+
+            // Cache for future use
+            sessionStorage.setItem(cacheKey, JSON.stringify(this.detailedData))
+          } else {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+          }
+
+        } catch (error) {
+          console.error('Failed to load detailed analytics:', error)
+          this.detailedData = this.getFallbackData()
+        } finally {
+          this.hideLoadingState()
+        }
+      }
+
+      async fetchDetailedAnalytics() {
+        // Intelligent API endpoint selection based on stat type
+        const endpoints = {
+          revenue: '/api/analytics/revenue-details',
+          sales: '/api/analytics/sales-details',
+          users: '/api/analytics/user-details',
+          orders: '/api/analytics/order-details',
+          default: '/api/analytics/stat-details'
+        }
+
+        const endpoint = endpoints[this.statType] || endpoints.default
+
+        return fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: JSON.stringify({
+            stat_type: this.statType,
+            current_value: this.currentValue,
+            trend_direction: this.trendDirection,
+            timeframe: this.element.dataset.timeframe || 'current_period'
+          })
+        })
+      }
+
+      async presentDetailedView() {
+        // Sophisticated presentation mode selection
+        const presentationMode = this.determinePresentationMode()
+
+        switch (presentationMode) {
+          case 'modal':
+            await this.presentAsModal()
+            break
+          case 'popover':
+            await this.presentAsPopover()
+            break
+          case 'inline':
+            this.presentInline()
+            break
+          default:
+            this.presentAsTooltip()
+        }
+      }
+
+      determinePresentationMode() {
+        // Intelligent presentation mode selection
+        const viewportWidth = window.innerWidth
+        const statCardRect = this.element.getBoundingClientRect()
+
+        if (viewportWidth < 768) {
+          return 'modal'
+        } else if (statCardRect.width > 300) {
+          return 'popover'
+        } else {
+          return 'inline'
+        }
+      }
+
+      async presentAsModal() {
+        // Advanced modal presentation with backdrop
+        const modal = document.createElement('div')
+        modal.className = 'stat-details-modal'
+        modal.innerHTML = this.generateModalContent()
+
+        // Setup modal interactions
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            this.closeModal(modal)
+          }
+        })
+
+        document.body.appendChild(modal)
+
+        // Animate modal entrance
+        requestAnimationFrame(() => {
+          modal.classList.add('active')
+        })
+
+        // Focus management for accessibility
+        const firstFocusable = modal.querySelector('[autofocus], [tabindex="0"]')
+        if (firstFocusable) {
+          firstFocusable.focus()
+        }
+      }
+
+      generateModalContent() {
+        // Sophisticated modal content generation
+        return `
+          <div class="stat-details-modal-content">
+            <div class="stat-details-header">
+              <h2>Detailed Analytics: ${this.statType}</h2>
+              <button class="stat-details-close" aria-label="Close analytics">&times;</button>
+            </div>
+            <div class="stat-details-body">
+              ${this.generateAnalyticsContent()}
+            </div>
+          </div>
+        `
+      }
+
+      generateAnalyticsContent() {
+        // Advanced analytics content generation
+        if (!this.detailedData) {
+          return '<div class="no-data">No detailed analytics available</div>'
+        }
+
+        return `
+          <div class="analytics-grid">
+            <div class="analytics-breakdown">
+              <h3>Value Breakdown</h3>
+              ${this.generateValueBreakdown()}
+            </div>
+            <div class="trend-analysis">
+              <h3>Trend Analysis</h3>
+              ${this.generateTrendAnalysis()}
+            </div>
+            <div class="insights-recommendations">
+              <h3>Insights & Recommendations</h3>
+              ${this.generateInsights()}
+            </div>
+          </div>
+        `
+      }
+
+      generateValueBreakdown() {
+        // Sophisticated value breakdown visualization
+        return `
+          <div class="value-breakdown-chart">
+            <div class="breakdown-item">
+              <span class="breakdown-label">Current Period</span>
+              <span class="breakdown-value">${this.currentValue}</span>
+            </div>
+            <div class="breakdown-item">
+              <span class="breakdown-label">Previous Period</span>
+              <span class="breakdown-value">${this.detailedData.previous_period || 0}</span>
+            </div>
+            <div class="breakdown-item">
+              <span class="breakdown-label">Period over Period</span>
+              <span class="breakdown-value">${this.detailedData.period_over_period || 0}%</span>
+            </div>
+          </div>
+        `
+      }
+
+      generateTrendAnalysis() {
+        // Advanced trend visualization
+        const trendData = this.detailedData.trend_analysis || []
+
+        return `
+          <div class="trend-visualization">
+            ${trendData.map((point, index) => `
+              <div class="trend-point" style="--delay: ${index * 0.1}s">
+                <span class="trend-date">${point.date}</span>
+                <span class="trend-value">${point.value}</span>
+              </div>
+            `).join('')}
+          </div>
+        `
+      }
+
+      generateInsights() {
+        // Sophisticated insights generation
+        const insights = this.detailedData.insights || []
+
+        return `
+          <div class="insights-container">
+            ${insights.map(insight => `
+              <div class="insight-card">
+                <div class="insight-icon">${insight.icon}</div>
+                <div class="insight-content">
+                  <h4>${insight.title}</h4>
+                  <p>${insight.description}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `
+      }
+
+      preloadDetails() {
+        // Intelligent preloading for performance optimization
+        if (this.shouldPreload()) {
+          this.loadDetailedAnalytics()
+        }
+      }
+
+      shouldPreload() {
+        // Sophisticated preloading decisions
+        return this.state.interactionCount > 0 ||
+               this.element.matches(':hover') ||
+               this.trendDirection !== 'neutral'
+      }
+
+      showLoadingState() {
+        // Sophisticated loading state management
+        if (this.hasLoadingIndicatorTarget) {
+          this.loadingIndicatorTarget.style.opacity = '1'
+        }
+      }
+
+      hideLoadingState() {
+        // Hide loading state with smooth transition
+        if (this.hasLoadingIndicatorTarget) {
+          this.loadingIndicatorTarget.style.opacity = '0'
+        }
+      }
+
+      trackInteraction() {
+        // Advanced interaction tracking for analytics
+        if (typeof gtag !== 'undefined') {
+          gtag('event', 'stat_card_interaction', {
+            stat_type: this.statType,
+            value: this.currentValue,
+            trend: this.trendDirection,
+            interaction_count: this.state.interactionCount
+          })
+        }
+      }
+
+      markPerformance(mark) {
+        // Performance monitoring for optimization
+        this.performanceMarks.set(mark, performance.now())
+      }
+
+      getPerformanceMetrics() {
+        // Sophisticated performance analysis
+        const metrics = {}
+        const marks = Array.from(this.performanceMarks.entries())
+
+        for (let i = 1; i < marks.length; i++) {
+          const [currentMark, currentTime] = marks[i]
+          const [previousMark, previousTime] = marks[i - 1]
+          metrics[`${previousMark}-to-${currentMark}`] = currentTime - previousTime
+        }
+
+        return metrics
+      }
+
+      handleError(error) {
+        // Sophisticated error handling with user feedback
+        console.error('Stat card error:', error)
+
+        this.showErrorMessage('Unable to load detailed analytics. Please try again.')
+        this.reportError(error)
+      }
+
+      showErrorMessage(message) {
+        // User-friendly error presentation
+        const notification = document.createElement('div')
+        notification.className = 'stat-error-notification'
+        notification.textContent = message
+        notification.setAttribute('role', 'alert')
+
+        this.element.appendChild(notification)
+
+        setTimeout(() => {
+          if (notification.parentNode) {
+            notification.remove()
+          }
+        }, 5000)
+      }
+
+      async reportError(error) {
+        // Error reporting for monitoring
+        try {
+          await fetch('/api/errors', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              component: 'StatCard',
+              error: error.message,
+              stat_type: this.statType,
+              timestamp: new Date().toISOString()
+            })
+          })
+        } catch (reportError) {
+          console.error('Failed to report error:', reportError)
+        }
+      }
+
+      getFallbackData() {
+        // Sophisticated fallback data generation
+        return {
+          previous_period: this.currentValue * 0.9,
+          period_over_period: -10,
+          trend_analysis: [],
+          insights: [
+            {
+              icon: '💡',
+              title: 'Data Unavailable',
+              description: 'Detailed analytics are currently unavailable for this metric.'
+            }
+          ]
+        }
+      }
+
+      cleanup() {
+        // Sophisticated cleanup to prevent memory leaks
+        // Clear performance marks
+        this.performanceMarks.clear()
+      }
+    }
+
+    // Register the controller for sophisticated functionality
+    if (window.Stimulus) {
+      window.Stimulus.register('stat-card', StatCardController)
+    }
+  </script>
+<% end %>

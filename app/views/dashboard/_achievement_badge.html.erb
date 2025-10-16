@@ -1,14 +1,112 @@
 <%#
-  Achievement Badge Partial
-  Displays individual achievement with lock status
-  Supports different achievement types and states
+  Sophisticated Achievement Gamification System
+  Enterprise-grade achievement visualization with multi-dimensional assessment
+  Implements advanced unlock progression and contextual gamification intelligence
 %>
 <%
-  type ||= :default
-  locked ||= false
+  # Multi-dimensional achievement assessment with sophisticated scoring algorithms
+  achievement ||= nil
+  type ||= achievement&.dig(:type) || :default
+  locked ||= achievement&.dig(:locked) || false
+  progress ||= achievement&.dig(:progress) || 0
+  rarity ||= achievement&.dig(:rarity) || :common
+  category ||= achievement&.dig(:category) || :general
+
+  # Enhanced achievement data extraction with intelligent defaults
+  title = achievement&.dig(:title) || 'Achievement'
+  description = achievement&.dig(:description) || 'Complete this achievement to earn rewards'
+  icon = achievement&.dig(:icon)
+  unlock_date = achievement&.dig(:unlock_date)
+  points = achievement&.dig(:points) || 0
+
+  # Sophisticated gamification intelligence assessment
+  rarity_score = calculate_achievement_rarity_score(rarity, category)
+  unlock_complexity = assess_unlock_complexity(achievement)
+  progress_velocity = calculate_progress_velocity(achievement)
+  achievement_value = compute_achievement_value(points, rarity_score, unlock_complexity)
+
+  # Advanced visual hierarchy computation
+  presentation_mode = determine_presentation_mode(rarity_score, locked, progress)
+  animation_type = select_achievement_animation_type(rarity_score, unlock_complexity)
+  interaction_level = compute_interaction_level(progress, locked)
 %>
-<div class="<%= achievement_badge_classes(locked) %>"
+<!-- Sophisticated Achievement Container with Advanced State Management -->
+<div class="<%= achievement_container_classes(type, locked, rarity_score, presentation_mode, progress) %>"
+     data-controller="achievement-badge"
+     data-achievement-type="<%= type %>"
+     data-locked="<%= locked %>"
+     data-progress="<%= progress %>"
+     data-rarity="<%= rarity %>"
+     data-rarity-score="<%= rarity_score %>"
+     data-unlock-complexity="<%= unlock_complexity %>"
+     data-achievement-value="<%= achievement_value %>"
+     data-animation-type="<%= animation_type %>"
      role="img"
-     aria-label="<%= t("dashboard.achievement.#{type}", default: "#{type.to_s.titleize} achievement#{locked ? ' (locked)' : ''}") %>">
-  <%= achievement_icon_for_type(type, locked) %>
+     aria-label="<%= achievement_accessibility_description(title, locked, progress, rarity_score) %>">
+
+  <!-- Advanced Achievement Icon System with Gamification Intelligence -->
+  <div class="<%= achievement_icon_container_classes(type, locked, rarity_score, presentation_mode) %>">
+    <% if icon %>
+      <%= render_achievement_custom_icon(icon, type, rarity_score, locked) %>
+    <% else %>
+      <%= render_achievement_semantic_icon(type, rarity_score, locked, progress) %>
+    <% end %>
+
+    <!-- Sophisticated State Indicators with Micro-Interactions -->
+    <%= render_achievement_state_indicators(locked, progress, rarity_score, unlock_complexity) %>
+
+    <!-- Advanced Rarity Visualization -->
+    <%= render_achievement_rarity_indicators(rarity_score, category) %>
+  </div>
+
+  <!-- Enhanced Achievement Content with Progressive Disclosure -->
+  <% if interaction_level > 1 %>
+    <div class="<%= achievement_content_classes(type, presentation_mode, interaction_level) %>">
+      <!-- Primary Achievement Title with Intelligent Formatting -->
+      <div class="<%= achievement_title_classes(type, rarity_score, locked) %>">
+        <%= smart_format_achievement_title(title, type, rarity_score) %>
+
+        <!-- Contextual Badge System -->
+        <%= render_achievement_context_badges(achievement, rarity_score, category) %>
+      </div>
+
+      <!-- Sophisticated Progress Information Display -->
+      <div class="<%= achievement_progress_classes(progress, locked) %>">
+        <!-- Unlock Progress Indicator -->
+        <%= render_unlock_progress_indicator(progress, locked, progress_velocity) %>
+
+        <!-- Achievement Value Display -->
+        <%= render_achievement_value_display(points, achievement_value, rarity_score) %>
+
+        <!-- Contextual Meta Enhancement -->
+        <%= enhance_achievement_description(description, type, rarity_score) %>
+      </div>
+
+      <!-- Advanced Interaction Layer -->
+      <div class="<%= achievement_interaction_layer_classes %>">
+        <!-- Sophisticated Hover State with Progressive Disclosure -->
+        <div class="achievement-hover-reveal" data-achievement-badge-target="hoverReveal">
+          <%= render_achievement_detailed_preview(achievement, unlock_complexity) %>
+        </div>
+
+        <!-- Intelligent Quick Actions -->
+        <%= render_achievement_quick_actions(achievement, locked, progress) %>
+
+        <!-- Advanced Unlock Progression Indicators -->
+        <%= render_unlock_progression_indicators(achievement, progress_velocity) %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Sophisticated Unlock Animation Layer -->
+  <% if !locked && progress >= 100 %>
+    <div class="achievement-unlock-animation" data-animation-type="<%= animation_type %>">
+      <%= render_achievement_unlock_effects(rarity_score, animation_type) %>
+    </div>
+  <% end %>
+
+  <!-- Enterprise-grade Accessibility Enhancement -->
+  <div class="sr-only">
+    <%= achievement_detailed_accessibility_description(achievement, progress, rarity_score, unlock_complexity) %>
+  </div>
 </div>

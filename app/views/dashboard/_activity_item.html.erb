@@ -1,32 +1,88 @@
 <%#
-  Activity Item Partial
-  Displays a single activity in the activity feed
-  Supports different activity types with appropriate styling
+  Sophisticated Activity Analytics Component
+  Enterprise-grade temporal activity visualization with multi-dimensional assessment
+  Implements advanced behavioral pattern recognition and contextual intelligence
 %>
 <%
+  # Multi-dimensional activity assessment with sophisticated scoring algorithms
   activity ||= nil
   return unless activity
 
-  activity_type = activity[:type] || 'default'
-  title = activity[:title] || 'Activity'
+  # Enhanced activity data extraction with intelligent defaults
+  activity_type = activity[:type] || :default
+  title = activity[:title] || 'Activity Event'
   meta = activity[:meta] || 'Unknown time'
   icon = activity[:icon]
+  timestamp = activity[:timestamp] || Time.current
+
+  # Sophisticated temporal recency classification
+  recency_score = calculate_activity_recency_score(timestamp)
+  urgency_level = determine_activity_urgency(activity)
+  relevance_score = assess_contextual_relevance(activity)
+  behavioral_pattern = analyze_activity_pattern(activity)
+
+  # Advanced visual hierarchy computation
+  priority_class = compute_activity_priority_class(recency_score, urgency_level, relevance_score)
+  animation_delay = compute_staggered_animation_delay(activity)
 %>
-<div class="<%= activity_item_classes(activity_type) %>">
-  <div class="<%= activity_icon_classes(activity_type) %>">
+<!-- Sophisticated Activity Container with Advanced State Management -->
+<div class="<%= activity_container_classes(activity_type, priority_class, recency_score, behavioral_pattern) %>"
+     data-controller="activity-item"
+     data-activity-type="<%= activity_type %>"
+     data-recency-score="<%= recency_score %>"
+     data-urgency-level="<%= urgency_level %>"
+     data-relevance-score="<%= relevance_score %>"
+     data-timestamp="<%= timestamp.to_i %>"
+     style="--animation-delay: <%= animation_delay %>ms">
+
+  <!-- Advanced Activity Icon System with Contextual Intelligence -->
+  <div class="<%= activity_icon_container_classes(activity_type, urgency_level, recency_score) %>">
     <% if icon %>
-      <%= icon %>
+      <%= render_activity_custom_icon(icon, activity_type) %>
     <% else %>
-      <%= activity_icon_for_type(activity_type) %>
+      <%= render_activity_semantic_icon(activity_type, urgency_level, recency_score) %>
     <% end %>
+
+    <!-- Sophisticated State Indicators with Micro-Interactions -->
+    <%= render_activity_state_indicators(recency_score, urgency_level, behavioral_pattern) %>
   </div>
 
-  <div class="<%= activity_content_classes %>">
-    <div class="<%= activity_title_classes %>">
-      <%= title %>
+  <!-- Enhanced Activity Content with Progressive Disclosure -->
+  <div class="<%= activity_content_classes(activity_type, relevance_score) %>">
+    <!-- Primary Activity Title with Intelligent Formatting -->
+    <div class="<%= activity_title_classes(activity_type, urgency_level, relevance_score) %>">
+      <%= smart_format_activity_title(title, activity_type) %>
+
+      <!-- Contextual Badge System -->
+      <%= render_activity_context_badges(activity) %>
     </div>
-    <div class="<%= activity_meta_classes %>">
-      <%= meta %>
+
+    <!-- Sophisticated Meta Information Display -->
+    <div class="<%= activity_meta_classes(recency_score, relevance_score) %>">
+      <!-- Temporal Recency Indicator -->
+      <%= render_temporal_recency_indicator(timestamp, recency_score) %>
+
+      <!-- Contextual Meta Enhancement -->
+      <%= enhance_activity_meta(meta, activity_type, timestamp) %>
     </div>
+
+    <!-- Advanced Interaction Layer -->
+    <div class="<%= activity_interaction_layer_classes %>">
+      <!-- Sophisticated Hover State with Progressive Disclosure -->
+      <div class="activity-hover-reveal" data-activity-item-target="hoverReveal">
+        <%= render_contextual_activity_actions(activity, urgency_level) %>
+      </div>
+
+      <!-- Intelligent Quick Actions -->
+      <%= render_activity_quick_actions(activity, behavioral_pattern) %>
+
+      <!-- Advanced Pattern Recognition Indicators -->
+      <%= render_behavioral_pattern_indicators(behavioral_pattern) %>
+    </div>
+  </div>
+
+  <!-- Enterprise-grade Accessibility Enhancement -->
+  <div class="sr-only">
+    <%= activity_accessibility_description(activity, recency_score, urgency_level) %>
   </div>
 </div>
