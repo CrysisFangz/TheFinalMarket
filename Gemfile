@@ -156,7 +156,7 @@ gem "jsbundling-rails", "~> 1.3"
 # BUSINESS LOGIC - Enterprise-grade business features
 # =============================================================================
 # Payment processing with Square and advanced fraud detection
-gem "square.rb", "~> 42.2"
+gem "square.rb", "~> 44.0"
 
 # Money and currency handling with multi-currency support
 gem "money-rails", "~> 1.15"
