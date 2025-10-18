@@ -441,17 +441,22 @@ Rails.application.configure do
   config = EnhancedMonitoring::Configuration.for_environment
   EnhancedMonitoring::Configuration.validate_config!(config)
 
-  # Configure structured logging
-  config.log_formatter = EnhancedMonitoring::StructuredLogger
+  # Configure structured logging formatter for Rails logger
+  Rails.application.config.logger = Logger.new($stdout).tap do |logger|
+    logger.formatter = proc do |severity, datetime, progname, msg|
+      EnhancedMonitoring::StructuredLogger.log(severity.downcase.to_sym, msg)
+      "#{datetime} #{severity} -- #{msg}\n"
+    end
+  end
 
   # Add correlation ID middleware
-  config.middleware.insert_before Rails::Rack::Logger, EnhancedMonitoring::CorrelationIdMiddleware
+  Rails.application.config.middleware.insert_before Rails::Rack::Logger, EnhancedMonitoring::CorrelationIdMiddleware
 
   # Use enhanced logger
-  config.middleware.use EnhancedMonitoring::EnhancedLogger
+  Rails.application.config.middleware.use EnhancedMonitoring::EnhancedLogger
 
   # Configure log level
-  config.log_level = config[:log_level]
+  Rails.application.config.log_level = config[:log_level]
 
   Rails.logger.info("Enhanced monitoring configured for #{Rails.env} environment")
 end

@@ -1,32 +1,28 @@
 
-/**
- * ApplicationController - Enterprise-Grade Base Controller with Hyperscale Architecture
- *
- * Implements the foundational layer of the Hexagonal Architecture, providing enterprise-grade
- * capabilities for authentication, authorization, caching, monitoring, and antifragile error handling.
- *
- * Base Controller Architecture:
- * - Zero-trust security model with behavioral analysis
- * - Intelligent caching with predictive warming strategies
- * - Real-time performance monitoring and adaptive scaling
- * - Comprehensive audit trails with event sourcing
- * - Circuit breaker integration for antifragile resilience
- * - Advanced internationalization and accessibility support
- *
- * Performance Characteristics:
- * - P99 response time: < 5ms for controller initialization
- * - Memory efficiency: O(log n) scaling with intelligent garbage collection
- * - Cache efficiency: > 99.8% hit rate for common operations
- * - Concurrent capacity: 100,000+ simultaneous sessions
- * - Real-time monitoring: < 1ms overhead for observability
- *
- * Security Features:
- * - Quantum-resistant authentication framework
- * - Behavioral biometric analysis integration
- * - Real-time threat intelligence correlation
- * - Adaptive rate limiting with machine learning
- * - Cryptographic key rotation and management
- * - Zero-trust authorization with continuous validation
+# ApplicationController - Enterprise-Grade Base Controller with Hyperscale Architecture
+ #
+# Implements the foundational layer of the Hexagonal Architecture, providing enterprise-grade
+# capabilities for authentication, authorization, caching, monitoring, and antifragile error handling.
+# # Base Controller Architecture:
+# - Zero-trust security model with behavioral analysis
+# - Intelligent caching with predictive warming strategies
+# - Real-time performance monitoring and adaptive scaling
+# - Comprehensive audit trails with event sourcing
+# - Circuit breaker integration for antifragile resilience
+# - Advanced internationalization and accessibility support
+# # Performance Characteristics:
+# - P99 response time: < 5ms for controller initialization
+# - Memory efficiency: O(log n) scaling with intelligent garbage collection
+# - Cache efficiency: > 99.8% hit rate for common operations
+# - Concurrent capacity: 100,000+ simultaneous sessions
+# - Real-time monitoring: < 1ms overhead for observability
+# # Security Features:
+# - Quantum-resistant authentication framework
+# - Behavioral biometric analysis integration
+# - Real-time threat intelligence correlation
+# - Adaptive rate limiting with machine learning
+# - Cryptographic key rotation and management
+# - Zero-trust authorization with continuous validation
  */
 
 class ApplicationController < ActionController::Base
@@ -1433,7 +1429,7 @@ class ApplicationController < ActionController::Base
   # Server-sent events support detection
   def server_sent_events_supported?
     # Detect Server-Sent Events support
-    request.headers['Accept']&.include?('text/event-stream')
+    request.headers["Accept"]&.include?("text/event-stream")
   end
 
   # User engagement analytics recording
@@ -3299,4 +3295,23 @@ class ApplicationController < ActionController::Base
 
   # Security config extraction
   def extract_security_config
-    # Extrac
+    # Extrac     # Extract security configuration for analysis
+     SecurityConfigExtractor.instance.extract(
+       application_config: extract_application_config,
+       environment_config: extract_environment_config,
+       security_headers: extract_security_headers
+     )
+   end
+
+   private
+
+   # Security config extraction implementation
+   def extract_security_config
+     # Extract security configuration for analysis
+     SecurityConfigExtractor.instance.extract(
+       application_config: extract_application_config,
+       environment_config: extract_environment_config,
+       security_headers: extract_security_headers
+     )
+   end
+ end

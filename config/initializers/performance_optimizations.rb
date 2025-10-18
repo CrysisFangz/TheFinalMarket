@@ -494,13 +494,8 @@ module PerformanceOptimizations
       def configure_rack_attack
         return unless defined?(Rack::Attack)
 
-        Rack::Attack.configure do
-          setup_rate_limiting
-          setup_blocklists
-          setup_custom_responses
-        end
-
-        Rails.application.config.middleware.use Rack::Attack
+        # Rack::Attack.configure removed - configuration handled in rack_attack.rb
+          # Configuration moved to dedicated rack_attack.rb initializer
         Rails.logger.info("Rack::Attack configured successfully")
       rescue StandardError => e
         Rails.logger.error("Failed to configure Rack::Attack: #{e.message}")
@@ -1069,16 +1064,16 @@ Rails.application.configure do
   PerformanceOptimizations::Configuration.validate_config!(config)
 
   # Enable HTTP/2 Server Push with asset preloading
-  config.action_dispatch.default_headers.merge!({
+  Rails.application.config.action_dispatch.default_headers.merge!({
     'Link' => '</assets/application.css>; rel=preload; as=style, </assets/application.js>; rel=preload; as=script'
   })
 
   # Enable Brotli compression
-  config.middleware.insert_before ActionDispatch::Static, Rack::Deflater
+  Rails.application.config.middleware.insert_before ActionDispatch::Static, Rack::Deflater
 
   # Enable parallel testing based on configuration
   if config[:enable_parallel_testing]
-    config.active_support.test_parallelization_threshold = config[:parallel_test_threshold]
+    Rails.application.config.active_support.test_parallelization_threshold = config[:parallel_test_threshold]
   end
 
   Rails.logger.info("Performance optimizations configured for #{Rails.env} environment")
