@@ -1,0 +1,20 @@
+# frozen_string_literal: true
+
+# $ BUNDLE_GEMFILE="gemfiles/rails_git.gemfile" bundle exec m test/integration/tasks_test.rb:50
+
+source "https://rubygems.org"
+
+gem "rails", github: "rails/rails", branch: "main"
+
+gem 'devise', github: "plataformatec/devise", branch: "main"
+
+group :development, :test do
+  gem "sqlite3", platform: [:ruby, :mswin, :mingw]
+  gem "activerecord-jdbcsqlite3-adapter", "~> 1.3.13", platform: :jruby
+  gem "test-unit", "~> 3.0"
+  gem "rackup"
+end
+
+gemspec path: "../"
+
+ENV['USING_RAILS_GIT'] = "1"

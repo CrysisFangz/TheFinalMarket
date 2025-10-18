@@ -1,0 +1,66 @@
+== master
+
+== 0.3.3 / 2010-03-07
+
+* Release gems via rake-gemcutter instead of rubyforge
+* Add support for customizing how the SHA value gets built
+* Allow methods or procs to be defined for dynamically generating SHA salts
+* Add support for customizing the SHA encryption algorithm
+
+== 0.3.2 / 2009-01-11
+
+* Use Array#pack/String#unpack instead of Base64 to be compatible with Ruby 1.9+
+
+== 0.3.1 / 2008-12-4
+
+* Fix symmetric ciphers not working on Ruby 1.8.6 and below
+
+== 0.3.0 / 2008-12-14
+
+* Remove the PluginAWeek namespace
+
+== 0.2.1 / 2008-12-04
+
+* Fix class-level defaults not working when inherited
+
+== 0.2.0 / 2008-12-01
+
+* Remove AsymmetricEncryptor.default_algorithm, instead relying on SymmetricEncryptor.default_algorithm
+* Rename NoKeyError to NoPasswordError
+* Rename Encryptors to Ciphers
+* Remove deprecated SymmetricEncryptor#key option
+* Require that symmetric encryption be PKCS #5 compliant
+
+== 0.1.1 / 2008-12-01
+
+* Fix non-compliant PKCS #5 algorithm being used for symmetric encryption. Use :pkcs5_compliant => true for better security.
+* Rename SymmetricEncryptor#key to #password
+* Fix deprecation messages for Cipher#encrypt/decrypt
+
+== 0.1.0 / 2008-07-06
+
+* Remove dependency on active_support
+
+== 0.0.5 / 2008-07-05
+
+* Add automatic stringification of salts for SHA encryption
+* Fix not resetting the encryptor after calling decrypt!
+
+== 0.0.4 / 2008-05-05
+
+* Updated documentation
+
+== 0.0.3 / 2007-09-18
+
+* Remove gem dependency on activesupport
+
+== 0.0.2 / 2007-08-23
+
+* Fix not allowing the decryption mode to be overriden if the string already has an encryptor
+* Convert dos newlines to unix newlines
+
+== 0.0.1 / 2007-08-05
+
+* Official public release
+* Add api documentation
+* Refactor unit test names

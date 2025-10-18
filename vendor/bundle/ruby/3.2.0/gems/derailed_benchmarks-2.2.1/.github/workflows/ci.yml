@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - ruby: "2.5"
+          gemfile: gemfiles/rails_5_1.gemfile
+        - ruby: "2.5"
+          gemfile: gemfiles/rails_5_2.gemfile
+        - ruby: "2.5"
+          gemfile: gemfiles/rails_6_0.gemfile
+        - ruby: "2.5"
+          gemfile: gemfiles/rails_6_1.gemfile
+        - ruby: "2.6"
+          gemfile: gemfiles/rails_5_2.gemfile
+        - ruby: "2.6"
+          gemfile: gemfiles/rails_6_0.gemfile
+        - ruby: "2.6"
+          gemfile: gemfiles/rails_6_1.gemfile
+        - ruby: "2.7"
+          gemfile: gemfiles/rails_5_1.gemfile
+        - ruby: "2.7"
+          gemfile: gemfiles/rails_5_2.gemfile
+        - ruby: "2.7"
+          gemfile: gemfiles/rails_6_0.gemfile
+        - ruby: "2.7"
+          gemfile: gemfiles/rails_6_1.gemfile
+        - ruby: "2.7"
+          gemfile: gemfiles/rails_7_0.gemfile
+        - ruby: "2.7"
+          gemfile: gemfiles/rails_7_1.gemfile
+        - ruby: "3.0"
+          gemfile: gemfiles/rails_6_0.gemfile
+        - ruby: "3.0"
+          gemfile: gemfiles/rails_6_1.gemfile
+        - ruby: "3.0"
+          gemfile: gemfiles/rails_7_0.gemfile
+        - ruby: "3.0"
+          gemfile: gemfiles/rails_7_1.gemfile
+        - ruby: "3.1"
+          gemfile: gemfiles/rails_6_0.gemfile
+        - ruby: "3.1"
+          gemfile: gemfiles/rails_6_1.gemfile
+        - ruby: "3.1"
+          gemfile: gemfiles/rails_7_0.gemfile
+        - ruby: "3.1"
+          gemfile: gemfiles/rails_7_1.gemfile
+        - ruby: "3.1"
+          gemfile: gemfiles/rails_7_2.gemfile
+        - ruby: "3.2"
+          gemfile: gemfiles/rails_6_0.gemfile
+        - ruby: "3.2"
+          gemfile: gemfiles/rails_6_1.gemfile
+        - ruby: "3.2"
+          gemfile: gemfiles/rails_7_0.gemfile
+        - ruby: "3.2"
+          gemfile: gemfiles/rails_7_1.gemfile
+        - ruby: "3.2"
+          gemfile: gemfiles/rails_7_2.gemfile
+        - ruby: "3.3"
+          gemfile: gemfiles/rails_6_0.gemfile
+        - ruby: "3.3"
+          gemfile: gemfiles/rails_6_1.gemfile
+        - ruby: "3.3"
+          gemfile: gemfiles/rails_7_0.gemfile
+        - ruby: "3.3"
+          gemfile: gemfiles/rails_7_1.gemfile
+        - ruby: "3.3"
+          gemfile: gemfiles/rails_7_2.gemfile
+        - ruby: "head"
+          gemfile: gemfiles/rails_head.gemfile
+    env:
+      BUNDLE_GEMFILE: ${{ matrix.gemfile }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+      - name: Set Git config
+        run: |
+          git config --global user.email "user@example.com"
+          git config --global user.name "Github Action Bot"
+      - name: Run test
+        run: bundle exec rake test

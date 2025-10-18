@@ -1,0 +1,26 @@
+inherit_gem:
+  rubocop-shopify: rubocop.yml
+
+AllCops:
+  Exclude:
+    - bin/generate-report
+    - vendor/bundle/**/*
+    - ext/**/*
+
+Style/MethodCallWithArgsParentheses:
+  Enabled: false
+
+Naming/FileName:
+  Enabled: false
+
+Lint/RescueException:
+  Enabled: false
+
+Lint/MissingSuper:
+  Enabled: false
+
+Lint/AssignmentInCondition:
+  Enabled: false
+
+Metrics/ParameterLists:
+  Enabled: false

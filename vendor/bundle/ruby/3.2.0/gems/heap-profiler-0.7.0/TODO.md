@@ -1,0 +1,3 @@
+### Explore
+
+- Detect object growth?

@@ -1,0 +1,32 @@
+current directory: /Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/ed25519-1.4.0/ext/ed25519_ref10
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/.rbenv/versions/3.2.2/bin/ruby extconf.rb
+checking for whether -Wall is accepted as CFLAGS... yes
+checking for whether -O3 is accepted as CFLAGS... yes
+checking for whether -pedantic is accepted as CFLAGS... yes
+checking for whether -std=c99 is accepted as CFLAGS... yes
+creating Makefile
+
+current directory: /Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/ed25519-1.4.0/ext/ed25519_ref10
+make DESTDIR\= sitearchdir\=./.gem.20251018-5954-yl938d sitelibdir\=./.gem.20251018-5954-yl938d clean
+
+current directory: /Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/ed25519-1.4.0/ext/ed25519_ref10
+make DESTDIR\= sitearchdir\=./.gem.20251018-5954-yl938d sitelibdir\=./.gem.20251018-5954-yl938d
+compiling ed25519_ref10.c
+compiling fe.c
+compiling ge.c
+compiling keypair.c
+compiling open.c
+compiling sc_muladd.c
+compiling sc_reduce.c
+compiling sha512.c
+compiling sign.c
+compiling verify.c
+linking shared-object ed25519_ref10.bundle
+ld: warning: -undefined dynamic_lookup may not work with chained fixups
+
+current directory: /Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/ed25519-1.4.0/ext/ed25519_ref10
+make DESTDIR\= sitearchdir\=./.gem.20251018-5954-yl938d sitelibdir\=./.gem.20251018-5954-yl938d install
+/usr/bin/install -c -m 0755 ed25519_ref10.bundle ./.gem.20251018-5954-yl938d
+
+current directory: /Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/ed25519-1.4.0/ext/ed25519_ref10
+make DESTDIR\= sitearchdir\=./.gem.20251018-5954-yl938d sitelibdir\=./.gem.20251018-5954-yl938d clean

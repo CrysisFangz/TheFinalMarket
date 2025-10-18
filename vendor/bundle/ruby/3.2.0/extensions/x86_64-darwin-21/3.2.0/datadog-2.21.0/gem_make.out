@@ -1,0 +1,19 @@
+current directory: /Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/datadog-2.21.0/ext/libdatadog_api
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/.rbenv/versions/3.2.2/bin/ruby extconf.rb
+WARN: Skipping build of libdatadog_api (issue setting up `libdatadog` gem: The `libdatadog` gem installed on your system is missing binaries for your platform variant. Your platform: `x86_64-darwin-21`; available binaries: `x86_64-linux-musl`, `x86_64-linux`, `aarch64-linux-musl`, `aarch64-linux`). Some functionality will not be available.
+
+current directory: /Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/datadog-2.21.0/ext/libdatadog_api
+make DESTDIR\= sitearchdir\=./.gem.20251018-5954-6gynyo sitelibdir\=./.gem.20251018-5954-6gynyo clean
+make: Nothing to be done for `clean'.
+
+current directory: /Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/datadog-2.21.0/ext/libdatadog_api
+make DESTDIR\= sitearchdir\=./.gem.20251018-5954-6gynyo sitelibdir\=./.gem.20251018-5954-6gynyo
+make: Nothing to be done for `all'.
+
+current directory: /Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/datadog-2.21.0/ext/libdatadog_api
+make DESTDIR\= sitearchdir\=./.gem.20251018-5954-6gynyo sitelibdir\=./.gem.20251018-5954-6gynyo install
+make: Nothing to be done for `install'.
+
+current directory: /Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/datadog-2.21.0/ext/libdatadog_api
+make DESTDIR\= sitearchdir\=./.gem.20251018-5954-6gynyo sitelibdir\=./.gem.20251018-5954-6gynyo clean
+make: Nothing to be done for `clean'.

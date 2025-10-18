@@ -1,0 +1,19 @@
+current directory: /Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/websocket-driver-0.8.0/ext/websocket-driver
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/.rbenv/versions/3.2.2/bin/ruby extconf.rb
+creating Makefile
+
+current directory: /Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/websocket-driver-0.8.0/ext/websocket-driver
+make DESTDIR\= sitearchdir\=./.gem.20251018-5954-x76xuu sitelibdir\=./.gem.20251018-5954-x76xuu clean
+
+current directory: /Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/websocket-driver-0.8.0/ext/websocket-driver
+make DESTDIR\= sitearchdir\=./.gem.20251018-5954-x76xuu sitelibdir\=./.gem.20251018-5954-x76xuu
+compiling websocket_mask.c
+linking shared-object websocket_mask.bundle
+ld: warning: -undefined dynamic_lookup may not work with chained fixups
+
+current directory: /Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/websocket-driver-0.8.0/ext/websocket-driver
+make DESTDIR\= sitearchdir\=./.gem.20251018-5954-x76xuu sitelibdir\=./.gem.20251018-5954-x76xuu install
+/usr/bin/install -c -m 0755 websocket_mask.bundle ./.gem.20251018-5954-x76xuu
+
+current directory: /Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/websocket-driver-0.8.0/ext/websocket-driver
+make DESTDIR\= sitearchdir\=./.gem.20251018-5954-x76xuu sitelibdir\=./.gem.20251018-5954-x76xuu clean

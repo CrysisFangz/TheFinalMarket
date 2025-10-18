@@ -1,0 +1,68 @@
+current directory: /Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/hiredis-0.6.3/ext/hiredis_ext
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/.rbenv/versions/3.2.2/bin/ruby extconf.rb
+checking for sys/socket.h... yes
+cc -std=c99 -pedantic -c -O3 -fPIC  -Wall -W -Wstrict-prototypes -Wwrite-strings -g -ggdb net.c
+cc -std=c99 -pedantic -c -O3 -fPIC  -Wall -W -Wstrict-prototypes -Wwrite-strings -g -ggdb hiredis.c
+cc -std=c99 -pedantic -c -O3 -fPIC  -Wall -W -Wstrict-prototypes -Wwrite-strings -g -ggdb sds.c
+cc -std=c99 -pedantic -c -O3 -fPIC  -Wall -W -Wstrict-prototypes -Wwrite-strings -g -ggdb async.c
+cc -std=c99 -pedantic -c -O3 -fPIC  -Wall -W -Wstrict-prototypes -Wwrite-strings -g -ggdb read.c
+ar rcs libhiredis.a net.o hiredis.o sds.o async.o read.o
+checking for rb_thread_fd_select()... yes
+creating Makefile
+
+current directory: /Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/hiredis-0.6.3/ext/hiredis_ext
+make DESTDIR\= sitearchdir\=./.gem.20251018-5954-ho6cfz sitelibdir\=./.gem.20251018-5954-ho6cfz clean
+
+current directory: /Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/hiredis-0.6.3/ext/hiredis_ext
+make DESTDIR\= sitearchdir\=./.gem.20251018-5954-ho6cfz sitelibdir\=./.gem.20251018-5954-ho6cfz
+compiling connection.c
+In file included from connection.c:3:
+In file included from ./hiredis_ext.h:11:
+In file included from ./../../vendor/hiredis/hiredis.h:40:
+./../../vendor/hiredis/sds.h:145:34: warning: implicit conversion loses integer precision: 'size_t' (aka 'unsigned long') to 'uint32_t' (aka 'unsigned int') [-Wshorten-64-to-32]
+            SDS_HDR(32,s)->len = newlen;
+                               ~ ^~~~~~
+./../../vendor/hiredis/sds.h:209:36: warning: implicit conversion loses integer precision: 'size_t' (aka 'unsigned long') to 'uint32_t' (aka 'unsigned int') [-Wshorten-64-to-32]
+            SDS_HDR(32,s)->alloc = newlen;
+                                 ~ ^~~~~~
+connection.c:45:58: warning: function 'parent_context_raise' could be declared with attribute 'noreturn' [-Wmissing-noreturn]
+static void parent_context_raise(redisParentContext *pc) {
+                                                         ^
+connection.c:458:24: warning: passing 'volatile VALUE *' (aka 'volatile unsigned long *') to parameter of type 'VALUE *' (aka 'unsigned long *') discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+    if (__get_reply(pc,&reply) == -1)
+                       ^~~~~~
+connection.c:375:55: note: passing argument to parameter 'reply' here
+static int __get_reply(redisParentContext *pc, VALUE *reply) {
+                                                      ^
+4 warnings generated.
+compiling hiredis_ext.c
+In file included from hiredis_ext.c:4:
+In file included from ./hiredis_ext.h:11:
+In file included from ./../../vendor/hiredis/hiredis.h:40:
+./../../vendor/hiredis/sds.h:145:34: warning: implicit conversion loses integer precision: 'size_t' (aka 'unsigned long') to 'uint32_t' (aka 'unsigned int') [-Wshorten-64-to-32]
+            SDS_HDR(32,s)->len = newlen;
+                               ~ ^~~~~~
+./../../vendor/hiredis/sds.h:209:36: warning: implicit conversion loses integer precision: 'size_t' (aka 'unsigned long') to 'uint32_t' (aka 'unsigned int') [-Wshorten-64-to-32]
+            SDS_HDR(32,s)->alloc = newlen;
+                                 ~ ^~~~~~
+2 warnings generated.
+compiling reader.c
+In file included from reader.c:2:
+In file included from ./hiredis_ext.h:11:
+In file included from ./../../vendor/hiredis/hiredis.h:40:
+./../../vendor/hiredis/sds.h:145:34: warning: implicit conversion loses integer precision: 'size_t' (aka 'unsigned long') to 'uint32_t' (aka 'unsigned int') [-Wshorten-64-to-32]
+            SDS_HDR(32,s)->len = newlen;
+                               ~ ^~~~~~
+./../../vendor/hiredis/sds.h:209:36: warning: implicit conversion loses integer precision: 'size_t' (aka 'unsigned long') to 'uint32_t' (aka 'unsigned int') [-Wshorten-64-to-32]
+            SDS_HDR(32,s)->alloc = newlen;
+                                 ~ ^~~~~~
+2 warnings generated.
+linking shared-object hiredis/ext/hiredis_ext.bundle
+ld: warning: -undefined dynamic_lookup may not work with chained fixups
+
+current directory: /Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/hiredis-0.6.3/ext/hiredis_ext
+make DESTDIR\= sitearchdir\=./.gem.20251018-5954-ho6cfz sitelibdir\=./.gem.20251018-5954-ho6cfz install
+/usr/bin/install -c -m 0755 hiredis_ext.bundle ./.gem.20251018-5954-ho6cfz/hiredis/ext
+
+current directory: /Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/hiredis-0.6.3/ext/hiredis_ext
+make DESTDIR\= sitearchdir\=./.gem.20251018-5954-ho6cfz sitelibdir\=./.gem.20251018-5954-ho6cfz clean

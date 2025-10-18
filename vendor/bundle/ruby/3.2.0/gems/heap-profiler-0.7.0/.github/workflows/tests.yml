@@ -1,0 +1,33 @@
+name: CI
+on: [push]
+
+jobs:
+  rubocop:
+    name: Rubocop
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '2.5'
+          bundler-cache: true
+      - name: Run linters
+        run: |
+          bin/rubocop -c .rubocop.yml
+
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ruby: [ '2.5', '2.6', '2.7', '3.0', '3.1' ]
+    name: Ruby ${{ matrix.ruby }} Tests
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+      - name: Run tests
+        run: bundle exec rake

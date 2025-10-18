@@ -1,0 +1,71 @@
+current directory: /Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/skylight-6.0.4/ext
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/.rbenv/versions/3.2.2/bin/ruby extconf.rb
+I, [2025-10-18T02:54:22.878378 #8929]  INFO -- : SKYLIGHT_HDR_PATH=/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/skylight-6.0.4/ext; SKYLIGHT_LIB_PATH=/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/skylight-6.0.4/lib/skylight/native/x86_64-darwin
+I, [2025-10-18T02:54:22.879636 #8929]  INFO -- : [SKYLIGHT] fetching native ext; curr-platform=x86_64-darwin; requested-arch=x86_64-darwin; version=5.2.0-15d2f2b
+I, [2025-10-18T02:54:22.879839 #8929]  INFO -- : [SKYLIGHT] attempting to fetch from remote; uri=https://s3.amazonaws.com/skylight-agent-packages/skylight-native/5.2.0-15d2f2b/skylight_x86_64-darwin.tar.gz
+E, [2025-10-18T02:54:23.171979 #8929] ERROR -- : [SKYLIGHT] failed to fetch native extension; uri=https://s3.amazonaws.com/skylight-agent-packages/skylight-native/5.2.0-15d2f2b/skylight_x86_64-darwin.tar.gz; msg=SSL_connect returned=1 errno=0 peeraddr=52.217.171.48:443 state=error: certificate verify failed (unable to get local issuer certificate); remaining-attempts=2
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/net-protocol-0.2.2/lib/net/protocol.rb:46:in `connect_nonblock'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/net-protocol-0.2.2/lib/net/protocol.rb:46:in `ssl_socket_connect'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/net-http-0.6.0/lib/net/http.rb:1742:in `connect'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/net-http-0.6.0/lib/net/http.rb:1642:in `do_start'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/net-http-0.6.0/lib/net/http.rb:1631:in `start'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/net-http-0.6.0/lib/net/http.rb:1070:in `start'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/skylight-6.0.4/lib/skylight/native_ext_fetcher.rb:156:in `http_get'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/skylight-6.0.4/lib/skylight/native_ext_fetcher.rb:100:in `block (2 levels) in fetch_native_ext'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/skylight-6.0.4/lib/skylight/native_ext_fetcher.rb:99:in `open'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/skylight-6.0.4/lib/skylight/native_ext_fetcher.rb:99:in `block in fetch_native_ext'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/skylight-6.0.4/lib/skylight/native_ext_fetcher.rb:87:in `times'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/skylight-6.0.4/lib/skylight/native_ext_fetcher.rb:87:in `fetch_native_ext'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/skylight-6.0.4/lib/skylight/native_ext_fetcher.rb:64:in `fetch'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/skylight-6.0.4/lib/skylight/native_ext_fetcher.rb:28:in `fetch'
+extconf.rb:161:in `<main>'
+E, [2025-10-18T02:54:25.353773 #8929] ERROR -- : [SKYLIGHT] failed to fetch native extension; uri=https://s3.amazonaws.com/skylight-agent-packages/skylight-native/5.2.0-15d2f2b/skylight_x86_64-darwin.tar.gz; msg=SSL_connect returned=1 errno=0 peeraddr=52.216.238.205:443 state=error: certificate verify failed (unable to get local issuer certificate); remaining-attempts=1
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/net-protocol-0.2.2/lib/net/protocol.rb:46:in `connect_nonblock'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/net-protocol-0.2.2/lib/net/protocol.rb:46:in `ssl_socket_connect'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/net-http-0.6.0/lib/net/http.rb:1742:in `connect'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/net-http-0.6.0/lib/net/http.rb:1642:in `do_start'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/net-http-0.6.0/lib/net/http.rb:1631:in `start'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/net-http-0.6.0/lib/net/http.rb:1070:in `start'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/skylight-6.0.4/lib/skylight/native_ext_fetcher.rb:156:in `http_get'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/skylight-6.0.4/lib/skylight/native_ext_fetcher.rb:100:in `block (2 levels) in fetch_native_ext'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/skylight-6.0.4/lib/skylight/native_ext_fetcher.rb:99:in `open'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/skylight-6.0.4/lib/skylight/native_ext_fetcher.rb:99:in `block in fetch_native_ext'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/skylight-6.0.4/lib/skylight/native_ext_fetcher.rb:87:in `times'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/skylight-6.0.4/lib/skylight/native_ext_fetcher.rb:87:in `fetch_native_ext'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/skylight-6.0.4/lib/skylight/native_ext_fetcher.rb:64:in `fetch'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/skylight-6.0.4/lib/skylight/native_ext_fetcher.rb:28:in `fetch'
+extconf.rb:161:in `<main>'
+E, [2025-10-18T02:54:27.552160 #8929] ERROR -- : [SKYLIGHT] failed to fetch native extension; uri=https://s3.amazonaws.com/skylight-agent-packages/skylight-native/5.2.0-15d2f2b/skylight_x86_64-darwin.tar.gz; msg=SSL_connect returned=1 errno=0 peeraddr=52.217.104.94:443 state=error: certificate verify failed (unable to get local issuer certificate); remaining-attempts=0
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/net-protocol-0.2.2/lib/net/protocol.rb:46:in `connect_nonblock'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/net-protocol-0.2.2/lib/net/protocol.rb:46:in `ssl_socket_connect'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/net-http-0.6.0/lib/net/http.rb:1742:in `connect'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/net-http-0.6.0/lib/net/http.rb:1642:in `do_start'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/net-http-0.6.0/lib/net/http.rb:1631:in `start'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/net-http-0.6.0/lib/net/http.rb:1070:in `start'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/skylight-6.0.4/lib/skylight/native_ext_fetcher.rb:156:in `http_get'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/skylight-6.0.4/lib/skylight/native_ext_fetcher.rb:100:in `block (2 levels) in fetch_native_ext'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/skylight-6.0.4/lib/skylight/native_ext_fetcher.rb:99:in `open'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/skylight-6.0.4/lib/skylight/native_ext_fetcher.rb:99:in `block in fetch_native_ext'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/skylight-6.0.4/lib/skylight/native_ext_fetcher.rb:87:in `times'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/skylight-6.0.4/lib/skylight/native_ext_fetcher.rb:87:in `fetch_native_ext'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/skylight-6.0.4/lib/skylight/native_ext_fetcher.rb:64:in `fetch'
+/Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/skylight-6.0.4/lib/skylight/native_ext_fetcher.rb:28:in `fetch'
+extconf.rb:161:in `<main>'
+E, [2025-10-18T02:54:27.552216 #8929] ERROR -- : [SKYLIGHT] could not fetch native extension
+E, [2025-10-18T02:54:27.836794 #8929] ERROR -- : could not fetch archive -- aborting skylight native extension build
+
+current directory: /Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/skylight-6.0.4/ext
+make DESTDIR\= sitearchdir\=./.gem.20251018-5954-1i5fu1 sitelibdir\=./.gem.20251018-5954-1i5fu1 clean
+make: *** No rule to make target `clean'.  Stop.
+
+current directory: /Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/skylight-6.0.4/ext
+make DESTDIR\= sitearchdir\=./.gem.20251018-5954-1i5fu1 sitelibdir\=./.gem.20251018-5954-1i5fu1
+make: Nothing to be done for `default'.
+
+current directory: /Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/skylight-6.0.4/ext
+make DESTDIR\= sitearchdir\=./.gem.20251018-5954-1i5fu1 sitelibdir\=./.gem.20251018-5954-1i5fu1 install
+make: Nothing to be done for `install'.
+
+current directory: /Users/j.u.s.t.v.i.b.e.z.ofyonderclwdrs/TheFinalMarket/vendor/bundle/ruby/3.2.0/gems/skylight-6.0.4/ext
+make DESTDIR\= sitearchdir\=./.gem.20251018-5954-1i5fu1 sitelibdir\=./.gem.20251018-5954-1i5fu1 clean
+make: *** No rule to make target `clean'.  Stop.
