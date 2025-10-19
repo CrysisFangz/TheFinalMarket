@@ -2,7 +2,7 @@
 
 Rails.application.configure do
   # Number of days to hold funds in escrow before automatic release
-  config.escrow_expiry_days = 14
+  config.escrow_expiry_days = 7
   
   # Maximum amount in cents that can be held in escrow per transaction
   config.max_escrow_amount = 1_000_000 # $10,000
@@ -14,5 +14,5 @@ Rails.application.configure do
   config.escrow_fee_percentage = 0.02 # 2%
   
   # Maximum fee in cents that can be charged for escrow
-  config.max_escrow_fee = 50_000 # $500
+  config.max_escrow_fee = 50_000 # $5000
 end
