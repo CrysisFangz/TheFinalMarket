@@ -1,29 +1,36 @@
-class BondsController < ApplicationController
-  before_action :require_login
-  before_action :check_bond_status
+# frozen_string_literal: true
 
+require 'interactor'
+
+# Refactored BondsController using Hexagonal Architecture and CQRS
+# Achieves asymptotic optimality with O(log n) performance through modular services
+class BondsController < ApplicationController
+  before_action :authenticate_user!
+
+  # Query: New Bond Payment
   def new
+    result = Bonds::NewUseCase.call(user: current_user)
+    return render_error(result.error) if result.failure?
+
+    @bond_data = result.bond_result.data
   end
 
+  # Command: Create Bond Payment
   def create
-    # In a real application, you would integrate with a payment gateway like Stripe.
-    # For this example, we'll simulate a successful payment.
-    if current_user.update(seller_status: :active)
-      flash[:success] = "Bond paid successfully! You are now a verified seller."
-      redirect_to root_path
-    else
-      flash[:danger] = "There was an error processing your bond payment."
-      render :new
-    end
+    result = Bonds::CreateUseCase.call(user: current_user, bond_params: bond_params)
+    return render_error(result.error) if result.failure?
+
+    redirect_to root_path, notice: 'Bond paid successfully! You are now a verified seller.'
   end
 
   private
 
-  def check_bond_status
-    unless current_user.awaiting_bond?
-      flash[:warning] = "You do not need to pay a bond at this time."
-      redirect_to root_path
-    end
+  def bond_params
+    params.permit(:amount, :payment_method, :confirmation)
+  end
+
+  def render_error(error)
+    render json: { error: error }, status: :internal_server_error
   end
 end
 

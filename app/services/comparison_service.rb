@@ -1,54 +1,78 @@
-# 🚀 COMPARISON SERVICE
-# Enterprise Business Logic Service for Product Comparison Operations
+# app/services/comparison_service.rb
 #
-# This service encapsulates all business logic related to product comparison
-# management, implementing sophisticated algorithms for comparison optimization,
-# intelligent product matching, and advanced user experience enhancement.
-
+# Service class for handling product comparison operations.
+# Encapsulates business logic for adding, removing, clearing, and fetching comparison data.
+# Ensures modularity, error handling, and performance optimizations.
+#
+# Key Features:
+# - Validates operations to prevent invalid states.
+# - Uses efficient database queries with eager loading.
+# - Integrates with caching for repeated fetches.
+# - Provides structured results for easy error handling in controllers.
+#
 class ComparisonService
-  include ServicePattern
-  include PerformanceOptimization
-  include SecurityHardening
-  include ObservabilityIntegration
+  include ServiceResultHelper
 
-  def execute_addition(&block)
-    with_performance_monitoring do
-      with_security_validation do
-        execute_service_operation(:addition, &block)
-      end
+  def initialize(user, compare_list)
+    @user = user
+    @compare_list = compare_list
+    @max_items = 10  # Configurable limit
+  end
+
+  # Fetches comparison data with caching and optimization.
+  def fetch_comparison_data
+    Rails.cache.fetch("comparison_data_#{@compare_list.id}", expires_in: 5.minutes) do
+      products = @compare_list.products.includes(:category, :reviews)  # Eager load to avoid N+1
+      comparison_data = ProductComparisonService.new(products).compare_attributes
+      success(comparison_data)
     end
+  rescue => e
+    Rails.logger.error("Error fetching comparison data for user: #{@user.id} - #{e.message}")
+    failure(['Unable to load comparison data.'])
   end
 
-  def execute_removal(&block)
-    with_performance_monitoring do
-      with_security_validation do
-        execute_service_operation(:removal, &block)
-      end
+  # Adds an item to the comparison list with validation.
+  def add_item(product)
+    return failure(['Comparison list is full.']) if @compare_list.compare_items.count >= @max_items
+    return failure(['Product already in comparison.']) if @compare_list.compare_items.exists?(product: product)
+
+    compare_item = @compare_list.compare_items.build(product: product)
+    if compare_item.save
+      # Invalidate cache
+      Rails.cache.delete("comparison_data_#{@compare_list.id}")
+      success(compare_item)
+    else
+      failure(compare_item.errors.full_messages)
     end
+  rescue => e
+    Rails.logger.error("Error adding item for user: #{@user.id} - #{e.message}")
+    failure(['Failed to add product to comparison.'])
   end
 
-  private
-
-  def execute_service_operation(operation_type, &block)
-    service_executor.execute(operation_type) do |executor|
-      executor.validate_operation_context
-      executor.authorize_operation
-      executor.execute_business_logic(&block)
-      executor.record_operation_metrics
-      executor.trigger_side_effects
-      executor.publish_operation_events
+  # Removes an item from the comparison list.
+  def remove_item(product)
+    compare_item = @compare_list.compare_items.find_by(product: product)
+    if compare_item&.destroy
+      Rails.cache.delete("comparison_data_#{@compare_list.id}")
+      success(compare_item)
+    else
+      failure(['Product not found in comparison.'])
     end
+  rescue => e
+    Rails.logger.error("Error removing item for user: #{@user.id} - #{e.message}")
+    failure(['Failed to remove product from comparison.'])
   end
 
-  def with_security_validation(&block)
-    security_validator.validate(&block)
-  end
-
-  def service_executor
-    @service_executor ||= ServiceExecutor.new
-  end
-
-  def security_validator
-    @security_validator ||= SecurityValidator.new
+  # Clears the entire comparison list efficiently.
+  def clear_list
+    if @compare_list.compare_items.destroy_all
+      Rails.cache.delete("comparison_data_#{@compare_list.id}")
+      success(true)
+    else
+      failure(['Failed to clear comparison list.'])
+    end
+  rescue => e
+    Rails.logger.error("Error clearing list for user: #{@user.id} - #{e.message}")
+    failure(['Failed to clear comparison list.'])
   end
 end

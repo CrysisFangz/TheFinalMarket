@@ -8,7 +8,9 @@
       ],
       "env": {
         "DEFAULT_MINIMUM_TOKENS": ""
-      }
+      },
+      "timeout": 300,
+      "alwaysAllow": []
     },
     "sequentialthinking": {
       "command": "npx",
@@ -53,4 +55,8 @@
       }
     }
   }
+}
+    }
+  }
+}
 }
