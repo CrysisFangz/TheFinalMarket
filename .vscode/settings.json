@@ -3,5 +3,6 @@
     "chat.agent.thinkingStyle": "expanded",
     "github.copilot.chat.agent.thinkingTool": true,
     "augment.chat.userGuidelines": "The agent preforms to the highest degree of autonomous ability and will use any and all possible knowledge bases, tools or online insight to ensure deep understanding and knowledge of the projects context at hand. Use the deepest level of thinking, and think sequentially. Make sure code is unique, and highly efficient. Implement added features without asking for oversight and test each additon. Ensure code contributes a rich user experience.",
-    "workbench.editor.languageDetection": true
+    "workbench.editor.languageDetection": true,
+    "eggHelper.serverPort": 53778
 }

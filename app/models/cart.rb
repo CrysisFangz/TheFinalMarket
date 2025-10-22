@@ -284,25 +284,7 @@ class Cart < ApplicationRecord
   # @return [Hash] Detailed analytics data
   #
   def analytics_data
-    {
-      cart_id: id,
-      user_id: user_id,
-      status: status,
-      cart_type: cart_type,
-      priority: priority,
-      item_count: item_count,
-      total_value_cents: total_value_cents,
-      currency: currency,
-      created_at: created_at,
-      last_activity_at: last_activity_at,
-      age_hours: age_in_hours,
-      abandonment_risk_score: calculate_abandonment_risk,
-      conversion_probability: calculate_conversion_probability,
-      average_item_value_cents: calculate_average_item_value,
-      product_diversity_score: calculate_product_diversity,
-      time_based_metrics: time_based_metrics,
-      user_behavior_metrics: user_behavior_metrics
-    }
+    CartAnalyticsService.instance.generate_analytics_data(self)
   end
 
   # Sophisticated abandonment risk assessment using ML features
@@ -310,11 +292,7 @@ class Cart < ApplicationRecord
   # @return [Float] Risk score between 0.0 and 1.0
   #
   def calculate_abandonment_risk
-    # Sophisticated ML-based risk calculation
-    features = build_risk_features
-    # Implementation would integrate with ML service
-    # Placeholder for sophisticated risk calculation
-    0.15
+    CartAnalyticsService.instance.calculate_abandonment_risk(self)
   end
 
   # Advanced conversion probability prediction
@@ -322,10 +300,7 @@ class Cart < ApplicationRecord
   # @return [Float] Conversion probability between 0.0 and 1.0
   #
   def calculate_conversion_probability
-    # Sophisticated conversion prediction using historical data
-    # Implementation would integrate with analytics service
-    # Placeholder for conversion probability calculation
-    0.75
+    CartAnalyticsService.instance.calculate_conversion_probability(self)
   end
 
   # =================================================================
@@ -360,13 +335,8 @@ class Cart < ApplicationRecord
   # @return [Hash] Health metrics and recommendations
   #
   def health_assessment
-    {
-      status: activity_status,
-      issues: detect_issues,
-      recommendations: generate_recommendations,
-      performance_score: calculate_performance_score,
-      last_assessment_at: Time.current
-    }
+    analytics = CartAnalyticsService.instance.generate_analytics_data(self)
+    analytics[:health_assessment]
   end
 
   # =================================================================
@@ -403,6 +373,9 @@ class Cart < ApplicationRecord
   # @return [Hash<Integer, Result>] Results for each cart
   #
   def self.batch_operation(cart_ids, operation, options = {})
+    allowed_operations = [:clear, :transition_to_status, :calculate_pricing]
+    raise ArgumentError, "Invalid operation: #{operation}" unless allowed_operations.include?(operation)
+
     results = {}
 
     Cart.transaction do
@@ -576,121 +549,6 @@ class Cart < ApplicationRecord
     @fallback_total ||= line_items.sum { |item| item.total_price }
   end
 
-  # Risk feature building for ML-based predictions
-  def build_risk_features
-    {
-      cart_age_hours: age_in_hours,
-      item_count: item_count,
-      total_value_cents: total_value_cents,
-      user_tier: user&.tier,
-      activity_status: activity_status,
-      time_since_last_activity_hours: (Time.current - last_activity_at) / 1.hour,
-      product_categories: line_items.joins(:product).distinct.pluck(:category_id),
-      average_item_value_cents: calculate_average_item_value,
-      day_of_week: created_at.wday,
-      hour_of_day: created_at.hour
-    }
-  end
-
-  # Average item value calculation
-  def calculate_average_item_value
-    return 0 if item_count.zero?
-    total_value_cents / item_count
-  end
-
-  # Product diversity calculation
-  def calculate_product_diversity
-    return 0.0 if line_items.empty?
-
-    unique_products = line_items.distinct.count(:product_id)
-    diversity_ratio = unique_products.to_f / item_count
-
-    # Normalize to 0-1 scale
-    Math.log(diversity_ratio + 1) / Math.log(2)
-  end
-
-  # Time-based metrics for analytics
-  def time_based_metrics
-    {
-      created_at_hour: created_at.hour,
-      created_at_day_of_week: created_at.wday,
-      last_activity_hour: last_activity_at.hour,
-      last_activity_day_of_week: last_activity_at.wday,
-      time_to_first_activity_minutes: calculate_time_to_first_activity,
-      average_session_duration_minutes: calculate_average_session_duration
-    }
-  end
-
-  # User behavior metrics for personalization
-  def user_behavior_metrics
-    {
-      user_cart_frequency: calculate_user_cart_frequency,
-      user_average_cart_value_cents: calculate_user_average_cart_value,
-      user_cart_abandonment_rate: calculate_user_abandonment_rate,
-      user_preferred_categories: calculate_user_preferred_categories
-    }
-  end
-
-  # Issue detection for cart health assessment
-  def detect_issues
-    issues = []
-
-    if abandoned?
-      issues << :abandoned_cart
-    end
-
-    if activity_status == :stale
-      issues << :stale_cart
-    end
-
-    if item_count > 100
-      issues << :large_cart
-    end
-
-    if calculate_conversion_probability < 0.3
-      issues << :low_conversion_probability
-    end
-
-    issues
-  end
-
-  # Recommendation generation based on cart analysis
-  def generate_recommendations
-    recommendations = []
-
-    if abandoned?
-      recommendations << :send_abandonment_recovery_email
-    end
-
-    if activity_status == :stale
-      recommendations << :schedule_cart_reminder
-    end
-
-    if calculate_product_diversity < 0.5
-      recommendations << :suggest_related_products
-    end
-
-    recommendations
-  end
-
-  # Performance score calculation
-  def calculate_performance_score
-    # Sophisticated performance scoring algorithm
-    base_score = 100.0
-
-    deductions = {
-      abandoned?: 30,
-      stale?: 20,
-      large_cart?: 10,
-      low_conversion?: 25
-    }
-
-    deductions.each do |condition, deduction|
-      base_score -= deduction if send(condition)
-    end
-
-    [base_score, 0.0].max
-  end
 
   # Cart archiving decision logic
   def self.should_archive_cart?(cart, options)
@@ -755,34 +613,4 @@ class Cart < ApplicationRecord
     calculate_conversion_probability < 0.3
   end
 
-  # Placeholder calculations for analytics
-  def calculate_time_to_first_activity
-    return 0 unless last_activity_at && created_at
-    (last_activity_at - created_at) / 1.minute
-  end
-
-  def calculate_average_session_duration
-    # Implementation would track session durations
-    15.0 # minutes
-  end
-
-  def calculate_user_cart_frequency
-    # Implementation would analyze user behavior
-    2.5 # carts per week
-  end
-
-  def calculate_user_average_cart_value
-    # Implementation would analyze user history
-    150_00 # cents
-  end
-
-  def calculate_user_abandonment_rate
-    # Implementation would analyze user patterns
-    0.25 # 25% abandonment rate
-  end
-
-  def calculate_user_preferred_categories
-    # Implementation would analyze user preferences
-    []
-  end
 end

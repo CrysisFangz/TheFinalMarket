@@ -273,11 +273,6 @@ module ServicePattern
   end
 end
 
-class ConversationCreationEvent < ApplicationRecord
-  belongs_to :conversation
-  belongs_to :creator, class_name: 'User'
-end
-
 class NotificationService
   def self.notify(recipient:, action:, notifiable:)
     # Implementation for notification service

@@ -1,0 +1,97 @@
+{
+	"image": "mcr.microsoft.com/devcontainers/universal:2",
+	"features": {
+		"ghcr.io/rocker-org/devcontainer-features/apt-packages:1": {
+			"upgradePackages": true,
+			"packages": "curl,nano"
+		},
+		"ghcr.io/mpriscella/features/kind:1": {
+			"version": "latest"
+		},
+		"ghcr.io/dhoeric/features/k6:1": {},
+		"ghcr.io/shyim/devcontainers-features/blackfire:0": {},
+		"ghcr.io/jungaretti/features/make:1": {},
+		"ghcr.io/rio/features/gum:1": {},
+		"ghcr.io/jsburckhardt/devcontainer-features/bat:1": {},
+		"ghcr.io/jsburckhardt/devcontainer-features/gitleaks:1": {},
+		"ghcr.io/jsburckhardt/devcontainer-features/just:1": {},
+		"ghcr.io/jsburckhardt/devcontainer-features/opencode:1": {},
+		"ghcr.io/roost-io/features/roost:1": {
+			"preemptible": "false"
+		},
+		"ghcr.io/lentzi90/features/tilt:0": {
+			"version": "v0.33.17"
+		},
+		"ghcr.io/kvokka/features/aicommit2:1": {
+			"version": "latest"
+		},
+		"ghcr.io/dasiths/devcontainer-features/syft:1": {
+			"version": "latest",
+			"destination_dir": "/usr/local/bin"
+		},
+		"ghcr.io/devcontainers-community/features/bazel:1": {
+			"bazelisk_version": "latest",
+			"buildifier_version": "latest"
+		},
+		"ghcr.io/devcontainers-community/npm-features/prettier:1": {
+			"version": "latest"
+		},
+		"ghcr.io/lee-orr/rusty-dev-containers/bacon:0": {},
+		"ghcr.io/lee-orr/rusty-dev-containers/cosmonic:0": {},
+		"ghcr.io/lee-orr/rusty-dev-containers/helix:0": {},
+		"ghcr.io/robbert229/devcontainer-features/postgresql-client:1": {
+			"version": "16"
+		},
+		"ghcr.io/maks1ms/devcontainers-features/wine:0": {},
+		"ghcr.io/schlich/devcontainer-features/starship:0": {},
+		"ghcr.io/raucha/devcontainer-features/pytorch:1": {},
+		"ghcr.io/cirolosapio/devcontainers-features/alpine-bat:0": {},
+		"ghcr.io/audacioustux/devcontainers/wasm-toolchain:1": {},
+		"ghcr.io/paul-gilber/devcontainer-features/openshift-cli-homebrew:1": {
+			"version": "latest"
+		},
+		"ghcr.io/prulloac/devcontainer-features/ollama:1": {},
+		"ghcr.io/casl0/devcontainer-features/depot_tools:1": {},
+		"ghcr.io/nikobockerman/devcontainer-features/yarn-persistent-cache:1": {},
+		"ghcr.io/hspaans/devcontainer-features/pyupgrade:2": {
+			"version": "latest"
+		},
+		"ghcr.io/dlouwers/devcontainer-features/bob:1": {},
+		"ghcr.io/dlouwers/devcontainer-features/devbox:1": {},
+		"ghcr.io/kreemer/features/marksman:1": {
+			"version": "latest"
+		},
+		"ghcr.io/kreemer/features/stow:1": {
+			"version": "latest"
+		},
+		"ghcr.io/opencodeco/devcontainers/install-php-extensions:0": {},
+		"ghcr.io/devcontainers-extra/features/alp-asdf:2": {
+			"version": "latest"
+		},
+		"ghcr.io/devcontainers-extra/features/apt-packages:1": {
+			"clean_ppas": true,
+			"preserve_apt_list": true,
+			"packages": "build-essential",
+			"ppas": "ppa:deadsnakes/ppa"
+		},
+		"ghcr.io/devcontainers-extra/features/asdf-package:1": {
+			"plugin": "act",
+			"version": "latest",
+			"pluginRepo": "https://github.com/grimoh/asdf-act.git",
+			"latestVersionPattern": "[0-9]"
+		},
+		"ghcr.io/devcontainers-extra/features/fish-apt-get:1": {},
+		"ghcr.io/devcontainers-extra/features/mise:1": {
+			"version": "latest"
+		},
+		"ghcr.io/devcontainers-extra/features/prisma:2": {
+			"version": "latest"
+		},
+		"ghcr.io/devcontainers-extra/features/ruby-asdf:0": {
+			"version": "latest"
+		},
+		"ghcr.io/devcontainers-extra/features/turborepo-npm:1": {
+			"version": "latest"
+		}
+	}
+}
