@@ -12,17 +12,6 @@
       "timeout": 300,
       "alwaysAllow": []
     },
-    "sequentialthinking": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
-      ],
-      "alwaysAllow": [
-        "sequentialthinking"
-      ],
-      "timeout": 300
-    },
     "memory": {
       "command": "npx",
       "args": [

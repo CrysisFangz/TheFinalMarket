@@ -1,0 +1,49 @@
+#Go to extentions, search for Kilocode: download. Then Make and account, you should get a pop up with an API key. Copy this, put it into the kilocode ext.
+#
+
+#Then pick Supernova for the model, and put reasoning to high, go to advanced settings, change temp to 0.25. 
+#
+Go to experimental select all boxes.
+Go to promptss select improve code, And input this into box:
+#
+#
+#
+
+Improve the following code from file path ${filePath}:${startLine}-${endLine}
+${userInput}
+
+```
+${selectedText}
+```
+
+Prime Mandate
+
+Effect a complete architectural and ontological refactoring of the provided source code. Your objective is to transmute the extant codebase into a paradigm of modern software engineering that embodies asymptotic optimality, profound systemic elegance, and unbounded scalability. The resultant artifact must serve as an exemplar for hyperscale, mission-critical digital systems.
+
+
+1. The Epistemic Mandate (Clarity & Architectural Purity)
+
+* Axiom of Conceptual Transparency: The code's structure must be isomorphic to its conceptual model, manifesting as a self-elucidating artifact. Deconstruct any monolithic components (e.g., God Objects, Fat Models) that violate the Single Responsibility Principle.
+* Principle of Hermetic Decoupling: Institute an inviolable partitioning of logical domains.
+    * Isolate business logic and procedural actions into dedicated Service Objects, Interactors, or Use Case classes.
+    * Abstract intricate algorithms or calculations into Engines, Calculators, or Strategy classes.
+    * Decouple data models from their representation using Presenters, ViewModels, or Serializers.
+    * The core business logic must exist as a pure, platonic model, entirely agnostic of ephemeral delivery mechanisms (e.g., UI, database) as per Hexagonal or Onion architecture.
+
+
+2. The Chronometric Mandate (Performance & Latency)
+
+* Doctrine of Asymptotic Optimality: Interrogate every computational pathway and substitute all logic with algorithms that are demonstrably optimal within their asymptotic complexity class, achieving the theoretical lower bound of performance (O min) for the given problem space. Systematically identify and eradicate all performance anti-patterns (e.g., N+1 queries).
+* Imperative of Hyper-Concurrency: Where applicable, engineer the system for exascale workloads, mandating a P99 latency envelope below the 10-millisecond threshold. Employ a non-blocking, asynchronous execution fabric, predictive caching strategies with intelligent invalidation, and the pervasive application of immutable data structures to eliminate side effects and ensure thread safety.
+
+
+3. The Architectural Zenith (Scalability & State Integrity)
+
+* Paradigm of Elasticity: The refactored architecture must be innately predisposed to fractal decomposition (i.e., microservices), geo-distribution, and unbounded horizontal elasticity. Its foundation shall be a reactive, message-driven substrate that guarantees resilient and responsive behavior under maximal load.
+* Precept of State Integrity: Mandate absolute referential transparency and a unidirectional, chronologically-ordered state propagation model. The system must be architecturally congruent with event-centric paradigms such as Command Query Responsibility Segregation (CQRS) and Event Sourcing, treating system state not as a mutable entity, but as an immutable, auditable log of sequential transformations.
+
+
+4. The Antifragility Postulate (Resilience & Reliability)
+
+* Engine of Systemic Antifragility: Transcend mere fault tolerance; engineer the system to gain strength and capability from stochastic shocks and stressors. Foundational components must include homeostatic regulation patterns (e.g., Circuit Breakers, Bulkheads, Adaptive Rate Limiters) and an integrated fabric of distributed observability (tracing, metrics, logging).
+* Covenant of Data Trust: Establish a zero-trust data validation perimeter at every ingress point. Institute a sophisticated failure taxonomy that distinguishes between transient and terminal anomalies, deploying adaptive, context-sensitive remediation strategies such as exponential backoff with jitter for transient faults and dead-letter queues for persistent ones.
