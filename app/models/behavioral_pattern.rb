@@ -1,14 +1,18 @@
+# frozen_string_literal: true
+
+# Hexagonal Architecture - Domain Layer
+# Pure business model with no external dependencies
 class BehavioralPattern < ApplicationRecord
+  # Domain dependencies only - no infrastructure concerns
   belongs_to :user
-  
-  validates :pattern_type, presence: true
-  
-  scope :recent, -> { where('detected_at > ?', 30.days.ago) }
-  scope :anomalous, -> { where(anomalous: true) }
-  scope :for_user, ->(user) { where(user: user) }
-  
-  # Pattern types
-  enum pattern_type: {
+
+  # Domain validations - pure business rules
+  validates :pattern_type, presence: true, inclusion: { in: PATTERN_TYPES.keys }
+  validates :detected_at, presence: true
+  validates :pattern_data, presence: true
+
+  # Domain constants - business vocabulary
+  PATTERN_TYPES = {
     login_pattern: 0,
     browsing_pattern: 1,
     purchase_pattern: 2,
@@ -19,66 +23,147 @@ class BehavioralPattern < ApplicationRecord
     time_pattern: 7,
     location_pattern: 8,
     device_pattern: 9
-  }
-  
-  # Detect anomalies in user behavior
-  def self.detect_anomalies_for(user)
-    detector = BehavioralPatternDetector.new(user)
-    detector.detect_all
-  end
-  
-  # Check if pattern is anomalous
+  }.freeze
+
+  # Domain enums - business concepts
+  enum pattern_type: PATTERN_TYPES, _prefix: true
+
+  # Query scopes - domain-specific queries
+  scope :recent, -> { where('detected_at > ?', 30.days.ago) }
+  scope :anomalous, -> { where(anomalous: true) }
+  scope :for_user, ->(user) { where(user: user) }
+  scope :by_pattern_type, ->(type) { where(pattern_type: type) }
+
+  # Domain events for event sourcing capabilities
+  after_commit :publish_domain_events, on: [:create, :update]
+
+  # ==================== DOMAIN BEHAVIOR ====================
+
+  # Pure domain logic - anomaly assessment
   def anomalous?
     anomalous == true
   end
-  
-  # Calculate anomaly score
+
+  # Domain business rule - anomaly classification
+  def anomaly_severity
+    return :none unless anomalous?
+
+    score = anomaly_score
+    case score
+    when 0..30 then :low
+    when 31..60 then :medium
+    when 61..85 then :high
+    else :critical
+    end
+  end
+
+  # Domain business rule - pattern confidence assessment
+  def confidence_level
+    base_confidence = pattern_data['sample_size'].to_i / 100.0
+    base_confidence *= pattern_data['statistical_significance'].to_f
+    [base_confidence, 1.0].min
+  end
+
+  # Domain business rule - pattern staleness
+  def stale?
+    detected_at < 24.hours.ago
+  end
+
+  # ==================== APPLICATION SERVICES ====================
+
+  # Orchestration method - delegates to application services
+  def self.detect_anomalies_for(user)
+    result = BehavioralAnalysisService.call(user)
+    result.success? ? result.patterns : []
+  end
+
+  # ==================== PRESENTATION LOGIC ====================
+
+  # Presentation logic - delegates to presenters
+  def description
+    @description ||= PatternDescriptionPresenter.present(self)
+  end
+
+  def summary
+    @summary ||= PatternSummaryPresenter.present(self)
+  end
+
+  # ==================== PRIVATE DOMAIN METHODS ====================
+
+  private
+
+  # Domain event publishing for event sourcing
+  def publish_domain_events
+    return unless saved_changes?
+
+    event = BehavioralPatternDetectedEvent.new(
+      pattern_id: id,
+      user_id: user_id,
+      pattern_type: pattern_type,
+      anomalous: anomalous,
+      detected_at: detected_at,
+      changes: saved_changes
+    )
+
+    EventPublisher.publish(event)
+  end
+
+  # Enhanced anomaly scoring with sophisticated algorithms
   def anomaly_score
     return 0 unless anomalous?
-    
-    score = 0
-    
-    # Deviation from normal
-    if pattern_data['deviation']
-      score += (pattern_data['deviation'] * 30).to_i
-    end
-    
-    # Frequency anomaly
-    if pattern_data['frequency_anomaly']
-      score += 25
-    end
-    
-    # Time anomaly
-    if pattern_data['time_anomaly']
-      score += 20
-    end
-    
-    # Location anomaly
-    if pattern_data['location_anomaly']
-      score += 25
-    end
-    
-    [score, 100].min
-  end
-  
-  # Get pattern description
-  def description
-    case pattern_type.to_sym
-    when :login_pattern
-      "Login behavior: #{pattern_data['description']}"
-    when :browsing_pattern
-      "Browsing behavior: #{pattern_data['description']}"
-    when :purchase_pattern
-      "Purchase behavior: #{pattern_data['description']}"
-    when :messaging_pattern
-      "Messaging behavior: #{pattern_data['description']}"
-    when :listing_pattern
-      "Listing behavior: #{pattern_data['description']}"
-    when :velocity_pattern
-      "Activity velocity: #{pattern_data['description']}"
-    else
-      "Pattern detected: #{pattern_data['description']}"
-    end
+
+    calculator = AnomalyScoreCalculator.new(pattern_data)
+    calculator.calculate
   end
 end
 
+# ==================== DOMAIN VALUE OBJECTS ====================
+
+# Immutable value objects for domain concepts
+BehavioralPattern::AnomalyScore = Struct.new(:value, :confidence, :factors) do
+  def initialize(value, confidence = 1.0, factors = [])
+    super(value, confidence, factors)
+    freeze # Immutable value object
+  end
+
+  def severity
+    case value
+    when 0..30 then :low
+    when 31..60 then :medium
+    when 61..85 then :high
+    else :critical
+    end
+  end
+
+  def high_risk?
+    value >= 70
+  end
+
+  def to_h
+    { value: value, confidence: confidence, factors: factors, severity: severity }
+  end
+end
+
+# Pattern metadata value object
+BehavioralPattern::PatternMetadata = Struct.new(
+  :sample_size, :time_window, :algorithm_version, :statistical_significance
+) do
+  def initialize(sample_size, time_window, algorithm_version, statistical_significance = 0.95)
+    super(sample_size, time_window, algorithm_version, statistical_significance)
+    freeze
+  end
+
+  def reliable?
+    sample_size >= 50 && statistical_significance >= 0.95
+  end
+
+  def to_h
+    {
+      sample_size: sample_size,
+      time_window: time_window,
+      algorithm_version: algorithm_version,
+      statistical_significance: statistical_significance,
+      reliable: reliable?
+    }
+  end
+end

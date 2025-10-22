@@ -69,7 +69,7 @@ gem "rails_event_store", "~> 2.10"
 gem "ruby_event_store", "~> 2.10"
 
 # CQRS pattern implementation with query/command separation
-gem "cqrs", "~> 0.2"
+
 
 # Reactive programming framework for non-blocking operations
 gem "dry-monads", "~> 1.6"
@@ -111,7 +111,7 @@ gem "encrypted_strings", "~> 0.3"
 gem "lockbox", "~> 1.3"
 
 # Advanced cryptographic protocols and zero-knowledge proofs
-gem "rb_na_cl", "~> 3.4"  # libsodium bindings for modern crypto
+
 gem "dry-schema", "~> 1.13"  # Formal schema validation
 
 # =============================================================================

@@ -14,7 +14,7 @@ class ChannelPreference < ApplicationRecord
     )
   end
   
-  # Get specific preference
+  # Get sp  ecific preference
   def get_preference(key)
     preferences_data&.dig(key)
   end
