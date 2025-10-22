@@ -91,28 +91,7 @@ class AccessibilitySetting < ApplicationRecord
     monospace: 4
   }, _default: :default
   
-  # Visual preferences
-  enum font_size: {
-    small: 0,
-    medium: 1,
-    large: 2,
-    extra_large: 3
-  }
-  
-  enum contrast_mode: {
-    normal: 0,
-    high_contrast: 1,
-    dark_mode: 2,
-    high_contrast_dark: 3
-  }
-  
-  enum font_family: {
-    default: 0,
-    dyslexia_friendly: 1,
-    sans_serif: 2,
-    serif: 3,
-    monospace: 4
-  }
+  # Duplicate enum definitions removed; original definitions are comprehensive
   
   # Apply accessibility preferences
   def apply_preferences

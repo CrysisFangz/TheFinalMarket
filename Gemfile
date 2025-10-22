@@ -87,6 +87,7 @@ gem "dry-auto_inject", "~> 1.0"
 # =============================================================================
 # Homomorphic authorization with quantum-resistant policy framework
 gem "pundit", "~> 2.5"
+gem "cancancan", "~> 3.6"  # Declarative authorization for RailsAdmin
 
 # Adaptive threat intelligence with behavioral anomaly detection
 gem "rack-attack", "~> 6.7"
@@ -262,6 +263,9 @@ gem "mobile-fu", "~> 1.4"
 # =============================================================================
 # ENTERPRISE FEATURES - Advanced Business Capabilities
 # =============================================================================
+# Enterprise-grade admin interface with zero-configuration model discovery
+gem "rails_admin", "~> 3.2"
+
 # Feature flags with advanced targeting and experimentation
 gem "flipper", "~> 1.3"
 gem "flipper-ui", "~> 1.3"

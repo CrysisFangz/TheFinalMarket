@@ -620,35 +620,7 @@ class AccessibilityAudit < ApplicationRecord
     audit_service.execute_batch_audit(urls)
   end
 
-  # Legacy compliance status method
-  def compliance_status
-    return 'unknown' unless score
-
-    case score
-    when 90..100 then 'excellent'
-    when 75..89 then 'good'
-    when 60..74 then 'fair'
-    when 40..59 then 'poor'
-    else 'critical'
-    end
-  end
-
-  # Legacy recommendations method
-  def recommendations
-    return [] unless results
-
-    result_processor = AccessibilityAudit::AuditResultProcessor.new(self, results)
-    processed_results = result_processor.process_comprehensive_results
-
-    processed_results[:recommendations] || []
-  end
-
-  # Legacy generate report method
-  def generate_report
-    report_presenter = AccessibilityAudit::AuditReportPresenter.new(self, results || {})
-
-    report_presenter.generate_report(:json, :technical)
-  end
+  # Legacy compatibility methods removed to eliminate duplication; main methods are more comprehensive
 
   # Build audit timeline for visualization
   def build_audit_timeline

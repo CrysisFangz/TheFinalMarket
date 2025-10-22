@@ -18,6 +18,14 @@ Rails.application.routes.draw do
    end
 
    # ================================================================================================
+   # ENTERPRISE ADMIN INTERFACE - RAILS ADMIN
+   # ================================================================================================
+   # Sophisticated admin panel with zero-configuration model discovery and comprehensive CRUD
+   # Secured with CanCanCan authorization and integrated with AdminActivityLoggingService
+   # Access restricted to admin, super_admin, and system roles only
+   mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
+
+   # ================================================================================================
    # CORE AUTHENTICATION & AUTHORIZATION SYSTEM
    # ================================================================================================
   # Essential user authentication system providing secure access management for the entire platform

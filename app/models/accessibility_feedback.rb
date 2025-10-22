@@ -101,30 +101,7 @@ class AccessibilityFeedback < ApplicationRecord
     none: 8
   }
   
-  enum feedback_type: {
-    issue: 0,
-    suggestion: 1,
-    praise: 2,
-    question: 3
-  }
-  
-  enum severity: {
-    low: 0,
-    medium: 1,
-    high: 2,
-    critical: 3
-  }
-  
-  enum assistive_technology: {
-    screen_reader: 0,
-    keyboard_only: 1,
-    voice_control: 2,
-    screen_magnifier: 3,
-    switch_control: 4,
-    eye_tracking: 5,
-    braille_display: 6,
-    other: 7
-  }
+  # Duplicate enum definitions removed; original definitions are more comprehensive
   
   # ============================================================================
   # ADVANCED QUERY SCOPES & CLASS METHODS
