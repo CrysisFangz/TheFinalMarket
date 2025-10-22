@@ -528,7 +528,7 @@ GEM
       stringio
     ptools (1.5.0)
     public_suffix (6.0.2)
-    puma (7.0.3)
+    puma (7.0.4)
       nio4r (~> 2.0)
     pundit (2.5.1)
       activesupport (>= 3.0.0)
