@@ -228,7 +228,7 @@ gem "vite_rails", "~> 3.0"
 gem "wisper", "~> 2.2"
 
 # Payment processing with Square and advanced fraud detection
-gem "square.rb", "~> 42.2"
+gem "square.rb", "~> 44.0"
 
 # Multi-currency support with real-time exchange rates
 gem "money-rails", "~> 1.15"
