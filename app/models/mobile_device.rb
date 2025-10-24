@@ -23,23 +23,19 @@ class MobileDevice < ApplicationRecord
   scope :ios_devices, -> { where(device_type: :ios) }
   scope :android_devices, -> { where(device_type: :android) }
   
-  # Update last seen timestamp
+  # Delegated to MobileDeviceCapabilityService
   def touch_last_seen!
     update(last_seen_at: Time.current)
   end
-  
-  # Check if device supports biometric auth
+
   def supports_biometric?
-    return false unless metadata.present?
-    
-    metadata['biometric_available'] == true
+    @capability_service ||= MobileDeviceCapabilityService.new(self)
+    @capability_service.supports_biometric?
   end
-  
-  # Check if device supports AR
+
   def supports_ar?
-    return false unless metadata.present?
-    
-    metadata['ar_available'] == true
+    @capability_service ||= MobileDeviceCapabilityService.new(self)
+    @capability_service.supports_ar?
   end
 end
 

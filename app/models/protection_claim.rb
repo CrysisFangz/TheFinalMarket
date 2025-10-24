@@ -1,20 +1,33 @@
+# frozen_string_literal: true
+
+# ProtectionClaim model refactored for resilience and auditability.
+# Claim processing logic extracted into dedicated service for compliance.
 class ProtectionClaim < ApplicationRecord
   belongs_to :purchase_protection
-  
+
   has_one :order, through: :purchase_protection
   has_one :user, through: :purchase_protection
-  
+
   has_many_attached :evidence_files
-  
-  validates :reason, presence: true
-  validates :description, presence: true
-  validates :claim_amount_cents, presence: true
-  
+
+  # Enhanced validations with custom messages
+  validates :reason, presence: true, inclusion: { in: reasons.keys }
+  validates :description, presence: true, length: { maximum: 1000 }
+  validates :claim_amount_cents, presence: true, numericality: { greater_than: 0, less_than_or_equal_to: 10000000 }
+  validates :evidence_files, presence: true, blob: { content_type: ['image/jpeg', 'image/png', 'application/pdf'] }
+
+  # Enhanced scopes with performance optimization
   scope :pending, -> { where(status: :pending) }
   scope :approved, -> { where(status: :approved) }
   scope :rejected, -> { where(status: :rejected) }
   scope :recent, -> { order(filed_at: :desc) }
-  
+  scope :with_associations, -> { includes(:purchase_protection, :order, :user) }
+  scope :by_reviewer, ->(reviewer_id) { where(reviewed_by: reviewer_id) }
+
+  # Event-driven: Publish events on status changes
+  after_create :publish_claim_filed_event
+  after_update :publish_status_change_event, if: :saved_change_to_status?
+
   # Claim reasons
   enum reason: {
     item_not_received: 0,
@@ -25,7 +38,7 @@ class ProtectionClaim < ApplicationRecord
     price_drop: 5,
     other: 9
   }
-  
+
   # Claim status
   enum status: {
     pending: 0,
@@ -34,53 +47,27 @@ class ProtectionClaim < ApplicationRecord
     rejected: 3,
     paid: 4
   }
-  
-  # Approve claim
+
+  # Approve claim using service
   def approve!(reviewer, payout_amount = nil)
-    payout = payout_amount || claim_amount_cents
-    
-    update!(
-      status: :approved,
-      approved_amount_cents: payout,
-      reviewed_by: reviewer.id,
-      reviewed_at: Time.current,
-      resolution_notes: 'Claim approved'
-    )
-    
-    # Process payout
-    process_payout(payout)
-    
-    # Notify user
-    ProtectionClaimMailer.approved(self).deliver_later
+    ProtectionClaimService.approve_claim(self, reviewer, payout_amount)
   end
-  
-  # Reject claim
+
+  # Reject claim using service
   def reject!(reviewer, reason)
-    update!(
-      status: :rejected,
-      reviewed_by: reviewer.id,
-      reviewed_at: Time.current,
-      resolution_notes: reason
-    )
-    
-    # Notify user
-    ProtectionClaimMailer.rejected(self, reason).deliver_later
+    ProtectionClaimService.reject_claim(self, reviewer, reason)
   end
-  
-  # Process payout
-  def process_payout(amount)
-    # Create refund
-    refund = Refund.create!(
-      order: order,
-      amount_cents: amount,
-      reason: 'Protection claim payout',
-      status: :pending
-    )
-    
-    # Process refund
-    refund.process!
-    
-    update!(status: :paid, paid_at: Time.current)
+
+  private
+
+  def publish_claim_filed_event
+    Rails.logger.info("Protection claim filed: ID=#{id}, Reason=#{reason}, Amount=#{claim_amount_cents}")
+    # In a full event system: EventPublisher.publish('protection_claim_filed', self.attributes)
+  end
+
+  def publish_status_change_event
+    Rails.logger.info("Protection claim status changed: ID=#{id}, Status=#{status}")
+    # In a full event system: EventPublisher.publish('protection_claim_status_changed', self.attributes)
   end
 end
 

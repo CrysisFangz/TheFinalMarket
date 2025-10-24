@@ -13,11 +13,15 @@ class Notification < ApplicationRecord
     update!(read_at: Time.current)
   end
 
+  # Note: mark_as_read! is simple, kept in model
+
   private
 
   def broadcast_to_recipient
-    broadcast_prepend_later_to "notifications_#{recipient.id}",
-      partial: "notifications/notification",
-      locals: { notification: self }
+    broadcast_service.broadcast_to_recipient
+  end
+
+  def broadcast_service
+    @broadcast_service ||= NotificationBroadcastService.new(self)
   end
 end

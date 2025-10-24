@@ -33,34 +33,22 @@ class PaymentTransaction < ApplicationRecord
 
   before_create :set_description
   after_create :process_transaction
-  
+
   private
 
   def set_description
-    self.description = case transaction_type
-    when 'purchase'
-      "Payment for Order ##{order.id}"
-    when 'refund'
-      "Refund for Order ##{order.id}"
-    when 'payout'
-      "Payout to connected account"
-    when 'fee'
-      "Platform fee"
-    when 'bond'
-      "Seller security bond"
-    when 'bond_refund'
-      "Seller bond refund"
-    end
+    self.description = description_service.generate_description
   end
 
   def process_transaction
-    case transaction_type
-    when 'purchase'
-      ProcessPurchaseJob.perform_later(self)
-    when 'refund'
-      ProcessRefundJob.perform_later(self)
-    when 'payout'
-      ProcessPayoutJob.perform_later(self)
-    end
+    processing_service.process_transaction
+  end
+
+  def description_service
+    @description_service ||= PaymentTransactionDescriptionService.new(self)
+  end
+
+  def processing_service
+    @processing_service ||= PaymentTransactionProcessingService.new(self)
   end
 end

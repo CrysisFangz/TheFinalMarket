@@ -1,13 +1,27 @@
+# frozen_string_literal: true
+
+# QuestObjective model refactored for performance and resilience.
+# Progress calculation logic extracted into dedicated service for optimization.
 class QuestObjective < ApplicationRecord
   belongs_to :shopping_quest
   belongs_to :product, optional: true
   belongs_to :category, optional: true
-  
+
+  # Enhanced validations with custom messages
   validates :shopping_quest, presence: true
-  validates :objective_type, presence: true
-  validates :description, presence: true
-  validates :target_value, numericality: { greater_than: 0 }
-  
+  validates :objective_type, presence: true, inclusion: { in: objective_types.keys }
+  validates :description, presence: true, length: { maximum: 500 }
+  validates :target_value, numericality: { greater_than: 0, less_than_or_equal_to: 1000000 }
+
+  # Enhanced scopes with performance optimization
+  scope :by_type, ->(type) { where(objective_type: type) }
+  scope :with_product, -> { includes(:product) }
+  scope :with_category, -> { includes(:category) }
+  scope :with_quest, -> { includes(:shopping_quest) }
+
+  # Event-driven: Publish events on objective completion
+  after_save :publish_objective_updated_event
+
   enum objective_type: {
     purchase_product: 0,
     purchase_from_category: 1,
@@ -20,85 +34,55 @@ class QuestObjective < ApplicationRecord
     add_to_wishlist: 8,
     complete_profile: 9
   }
-  
-  # Check if objective is completed by user
-  def completed_by?(user)
-    current_progress(user) >= target_value
-  end
-  
-  # Get current progress for user with caching and optimization
-  def current_progress(user)
-    cache_key = "quest_objective:#{id}:progress:#{user.id}"
 
-    Rails.cache.fetch(cache_key, expires_in: 10.minutes) do
-      case objective_type.to_sym
-      when :purchase_product
-        user.orders.completed.joins(:line_items)
-            .where(line_items: { product_id: product_id })
-            .count
-      when :purchase_from_category
-        user.orders.completed.joins(line_items: :product)
-            .where(products: { category_id: category_id })
-            .count
-      when :spend_amount
-        user.orders.completed
-            .where('created_at >= ?', shopping_quest.starts_at)
-            .sum(:total_cents) / 100.0
-      when :purchase_count
-        user.orders.completed
-            .where('created_at >= ?', shopping_quest.starts_at)
-            .count
-      when :review_product
-        user.reviews.where(product_id: product_id).count
-      when :share_product
-        # Implementation depends on your sharing system
-        0
-      when :refer_friend
-        user.referrals.where('created_at >= ?', shopping_quest.starts_at).count
-      when :visit_store
-        # Implementation depends on your analytics system
-        0
-      when :add_to_wishlist
-        user.wishlist_items.where(product_id: product_id).count
-      when :complete_profile
-        user.profile_completion_percentage
-      else
-        0
-      end
-    end
+  # Check if objective is completed by user using service
+  def completed_by?(user)
+    QuestProgressService.calculate_progress(self, user) >= target_value
   end
-  
-  # Get progress percentage
+
+  # Get current progress for user using service
+  def current_progress(user)
+    QuestProgressService.calculate_progress(self, user)
+  end
+
+  # Get progress percentage using service
   def progress_percentage(user)
-    ((current_progress(user).to_f / target_value) * 100).round(2).clamp(0, 100)
+    QuestProgressService.calculate_progress_percentage(self, user)
   end
-  
-  # Get display text
+
+  # Get display text with enhanced formatting
   def display_text
     case objective_type.to_sym
     when :purchase_product
-      "Purchase #{product.name}"
+      "Purchase #{product&.name || 'specified product'}"
     when :purchase_from_category
-      "Purchase from #{category.name}"
+      "Purchase from #{category&.name || 'specified category'}"
     when :spend_amount
       "Spend $#{target_value}"
     when :purchase_count
       "Make #{target_value} purchases"
     when :review_product
-      "Review #{product.name}"
+      "Review #{product&.name || 'specified product'}"
     when :share_product
-      "Share #{product.name}"
+      "Share #{product&.name || 'specified product'}"
     when :refer_friend
       "Refer #{target_value} friends"
     when :visit_store
       "Visit the store #{target_value} times"
     when :add_to_wishlist
-      "Add #{product.name} to wishlist"
+      "Add #{product&.name || 'specified product'} to wishlist"
     when :complete_profile
       "Complete your profile to #{target_value}%"
     else
       description
     end
+  end
+
+  private
+
+  def publish_objective_updated_event
+    Rails.logger.info("Quest objective updated: ID=#{id}, Type=#{objective_type}, Quest=#{shopping_quest_id}")
+    # In a full event system: EventPublisher.publish('quest_objective_updated', self.attributes)
   end
 end
 

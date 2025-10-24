@@ -16,94 +16,51 @@ class MobileWallet < ApplicationRecord
   # Scopes
   scope :active_wallets, -> { where(status: :active) }
   
-  # Create wallet for user
+  # Delegated to MobileWalletManagementService
   def self.create_for_user(user)
-    create!(
-      user: user,
-      wallet_id: generate_wallet_id,
-      balance_cents: 0,
-      status: :active,
-      activated_at: Time.current
-    )
+    MobileWalletManagementService.create_for_user(user)
   end
   
-  # Add funds to wallet
+  # Delegated to MobileWalletTransactionService
   def add_funds(amount_cents, source, metadata = {})
-    return false unless active?
-    
-    transaction = wallet_transactions.create!(
-      transaction_type: :credit,
-      amount_cents: amount_cents,
-      source: source,
-      balance_after_cents: balance_cents + amount_cents,
-      transaction_data: metadata,
-      processed_at: Time.current
-    )
-    
-    increment!(:balance_cents, amount_cents)
-    transaction
+    @transaction_service ||= MobileWalletTransactionService.new(self)
+    @transaction_service.add_funds(amount_cents, source, metadata)
   end
   
-  # Deduct funds from wallet
+  # Delegated to MobileWalletTransactionService
   def deduct_funds(amount_cents, purpose, metadata = {})
-    return false unless active?
-    return false if balance_cents < amount_cents
-    
-    transaction = wallet_transactions.create!(
-      transaction_type: :debit,
-      amount_cents: amount_cents,
-      purpose: purpose,
-      balance_after_cents: balance_cents - amount_cents,
-      transaction_data: metadata,
-      processed_at: Time.current
-    )
-    
-    decrement!(:balance_cents, amount_cents)
-    transaction
+    @transaction_service ||= MobileWalletTransactionService.new(self)
+    @transaction_service.deduct_funds(amount_cents, purpose, metadata)
   end
   
-  # Add payment card
+  # Delegated to MobileWalletCardService
   def add_card(card_params)
-    wallet_cards.create!(
-      card_type: card_params[:card_type],
-      last_four: card_params[:last_four],
-      card_brand: card_params[:card_brand],
-      expiry_month: card_params[:expiry_month],
-      expiry_year: card_params[:expiry_year],
-      cardholder_name: card_params[:cardholder_name],
-      is_default: wallet_cards.empty?,
-      token: card_params[:token],
-      card_data: card_params[:metadata] || {}
-    )
+    @card_service ||= MobileWalletCardService.new(self)
+    @card_service.add_card(card_params)
   end
   
-  # Add pass (loyalty card, coupon, ticket, etc.)
+  # Delegated to MobileWalletPassService
   def add_pass(pass_params)
-    wallet_passes.create!(
-      pass_type: pass_params[:pass_type],
-      pass_name: pass_params[:pass_name],
-      pass_identifier: pass_params[:pass_identifier],
-      barcode_value: pass_params[:barcode_value],
-      barcode_format: pass_params[:barcode_format],
-      expiry_date: pass_params[:expiry_date],
-      pass_data: pass_params[:pass_data] || {},
-      added_at: Time.current
-    )
+    @pass_service ||= MobileWalletPassService.new(self)
+    @pass_service.add_pass(pass_params)
   end
   
-  # Get wallet balance
+  # Delegated to MobileWalletAnalyticsService
   def balance
-    balance_cents / 100.0
+    @analytics_service ||= MobileWalletAnalyticsService.new(self)
+    @analytics_service.balance
   end
   
-  # Get transaction history
+  # Delegated to MobileWalletAnalyticsService
   def transaction_history(limit: 50)
-    wallet_transactions.order(processed_at: :desc).limit(limit)
+    @analytics_service ||= MobileWalletAnalyticsService.new(self)
+    @analytics_service.transaction_history(limit: limit)
   end
   
-  # Get default payment card
+  # Delegated to MobileWalletCardService
   def default_card
-    wallet_cards.active.find_by(is_default: true) || wallet_cards.active.first
+    @card_service ||= MobileWalletCardService.new(self)
+    @card_service.default_card
   end
   
   # Get wallet summary
@@ -138,12 +95,7 @@ class MobileWallet < ApplicationRecord
   end
   
   private
-  
-  def self.generate_wallet_id
-    loop do
-      wallet_id = "MW#{SecureRandom.hex(8).upcase}"
-      break wallet_id unless exists?(wallet_id: wallet_id)
-    end
-  end
+
+  # generate_wallet_id is now handled in MobileWalletManagementService
 end
 

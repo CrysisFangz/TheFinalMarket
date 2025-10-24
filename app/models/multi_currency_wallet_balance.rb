@@ -17,91 +17,67 @@ class MultiCurrencyWalletBalance < ApplicationRecord
   scope :high_value, ->(threshold_cents = 1000_00) { where('balance_cents >= ?', threshold_cents) }
   scope :by_currency_code, ->(code) { joins(:currency).where(currencies: { code: code }) }
 
-  # Update balance with atomic operations and real-time synchronization
+  # Delegated to MultiCurrencyWalletBalanceUpdateService
   def update_balance!(new_balance_cents, exchange_rate = nil)
-    MultiCurrencyWalletBalance.transaction do
-      # Update balance atomically
-      update!(
-        balance_cents: new_balance_cents,
-        last_updated_at: Time.current,
-        exchange_rate_at_balance: exchange_rate || current_exchange_rate,
-        previous_balance_cents: balance_cents,
-        balance_updated_by: extract_update_context
-      )
-
-      # Update wallet total balance
-      multi_currency_wallet.update_total_balance!
-
-      # Trigger real-time balance synchronization
-      trigger_balance_synchronization
-
-      # Record balance change activity
-      record_balance_change_activity(new_balance_cents)
-    end
-
-    true
-  rescue ActiveRecord::RecordInvalid => e
-    Rails.logger.error "Failed to update wallet balance: #{e.message}"
-    false
+    @update_service ||= MultiCurrencyWalletBalanceUpdateService.new(self)
+    @update_service.update_balance!(new_balance_cents, exchange_rate)
   end
 
-  # Get balance in various formats
+  # Delegated to MultiCurrencyWalletBalanceCalculationService
   def balance
-    balance_cents / 100.0
+    @calculation_service ||= MultiCurrencyWalletBalanceCalculationService.new(self)
+    @calculation_service.balance
   end
 
   def balance_formatted
-    currency.format_amount(balance_cents)
+    @calculation_service ||= MultiCurrencyWalletBalanceCalculationService.new(self)
+    @calculation_service.balance_formatted
   end
 
   def usd_equivalent_cents
-    (balance_cents * exchange_rate_at_balance).round
+    @calculation_service ||= MultiCurrencyWalletBalanceCalculationService.new(self)
+    @calculation_service.usd_equivalent_cents
   end
 
   def usd_equivalent
-    usd_equivalent_cents / 100.0
+    @calculation_service ||= MultiCurrencyWalletBalanceCalculationService.new(self)
+    @calculation_service.usd_equivalent
   end
 
   def usd_equivalent_formatted
-    "$#{usd_equivalent.round(2).to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse}"
+    @calculation_service ||= MultiCurrencyWalletBalanceCalculationService.new(self)
+    @calculation_service.usd_equivalent_formatted
   end
 
-  # Check if balance is sufficient for transaction
   def sufficient_for?(required_cents)
-    balance_cents >= required_cents
+    @calculation_service ||= MultiCurrencyWalletBalanceCalculationService.new(self)
+    @calculation_service.sufficient_for?(required_cents)
   end
 
-  # Get current exchange rate with caching
   def current_exchange_rate
-    Rails.cache.fetch("exchange_rate:#{currency.code}", expires_in: 1.hour) do
-      currency.current_exchange_rate
-    end
+    @calculation_service ||= MultiCurrencyWalletBalanceCalculationService.new(self)
+    @calculation_service.current_exchange_rate
   end
 
-  # Calculate balance value change since last update
+  # Delegated to MultiCurrencyWalletBalanceCalculationService
   def balance_value_change_cents
-    return 0 if previous_balance_cents.blank?
-
-    current_usd_value = usd_equivalent_cents
-    previous_usd_value = (previous_balance_cents * exchange_rate_at_balance).round
-
-    current_usd_value - previous_usd_value
+    @calculation_service ||= MultiCurrencyWalletBalanceCalculationService.new(self)
+    @calculation_service.balance_value_change_cents
   end
 
   def balance_value_change_percentage
-    return 0.0 if previous_balance_cents.blank? || previous_balance_cents.zero?
-
-    change_cents = balance_value_change_cents
-    (change_cents.to_f / (previous_balance_cents * exchange_rate_at_balance) * 100).round(2)
+    @calculation_service ||= MultiCurrencyWalletBalanceCalculationService.new(self)
+    @calculation_service.balance_value_change_percentage
   end
 
-  # Get balance health indicators
   def balance_health_score
-    calculate_balance_health_score
+    @calculation_service ||= MultiCurrencyWalletBalanceCalculationService.new(self)
+    @calculation_service.balance_health_score
   end
 
   def requires_attention?
-    balance_health_score < 70 || stale_balance? || unusual_activity?
+    @calculation_service ||= MultiCurrencyWalletBalanceCalculationService.new(self)
+    @calculation_service.requires_attention?
   end
 
   private

@@ -166,243 +166,118 @@ class Order < ApplicationRecord
   # Saga patterns with compensation workflows for hyperscale reliability
 
   def execute_distributed_order_processing(order_context = {})
-    distributed_processor.process do |processor|
-      processor.initialize_distributed_transaction(self)
-      processor.execute_inventory_reservation_saga(self)
-      processor.execute_payment_authorization_saga(self)
-      processor.execute_fulfillment_orchestration_saga(self)
-      processor.validate_distributed_consistency(self)
-      processor.create_distributed_audit_trail(self)
-    end
+    processing_service.execute_distributed_order_processing(order_context)
   end
 
   def manage_compensation_workflows(compensation_context = {})
-    compensation_manager.manage do |manager|
-      manager.analyze_compensation_requirements(self, compensation_context)
-      manager.execute_compensation_saga_pattern(self)
-      manager.validate_compensation_effectiveness(self)
-      manager.update_compensation_analytics(self)
-      manager.create_compensation_audit_trail(self)
-    end
+    processing_service.manage_compensation_workflows(compensation_context)
   end
 
   # 🚀 AI-POWERED FULFILLMENT OPTIMIZATION METHODS
   # Machine learning-driven fulfillment optimization and logistics
 
   def optimize_fulfillment_strategy(fulfillment_context = {})
-    fulfillment_optimizer.optimize do |optimizer|
-      optimizer.analyze_order_characteristics(self)
-      optimizer.evaluate_fulfillment_options(self, fulfillment_context)
-      optimizer.predict_delivery_timeframes(self)
-      optimizer.select_optimal_fulfillment_strategy(self)
-      optimizer.execute_fulfillment_optimization(self)
-      optimizer.validate_optimization_effectiveness(self)
-    end
+    fulfillment_service.optimize_fulfillment_strategy(fulfillment_context)
   end
 
   def predict_delivery_timeframe(prediction_context = {})
-    delivery_predictor.predict do |predictor|
-      predictor.analyze_order_logistics_requirements(self)
-      predictor.evaluate_shipping_carrier_options(self)
-      predictor.execute_time_series_prediction_model(self)
-      predictor.calculate_prediction_confidence_intervals(self)
-      predictor.generate_delivery_timeframe_insights(self)
-      predictor.validate_prediction_accuracy(self)
-    end
+    fulfillment_service.predict_delivery_timeframe(prediction_context)
   end
 
   # 🚀 GLOBAL ORDER COORDINATION METHODS
   # Multi-region order coordination with international compliance
 
   def coordinate_global_order_execution(coordination_context = {})
-    global_coordinator.coordinate do |coordinator|
-      coordinator.analyze_global_order_requirements(self)
-      coordinator.select_optimal_regional_fulfillment_centers(self)
-      coordinator.execute_cross_region_synchronization(self)
-      coordinator.validate_international_compliance(self, coordination_context)
-      coordinator.optimize_global_performance(self)
-      coordinator.monitor_coordination_effectiveness(self)
-    end
+    fulfillment_service.coordinate_global_order_execution(coordination_context)
   end
 
   def manage_international_shipping(international_context = {})
-    international_shipping_manager.manage do |manager|
-      manager.analyze_international_shipping_requirements(self)
-      manager.select_optimal_shipping_carriers(self, international_context)
-      manager.calculate_international_shipping_costs(self)
-      manager.validate_customs_compliance(self)
-      manager.optimize_international_routing(self)
-      manager.monitor_international_delivery_progress(self)
-    end
+    fulfillment_service.manage_international_shipping(international_context)
   end
 
   # 🚀 BLOCKCHAIN ORDER VERIFICATION METHODS
   # Cryptographic order verification with distributed ledger technology
 
   def execute_blockchain_order_verification(verification_context = {})
-    blockchain_verifier.verify do |verifier|
-      verifier.validate_order_authenticity(self)
-      verifier.execute_distributed_consensus_verification(self)
-      verifier.record_order_on_blockchain(self)
-      verifier.generate_cryptographic_order_proof(self)
-      verifier.update_order_verification_status(self)
-      verifier.create_order_verification_audit_trail(self)
-    end
+    compliance_service.execute_blockchain_order_verification(verification_context)
   end
 
   def track_order_supply_chain_events(supply_chain_context = {})
-    supply_chain_tracker.track do |tracker|
-      tracker.validate_supply_chain_event_data(self, supply_chain_context)
-      tracker.record_events_on_blockchain(self)
-      tracker.update_supply_chain_transparency_record(self)
-      tracker.trigger_supply_chain_notifications(self)
-      tracker.validate_supply_chain_integrity(self)
-      tracker.generate_supply_chain_analytics(self)
-    end
+    compliance_service.track_order_supply_chain_events(supply_chain_context)
   end
 
   # 🚀 COMPLIANCE AND REGULATORY METHODS
   # Multi-jurisdictional compliance with automated reporting
 
   def validate_order_compliance(regulatory_context = {})
-    compliance_validator.validate do |validator|
-      validator.assess_regulatory_requirements(self, regulatory_context)
-      validator.verify_technical_compliance(self)
-      validator.check_tax_and_duty_compliance(self)
-      validator.validate_data_protection_measures(self)
-      validator.ensure_trade_compliance(self)
-      validator.generate_compliance_documentation(self)
-    end
+    compliance_service.validate_order_compliance(regulatory_context)
   end
 
   def execute_order_audit(audit_context = {})
-    audit_processor.execute do |processor|
-      processor.initialize_order_audit_session(self)
-      processor.collect_comprehensive_audit_data(self)
-      processor.analyze_audit_findings(self, audit_context)
-      processor.generate_audit_reports(self)
-      processor.trigger_corrective_actions(self)
-      processor.validate_audit_compliance(self)
-    end
+    compliance_service.execute_order_audit(audit_context)
   end
 
   # 🚀 ENHANCED BUSINESS METHODS
   # Enterprise-grade business logic with AI enhancement
 
   def calculate_optimal_fulfillment_cost(fulfillment_options = {})
-    fulfillment_calculator.calculate do |calculator|
-      calculator.analyze_fulfillment_option_costs(self, fulfillment_options)
-      calculator.evaluate_fulfillment_time_vs_cost_tradeoffs(self)
-      calculator.execute_machine_learning_cost_optimization(self)
-      calculator.simulate_fulfillment_cost_impact(self)
-      calculator.generate_cost_optimization_recommendations(self)
-      calculator.validate_cost_calculation_accuracy(self)
-    end
+    fulfillment_service.calculate_optimal_fulfillment_cost(fulfillment_options)
   end
 
   def generate_order_analytics_dashboard(time_range = :last_30_days)
-    analytics_dashboard_generator.generate do |generator|
-      generator.retrieve_order_performance_data(self, time_range)
-      generator.execute_multi_dimensional_analysis(self)
-      generator.generate_visualization_components(self)
-      generator.personalize_dashboard_for_stakeholders(self)
-      generator.optimize_dashboard_performance(self)
-      generator.validate_dashboard_data_accuracy(self)
-    end
+    analytics_service.generate_order_analytics_dashboard(time_range)
   end
 
   # 🚀 PERFORMANCE OPTIMIZATION METHODS
   # Hyperscale performance with intelligent caching and optimization
 
   def execute_performance_optimization_profiling
-    performance_optimizer.profile do |optimizer|
-      optimizer.analyze_query_patterns(self)
-      optimizer.identify_performance_bottlenecks(self)
-      optimizer.generate_optimization_strategies(self)
-      optimizer.implement_performance_enhancements(self)
-      optimizer.validate_optimization_effectiveness(self)
-      optimizer.update_performance_baselines(self)
-    end
+    fulfillment_service.execute_performance_optimization_profiling
   end
 
   def manage_global_order_synchronization(sync_context = {})
-    synchronization_manager.synchronize do |manager|
-      manager.analyze_synchronization_requirements(self)
-      manager.execute_cross_region_replication(self)
-      manager.validate_data_consistency(self)
-      manager.optimize_synchronization_performance(self)
-      manager.monitor_synchronization_health(self)
-      manager.generate_synchronization_analytics(self)
-    end
+    processing_service.manage_global_order_synchronization(sync_context)
   end
 
   # 🚀 ENHANCED INSTANCE METHODS
   # Enterprise-grade instance methods with performance optimization
 
   def total_items
-    order_items.sum(:quantity)
+    calculation_service.total_items
   end
 
   def calculate_total
-    calculate_order_total_with_precision
+    calculation_service.calculate_total
   end
 
   def total_weight
-    calculate_order_weight_with_distributed_inventory
+    calculation_service.total_weight
   end
 
   def total_dimensions
-    calculate_order_dimensions_with_optimization
+    calculation_service.total_dimensions
   end
 
   # 🚀 ENHANCED LIFECYCLE METHODS
   # Advanced order lifecycle management with business intelligence
 
   def activate_enterprise_features
-    feature_activator.activate do |activator|
-      activator.validate_enterprise_eligibility(self)
-      activator.initialize_enterprise_service_integrations(self)
-      activator.configure_enterprise_optimization_engines(self)
-      activator.setup_enterprise_compliance_framework(self)
-      activator.enable_enterprise_analytics(self)
-      activator.trigger_enterprise_activation_notifications(self)
-    end
+    processing_service.activate_enterprise_features
   end
 
   def cancel_with_enterprise_compliance(cancellation_reason, cancellation_context = {})
-    cancellation_processor.process do |processor|
-      processor.validate_cancellation_eligibility(self)
-      processor.execute_distributed_cancellation_saga(self, cancellation_reason)
-      processor.process_cancellation_compensation_transactions(self)
-      processor.trigger_compliance_notifications(self)
-      processor.create_cancellation_audit_trail(self, cancellation_context)
-      processor.validate_cancellation_compliance(self)
-    end
+    processing_service.cancel_with_enterprise_compliance(cancellation_reason, cancellation_context)
   end
 
   # 🚀 REAL-TIME ORDER ANALYTICS METHODS
   # Streaming analytics with business intelligence insights
 
   def generate_real_time_order_insights(insights_context = {})
-    insights_generator.generate do |generator|
-      generator.analyze_order_performance_metrics(self)
-      generator.execute_predictive_analytics(self)
-      generator.generate_comprehensive_insights(self)
-      generator.personalize_insights_for_stakeholders(self, insights_context)
-      generator.validate_insights_business_accuracy(self)
-      generator.create_insights_distribution_strategy(self)
-    end
+    analytics_service.generate_real_time_order_insights(insights_context)
   end
 
   def predict_order_fulfillment_timeframe(prediction_context = {})
-    fulfillment_predictor.predict do |predictor|
-      predictor.analyze_order_fulfillment_requirements(self)
-      predictor.evaluate_shipping_carrier_performance(self)
-      predictor.execute_time_series_prediction_model(self)
-      predictor.calculate_prediction_confidence_intervals(self)
-      predictor.generate_fulfillment_timeframe_insights(self)
-      predictor.validate_prediction_accuracy(self)
-    end
+    fulfillment_service.predict_order_fulfillment_timeframe(prediction_context)
   end
 
   # 🚀 PRIVATE METHODS
@@ -410,114 +285,28 @@ class Order < ApplicationRecord
 
   private
 
-  def initialize_enterprise_services
-    @distributed_processor ||= DistributedOrderProcessor.new
-    @compensation_manager ||= OrderCompensationManager.new
-    @fulfillment_optimizer ||= AIFulfillmentOptimizer.new
-    @delivery_predictor ||= DeliveryTimePredictor.new
-    @global_coordinator ||= GlobalOrderCoordinator.new
-    @international_shipping_manager ||= InternationalShippingManager.new
-    @blockchain_verifier ||= BlockchainOrderVerificationEngine.new
-    @compliance_validator ||= OrderComplianceValidator.new
-    @audit_processor ||= OrderAuditProcessor.new
-    @fulfillment_calculator ||= FulfillmentCostCalculator.new
-    @analytics_dashboard_generator ||= OrderAnalyticsDashboardGenerator.new
-    @performance_optimizer ||= OrderPerformanceOptimizer.new
-    @synchronization_manager ||= GlobalOrderSynchronizationManager.new
-    @feature_activator ||= EnterpriseOrderFeatureActivator.new
-    @cancellation_processor ||= OrderCancellationProcessor.new
-    @insights_generator ||= OrderInsightsGenerator.new
-    @fulfillment_predictor ||= OrderFulfillmentPredictor.new
+  def processing_service
+    @processing_service ||= OrderProcessingService.new(self)
   end
 
-  def execute_pre_save_enterprise_validations
-    validate_enterprise_order_data_integrity
-    update_enterprise_order_metadata
-    execute_pre_save_compliance_checks
-    optimize_order_processing_attributes
+  def fulfillment_service
+    @fulfillment_service ||= OrderFulfillmentService.new(self)
   end
 
-  def trigger_global_order_synchronization
-    GlobalOrderSynchronizationJob.perform_async(id, :create)
+  def analytics_service
+    @analytics_service ||= OrderAnalyticsService.new(self)
   end
 
-  def broadcast_order_state_changes
-    OrderStateChangeBroadcaster.broadcast(self)
+  def compliance_service
+    @compliance_service ||= OrderComplianceService.new(self)
   end
 
-  def execute_order_cancellation_protocol
-    OrderCancellationProtocol.execute(self)
+  def calculation_service
+    @calculation_service ||= OrderCalculationService.new(self)
   end
 
-  def initialize_distributed_order_processing
-    DistributedOrderProcessingJob.perform_async(id)
-  end
-
-  def trigger_ai_powered_fulfillment_optimization
-    AIFulfillmentOptimizationJob.perform_async(id)
-  end
-
-  def execute_global_order_compliance_validation
-    GlobalOrderComplianceValidationJob.perform_async(id)
-  end
-
-  def manage_order_state_transitions
-    OrderStateTransitionManager.manage(self)
-  end
-
-  def set_default_enterprise_status
-    self.status ||= :pending
-    self.payment_status ||= :pending
-    self.fulfillment_method ||= :standard
-  end
-
-  def calculate_order_total_with_precision
-    order_total_calculator.calculate_with_precision(self)
-  end
-
-  def calculate_order_weight_with_distributed_inventory
-    distributed_inventory_calculator.calculate_weight(self)
-  end
-
-  def calculate_order_dimensions_with_optimization
-    dimension_calculator.calculate_optimized_dimensions(self)
-  end
-
-  def validate_enterprise_order_data_integrity
-    EnterpriseOrderDataValidator.validate(self)
-  end
-
-  def update_enterprise_order_metadata
-    self.enterprise_audit_data = generate_enterprise_audit_metadata
-    self.distributed_processing_metadata = generate_distributed_processing_metadata
-  end
-
-  def execute_pre_save_compliance_checks
-    PreSaveOrderComplianceChecker.check(self)
-  end
-
-  def optimize_order_processing_attributes
-    OrderProcessingAttributeOptimizer.optimize(self)
-  end
-
-  def generate_enterprise_audit_metadata
-    {
-      validation_version: '3.0',
-      compliance_version: 'international',
-      blockchain_verification_status: 'active',
-      distributed_processing_version: '2.1',
-      ai_optimization_timestamp: Time.current
-    }
-  end
-
-  def generate_distributed_processing_metadata
-    {
-      saga_pattern_version: '2.0',
-      compensation_workflow_version: '1.5',
-      global_coordination_version: '3.0',
-      blockchain_integration_version: '1.0'
-    }
-  end
+  # Note: Complex private methods have been extracted into services
+  # The model now properly delegates to services instead of containing business logic
 
   # 🚀 ENHANCED DELIVERY AND FULFILLMENT METHODS
   # Advanced delivery management with predictive optimization
@@ -558,48 +347,107 @@ class Order < ApplicationRecord
   # Enterprise-grade order processing with distributed optimization
 
   def process_order_with_enterprise_optimization
-    order_processor.process do |processor|
-      processor.validate_order_business_rules(self)
-      processor.execute_distributed_inventory_reservation(self)
-      processor.optimize_fulfillment_strategy(self)
-      processor.initialize_payment_orchestration(self)
-      processor.trigger_order_analytics_collection(self)
-      processor.broadcast_order_processing_events(self)
-    end
+    processing_service.process_order_with_enterprise_optimization
   end
 
   def award_points_with_enterprise_enhancement
-    points_manager.award do |manager|
-      manager.calculate_buyer_reward_points(self)
-      manager.calculate_seller_reward_points(self)
-      manager.execute_points_distribution(self)
-      manager.update_gamification_analytics(self)
-      manager.validate_points_distribution_integrity(self)
-      manager.trigger_points_notification_events(self)
-    end
+    analytics_service.award_points_with_enterprise_enhancement
   end
 
   # 🚀 PERFORMANCE MONITORING
   # Real-time performance monitoring and optimization
 
   def collect_performance_metrics(operation, duration, context = {})
-    OrderPerformanceMetricsCollector.collect(
-      order_id: id,
-      operation: operation,
-      duration: duration,
-      context: context,
-      timestamp: Time.current
-    )
+    analytics_service.collect_performance_metrics(operation, duration, context)
   end
 
   def track_business_impact(operation, impact_data)
-    OrderBusinessImpactTracker.track(
-      order_id: id,
-      operation: operation,
-      impact: impact_data,
-      timestamp: Time.current,
-      context: execution_context
-    )
+    analytics_service.track_business_impact(operation, impact_data)
+  end
+
+  # Additional methods that delegate to services
+  def compliance_status
+    compliance_service.compliance_status
+  end
+
+  def generate_compliance_report(format = :json)
+    compliance_service.generate_compliance_report(format)
+  end
+
+  def order_summary
+    analytics_service.order_summary
+  end
+
+  def performance_report(time_range = :last_7_days)
+    analytics_service.performance_report(time_range)
+  end
+
+  def subtotal
+    calculation_service.subtotal
+  end
+
+  def tax_amount
+    calculation_service.tax_amount
+  end
+
+  def shipping_cost
+    calculation_service.shipping_cost
+  end
+
+  def discount_amount
+    calculation_service.discount_amount
+  end
+
+  def final_total
+    calculation_service.final_total
+  end
+
+  def estimated_delivery_date
+    calculation_service.estimated_delivery_date
+  end
+
+  def engagement_score
+    analytics_service.engagement_score
+  end
+
+  def lifetime_value_prediction
+    analytics_service.lifetime_value_prediction
+  end
+
+  def recommended_products(limit = 10)
+    analytics_service.recommended_products(limit)
+  end
+
+  def recommended_channel_for_action(action_type)
+    analytics_service.recommended_channel_for_action(action_type)
+  end
+
+  def personalized_campaigns
+    analytics_service.personalized_campaigns
+  end
+
+  def optimal_send_time
+    analytics_service.optimal_send_time
+  end
+
+  def channel_performance_comparison
+    analytics_service.channel_performance_comparison
+  end
+
+  def sync_to_channel(channel, profile_data = nil)
+    compliance_service.sync_to_channel(channel, profile_data)
+  end
+
+  def sync_from_channel(channel, channel_data)
+    compliance_service.sync_from_channel(channel, channel_data)
+  end
+
+  def sync_preferences_only!
+    compliance_service.sync_preferences_only!
+  end
+
+  def validate_channel_sync_status
+    compliance_service.validate_channel_sync_status
   end
 
   # 🚀 UTILITY CLASSES AND HELPERS

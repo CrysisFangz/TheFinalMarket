@@ -25,16 +25,20 @@ class Message < ApplicationRecord
   after_update_commit :broadcast_status_change, if: :saved_change_to_status?
 
   def mark_as_read!(by_user)
-    MessageService.new(self).mark_as_read!(by_user)
+    @status_service ||= MessageStatusService.new(self)
+    @status_service.mark_as_read!(by_user)
   end
 
   def mark_as_delivered!
-    MessageService.new(self).mark_as_delivered!
+    @status_service ||= MessageStatusService.new(self)
+    @status_service.mark_as_delivered!
   end
 
   def has_attachments?
     files.attached? || (attachments.present? && attachments['urls'].present?)
   end
+
+  # Note: has_attachments? is a simple validation helper, kept in model
 
   private
 

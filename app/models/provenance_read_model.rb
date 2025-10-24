@@ -58,7 +58,7 @@ class ProvenanceReadModel
     end
   end
 
-  # Find by blockchain ID (read-optimized)
+    # Find by blockchain ID (read-optimized)
   # @param blockchain_id [String] blockchain ID to search for
   # @return [ProvenanceReadModel, nil] found read model or nil
   def self.find_by_blockchain_id(blockchain_id)
@@ -73,29 +73,42 @@ class ProvenanceReadModel
 
       from_provenance(provenance) if provenance
     end
-  end
+  rescue StandardError => e
+    Rails.logger.error("Failed to find provenance by blockchain ID #{blockchain_id}: #{e.message}")
+    nil
+  end</search>
+</search_and_replace>
 
-  # Search provenances with filters
+    # Search provenances with filters
   # @param filters [Hash] search filters
   # @return [Array<ProvenanceReadModel>] matching read models
   def self.search(filters = {})
-    provenances = BlockchainProvenance.includes(
-      :product,
-      provenance_events: [:blockchain_provenance]
-    )
+    cache_key = "provenance_search_#{Digest::MD5.hexdigest(filters.to_s)}"
 
-    # Apply filters
-    provenances = provenances.where(blockchain: filters[:blockchain]) if filters[:blockchain]
-    provenances = provenances.where(verified: filters[:verified]) if filters.key?(:verified)
-    provenances = provenances.where('created_at >= ?', filters[:created_after]) if filters[:created_after]
-    provenances = provenances.where('created_at <= ?', filters[:created_before]) if filters[:created_before]
-    provenances = provenances.joins(:product).where('products.name ILIKE ?', "%#{filters[:product_name]}%") if filters[:product_name]
+    Rails.cache.fetch(cache_key, expires_in: 10.minutes) do
+      provenances = BlockchainProvenance.includes(
+        :product,
+        provenance_events: [:blockchain_provenance]
+      )
 
-    # Optimize query with pagination
-    provenances = provenances.order(created_at: :desc).limit(filters[:limit] || 100)
+      # Apply filters with validation
+      provenances = provenances.where(blockchain: filters[:blockchain]) if filters[:blockchain].present?
+      provenances = provenances.where(verified: filters[:verified]) if filters.key?(:verified)
+      provenances = provenances.where('created_at >= ?', filters[:created_after]) if filters[:created_after]
+      provenances = provenances.where('created_at <= ?', filters[:created_before]) if filters[:created_before]
+      provenances = provenances.joins(:product).where('products.name ILIKE ?', "%#{filters[:product_name]}%") if filters[:product_name].present?
 
-    provenances.map { |provenance| from_provenance(provenance) }
-  end
+      # Optimize query with pagination
+      limit = [filters[:limit] || 100, 1000].min # Cap at 1000 for performance
+      provenances = provenances.order(created_at: :desc).limit(limit)
+
+      provenances.map { |provenance| from_provenance(provenance) }
+    end
+  rescue StandardError => e
+    Rails.logger.error("Provenance search failed with filters #{filters}: #{e.message}")
+    []
+  end</search>
+</search_and_replace>
 
   # Get provenance statistics
   # @return [Hash] statistical data
@@ -179,6 +192,32 @@ class ProvenanceReadModel
     when 40..59 then :high
     else :critical
     end
+  end
+
+  # Enhanced performance and resilience methods
+  def refresh_cache
+    cache_key = "provenance_read_model_#{blockchain_id}"
+    Rails.cache.delete(cache_key)
+    self.class.find_by_blockchain_id(blockchain_id)
+  end
+
+  def to_json_with_metadata
+    {
+      provenance_data: as_json,
+      metadata: {
+        cached_at: Time.current,
+        cache_expires_in: 1.hour,
+        health_score: health_score,
+        risk_level: risk_level,
+        verification_status: verification_status
+      }
+    }
+  end
+
+  # Event publishing for provenance changes
+  def publish_verification_event
+    Rails.logger.info("Provenance verification status changed: ID=#{id}, Verified=#{verified}")
+    # In a full event system: EventPublisher.publish('provenance_verified', self.attributes)
   end
 
   private

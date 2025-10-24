@@ -33,110 +33,56 @@ class MarketingCampaign < ApplicationRecord
     cancelled: 5
   }
   
-  # Launch campaign
+  # Delegated to MarketingCampaignExecutionService
   def launch!
-    return false unless draft? || scheduled?
-    
-    update!(
-      status: :active,
-      launched_at: Time.current
-    )
-    
-    # Queue campaign execution
-    MarketingCampaignJob.perform_later(id)
+    @execution_service ||= MarketingCampaignExecutionService.new(self)
+    @execution_service.launch!
   end
   
-  # Pause campaign
+  # Delegated to MarketingCampaignExecutionService
   def pause!
-    update!(status: :paused)
+    @execution_service ||= MarketingCampaignExecutionService.new(self)
+    @execution_service.pause!
   end
-  
-  # Resume campaign
+
   def resume!
-    update!(status: :active)
+    @execution_service ||= MarketingCampaignExecutionService.new(self)
+    @execution_service.resume!
   end
-  
-  # Complete campaign
+
   def complete!
-    update!(
-      status: :completed,
-      completed_at: Time.current
-    )
+    @execution_service ||= MarketingCampaignExecutionService.new(self)
+    @execution_service.complete!
   end
   
-  # Get target audience
+  # Delegated to MarketingCampaignAudienceService
   def target_audience
-    case campaign_type.to_sym
-    when :abandoned_cart
-      users_with_abandoned_carts
-    when :customer_winback
-      inactive_customers
-    when :loyalty_reward
-      loyal_customers
-    when :cross_sell
-      customers_who_bought_related_products
-    when :upsell
-      customers_who_bought_lower_tier_products
-    else
-      all_customers
-    end
+    @audience_service ||= MarketingCampaignAudienceService.new(self)
+    @audience_service.target_audience
   end
   
-  # Send to audience
+  # Delegated to MarketingCampaignExecutionService
   def send_to_audience
-    audience = target_audience
-    
-    audience.find_each do |user|
-      next unless can_send_to?(user)
-      
-      campaign_emails.create!(
-        user: user,
-        subject: personalize_subject(user),
-        content: personalize_content(user),
-        scheduled_for: Time.current,
-        status: :pending
-      )
-    end
-    
-    # Queue email sending
-    SendCampaignEmailsJob.perform_later(id)
+    @execution_service ||= MarketingCampaignExecutionService.new(self)
+    @execution_service.send_to_audience
   end
   
-  # Get campaign performance
+  # Delegated to MarketingCampaignAnalyticsService
   def performance_metrics
-    {
-      sent: campaign_emails.sent.count,
-      delivered: campaign_emails.delivered.count,
-      opened: campaign_emails.opened.count,
-      clicked: campaign_emails.clicked.count,
-      converted: campaign_emails.converted.count,
-      revenue_generated: campaign_emails.sum(:revenue_generated_cents) / 100.0,
-      open_rate: calculate_rate(:opened, :delivered),
-      click_rate: calculate_rate(:clicked, :opened),
-      conversion_rate: calculate_rate(:converted, :clicked),
-      roi: calculate_roi
-    }
+    @analytics_service ||= MarketingCampaignAnalyticsService.new(self)
+    @analytics_service.performance_metrics
   end
   
-  # A/B test
+  # Delegated to MarketingCampaignABTestService
   def create_ab_test(variant_name, changes = {})
-    variant = dup
-    variant.name = "#{name} - #{variant_name}"
-    variant.ab_test_variant = variant_name
-    variant.ab_test_parent_id = id
-    variant.subject_line = changes[:subject_line] if changes[:subject_line]
-    variant.email_content = changes[:email_content] if changes[:email_content]
-    variant.save!
-    
-    variant
+    @ab_test_service ||= MarketingCampaignABTestService.new(self)
+    @ab_test_service.create_ab_test(variant_name, changes)
   end
   
-  # Get winning variant
+  # Delegated to MarketingCampaignABTestService
   def winning_variant
-    variants = MarketingCampaign.where(ab_test_parent_id: id)
-    return nil if variants.empty?
-    
-    variants.max_by { |v| v.performance_metrics[:conversion_rate] }
+    @ab_test_service ||= MarketingCampaignABTestService.new(self)
+    @ab_test_service.winning_variant
   end
   
   private

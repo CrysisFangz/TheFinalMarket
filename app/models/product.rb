@@ -160,23 +160,23 @@ class Product < ApplicationRecord
   attribute :blockchain_metadata, :json, default: {}
   attribute :enterprise_metadata, :json, default: {}
 
-  # Scopes for performance
+  # Enhanced scopes for performance and optimization
   scope :active, -> { where(status: 'active') }
   scope :available, -> { where(availability: 'available') }
   scope :with_categories, -> { includes(:categories) }
   scope :with_tags, -> { includes(:tags) }
   scope :with_variants, -> { includes(:variants) }
+  scope :with_all_associations, -> { includes(:categories, :tags, :variants, :product_images, :user) }
+  scope :searchable, -> { where(status: 'active', availability: 'available') }
+  scope :recent, -> { order(created_at: :desc) }
 
-  # Simple instance methods
+  # Simple instance methods with enhanced service integration
   def tag_list
-    Rails.cache.fetch("product:#{id}:tag_list", expires_in: 1.hour) do
-      tags.pluck(:name).join(', ')
-    end
+    ProductTagService.get_tag_list(self)
   end
 
   def tag_list=(names)
-    self.tags = names.split(',').map(&:strip).map { |name| Tag.find_or_create_by(name: name) }
-    Rails.cache.delete("product:#{id}:tag_list")
+    ProductTagService.update_tags(self, names)
   end
 
   def default_variant
@@ -202,6 +202,34 @@ class Product < ApplicationRecord
   def total_stock
     Rails.cache.fetch("product:#{id}:total_stock", expires_in: 15.minutes) do
       InventoryService.new.total_stock(self)
+    end
+  end
+
+  # Enhanced performance methods with better caching
+  def cached_category_names
+    Rails.cache.fetch("product:#{id}:category_names", expires_in: 2.hours) do
+      categories.pluck(:name)
+    end
+  end
+
+  def cached_variant_count
+    Rails.cache.fetch("product:#{id}:variant_count", expires_in: 1.hour) do
+      variants.count
+    end
+  end
+
+  def cached_average_rating
+    Rails.cache.fetch("product:#{id}:average_rating", expires_in: 30.minutes) do
+      reviews.average(:rating).to_f.round(2)
+    end
+  end
+
+  # Performance optimized search with enhanced caching
+  def self.cached_search(query: nil, filters: {}, page: 1, per_page: 20)
+    cache_key = "product_search:#{Digest::MD5.hexdigest([query, filters, page, per_page].to_s)}"
+
+    Rails.cache.fetch(cache_key, expires_in: 10.minutes) do
+      search(query: query, filters: filters, page: page, per_page: per_page)
     end
   end
 

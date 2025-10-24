@@ -22,104 +22,51 @@ class PriceExperiment < ApplicationRecord
   
   # Calculate conversion rates
   def control_conversion_rate
-    return 0 if control_views.zero?
-    (control_conversions.to_f / control_views * 100).round(2)
+    calculation_service.control_conversion_rate
   end
-  
+
   def variant_conversion_rate
-    return 0 if variant_views.zero?
-    (variant_conversions.to_f / variant_views * 100).round(2)
+    calculation_service.variant_conversion_rate
   end
-  
+
   # Calculate improvement
   def conversion_improvement
-    return 0 if control_conversion_rate.zero?
-    ((variant_conversion_rate - control_conversion_rate) / control_conversion_rate * 100).round(2)
+    calculation_service.conversion_improvement
   end
-  
+
   # Calculate statistical significance (simplified z-test)
   def calculate_significance
-    return 0 if control_views.zero? || variant_views.zero?
-    
-    p1 = control_conversions.to_f / control_views
-    p2 = variant_conversions.to_f / variant_views
-    
-    p_pool = (control_conversions + variant_conversions).to_f / (control_views + variant_views)
-    
-    se = Math.sqrt(p_pool * (1 - p_pool) * (1.0/control_views + 1.0/variant_views))
-    
-    return 0 if se.zero?
-    
-    z_score = (p2 - p1) / se
-    
-    # Convert z-score to confidence level (simplified)
-    confidence = (1 - Math.exp(-z_score.abs)) * 100
-    
-    update!(confidence_level: confidence.round(2))
-    confidence.round(2)
+    calculation_service.calculate_significance
   end
-  
+
   # Determine winner
   def determine_winner
-    return nil unless active? || completed?
-    
-    significance = calculate_significance
-    
-    # Need at least 95% confidence and 100 views per variant
-    return nil if significance < 95 || control_views < 100 || variant_views < 100
-    
-    winner = variant_conversion_rate > control_conversion_rate ? 'variant' : 'control'
-    
-    update!(
-      winner: winner,
-      status: :completed,
-      ended_at: Time.current,
-      results: {
-        control_conversion_rate: control_conversion_rate,
-        variant_conversion_rate: variant_conversion_rate,
-        improvement: conversion_improvement,
-        confidence: significance,
-        winner: winner
-      }
-    )
-    
-    winner
+    management_service.determine_winner
   end
   
   # Record a view
   def record_view(variant_type)
-    if variant_type == 'control'
-      increment!(:control_views)
-    else
-      increment!(:variant_views)
-    end
+    management_service.record_view(variant_type)
   end
-  
+
   # Record a conversion
   def record_conversion(variant_type)
-    if variant_type == 'control'
-      increment!(:control_conversions)
-    else
-      increment!(:variant_conversions)
-    end
-    
-    # Check if we can determine a winner
-    determine_winner if active?
+    management_service.record_conversion(variant_type)
   end
-  
+
   # Get price for variant
   def price_for_variant(variant_type)
-    variant_type == 'control' ? control_price_cents : variant_price_cents
+    management_service.price_for_variant(variant_type)
   end
-  
+
   # Assign variant to user (50/50 split)
   def assign_variant
-    rand < 0.5 ? 'control' : 'variant'
+    management_service.assign_variant
   end
-  
+
   # Check if experiment has enough data
   def has_sufficient_data?
-    control_views >= 100 && variant_views >= 100
+    management_service.has_sufficient_data?
   end
   
   # Get experiment summary
@@ -144,14 +91,82 @@ class PriceExperiment < ApplicationRecord
       winner: winner,
       duration_days: duration_days
     }
+    end
+
+  # Additional methods that delegate to services
+  def price_elasticity
+    calculation_service.price_elasticity
   end
-  
+
+  def revenue_impact
+    calculation_service.revenue_impact
+  end
+
+  def statistical_power
+    calculation_service.statistical_power
+  end
+
+  def start_experiment!
+    management_service.start_experiment!
+  end
+
+  def pause_experiment!
+    management_service.pause_experiment!
+  end
+
+  def resume_experiment!
+    management_service.resume_experiment!
+  end
+
+  def stop_experiment!(reason = nil)
+    management_service.stop_experiment!(reason)
+  end
+
+  def archive_experiment!
+    management_service.archive_experiment!
+  end
+
+  def experiment_summary
+    {
+      name: name,
+      status: status,
+      control: {
+        price: control_price_cents,
+        views: control_views,
+        conversions: control_conversions,
+        conversion_rate: control_conversion_rate
+      },
+      variant: {
+        price: variant_price_cents,
+        views: variant_views,
+        conversions: variant_conversions,
+        conversion_rate: variant_conversion_rate
+      },
+      improvement: conversion_improvement,
+      confidence: confidence_level,
+      winner: winner,
+      duration_days: duration_days,
+      price_elasticity: price_elasticity,
+      revenue_impact: revenue_impact,
+      statistical_power: statistical_power
+    }
+  end
+
   private
-  
+
+  def calculation_service
+    @calculation_service ||= PriceExperimentCalculationService.new(self)
+  end
+
+  def management_service
+    @management_service ||= PriceExperimentManagementService.new(self)
+  end
+
   def duration_days
     return 0 unless started_at
     end_date = ended_at || Time.current
     ((end_date - started_at) / 1.day).round
-  end
+  end</search>
+</search_and_replace>
 end
 

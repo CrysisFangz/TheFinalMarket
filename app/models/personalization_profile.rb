@@ -35,76 +35,51 @@ class PersonalizationProfile < ApplicationRecord
 
   # Predict next purchase
   def predict_next_purchase
-    return nil if purchase_history.empty?
-
-    # Calculate average days between purchases
-    days_between = calculate_days_between_purchases
-    last_purchase = purchase_history.last[:date]
-
-    {
-      predicted_date: last_purchase + days_between.days,
-      confidence: calculate_prediction_confidence,
-      likely_categories: top_categories.first(3),
-      likely_price_range: predict_price_range
-    }
+    prediction_service.predict_next_purchase
   end
 
   # Get emotional state (sentiment analysis)
   def emotional_state
-    recent_reviews = user.reviews.where('created_at > ?', 30.days.ago)
-
-    return 'neutral' if recent_reviews.empty?
-
-    avg_rating = recent_reviews.average(:rating).to_f
-
-    if avg_rating >= 4.5
-      'very_satisfied'
-    elsif avg_rating >= 4.0
-      'satisfied'
-    elsif avg_rating >= 3.0
-      'neutral'
-    elsif avg_rating >= 2.0
-      'dissatisfied'
-    else
-      'very_dissatisfied'
-    end
+    analytics_service.emotional_state
   end
-  
+
+  # Additional methods that delegate to services
+  def predict_lifetime_value(timeframe_months = 12)
+    prediction_service.predict_lifetime_value(timeframe_months)
+  end
+
+  def predict_churn_probability
+    prediction_service.predict_churn_probability
+  end
+
+  def predict_preferred_channels
+    prediction_service.predict_preferred_channels
+  end
+
+  def behavioral_insights
+    analytics_service.behavioral_insights
+  end
+
+  def engagement_score
+    analytics_service.engagement_score
+  end
+
+  def user_segmentation_data
+    analytics_service.user_segmentation_data
+  end
+
+  def recommendation_insights
+    analytics_service.recommendation_insights
+  end
+
   private
 
-  def top_categories
-    (product_interests || {}).sort_by { |k, v| -v }.map(&:first).first(5)
+  def prediction_service
+    @prediction_service ||= PersonalizationPredictionService.new(self)
   end
 
-  def calculate_days_between_purchases
-    return 30 if purchase_history.count < 2
-
-    dates = purchase_history.map { |p| p[:date] }.sort
-    intervals = dates.each_cons(2).map { |a, b| (b - a) / 1.day }
-    intervals.sum / intervals.count.to_f
-  end
-
-  def calculate_prediction_confidence
-    purchase_count = purchase_history&.count || 0
-
-    if purchase_count > 10
-      90
-    elsif purchase_count > 5
-      70
-    elsif purchase_count > 2
-      50
-    else
-      30
-    end
-  end
-
-  def predict_price_range
-    return [0, 10000] if purchase_history.blank?
-
-    prices = purchase_history.map { |p| p[:total] }
-    avg = prices.sum / prices.count.to_f
-
-    [(avg * 0.7).to_i, (avg * 1.3).to_i]
+  def analytics_service
+    @analytics_service ||= PersonalizationAnalyticsService.new(self)
   end
 end
 

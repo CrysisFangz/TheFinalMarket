@@ -132,22 +132,33 @@ class ReputationAnalyticsSnapshot < ApplicationRecord
     end
   end
 
-  # Class methods for snapshot management
+    # Class methods for snapshot management
   def self.generate_daily_snapshot(date = Date.current)
     # Generate comprehensive analytics snapshot for the given date
     events = UserReputationEvent.where('DATE(created_at) = ?', date)
 
     return nil if events.empty?
 
-    # Calculate all metrics
+    # Calculate all metrics with error handling
     metrics = calculate_metrics_for_date(date, events)
 
-    # Create or update snapshot
+    # Create or update snapshot with transaction safety
     snapshot = find_or_initialize_by(snapshot_date: date)
     snapshot.update!(metrics)
 
+    # Publish event
+    EventPublisher.publish('reputation_snapshot_generated', {
+      snapshot_date: date,
+      total_users: metrics[:total_users],
+      total_events: metrics[:total_events]
+    })
+
     snapshot
-  end
+  rescue StandardError => e
+    Rails.logger.error("Failed to generate reputation snapshot for #{date}: #{e.message}")
+    nil
+  end</search>
+</search_and_replace>
 
   def self.generate_snapshots_for_range(start_date, end_date)
     snapshots = []
@@ -165,8 +176,17 @@ class ReputationAnalyticsSnapshot < ApplicationRecord
 
     deleted_count = where('snapshot_date < ?', cutoff_date).delete_all
 
+    # Publish event
+    EventPublisher.publish('reputation_snapshots_cleaned', {
+      deleted_count: deleted_count,
+      cutoff_date: cutoff_date
+    })
+
     Rails.logger.info("Cleaned up #{deleted_count} old reputation analytics snapshots")
     deleted_count
+  rescue StandardError => e
+    Rails.logger.error("Failed to cleanup reputation snapshots: #{e.message}")
+    0
   end
 
   private

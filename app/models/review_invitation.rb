@@ -34,11 +34,13 @@ class ReviewInvitation < ApplicationRecord
   after_destroy :publish_destroyed_event
   
   def expire!
-    ReviewInvitationService.expire_invitation(self)
+    @management_service ||= ReviewInvitationManagementService.new(self)
+    @management_service.expire!
   end
 
   def complete!
-    ReviewInvitationService.complete_invitation(self)
+    @management_service ||= ReviewInvitationManagementService.new(self)
+    @management_service.complete!
   end
 
   def self.cached_find(id)
@@ -63,9 +65,13 @@ class ReviewInvitation < ApplicationRecord
     ReviewInvitationExpiryService.get_expiring_soon(user_id, within_days)
   end
 
+  # Note: Cached methods are already using services, kept as is
+
   def presenter
     @presenter ||= ReviewInvitationPresenter.new(self)
   end
+
+  # Note: Presenter is a view concern, kept in model for now
 
   private
 

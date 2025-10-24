@@ -50,113 +50,33 @@ class MultiCurrencyExchangeTransaction < ApplicationRecord
     :exchange_path, :rate_source, :global_commerce_flags, :compliance_flags
   ], coder: JSON
 
-  # Create exchange transaction with comprehensive tracking
+  # Delegated to MultiCurrencyExchangeTransactionCreationService
   def self.create_exchange_transaction!(wallet, exchange_params, user_context = {})
-    MultiCurrencyExchangeTransaction.transaction do
-      transaction = create!(
-        multi_currency_wallet: wallet,
-        user: wallet.user,
-        initiated_by: user_context[:initiated_by] || wallet.user,
-        transaction_type: :exchange,
-        from_currency: exchange_params[:from_currency],
-        to_currency: exchange_params[:to_currency],
-        amount_cents: exchange_params[:amount_cents],
-        exchange_rate: exchange_params[:exchange_rate],
-        fee_cents: exchange_params[:fee_cents] || 0,
-        status: :pending,
-        exchange_metadata: {
-          exchange_request_id: exchange_params[:request_id],
-          user_context: user_context,
-          global_commerce_enabled: wallet.global_commerce_enabled?,
-          compliance_level: :enhanced
-        }.merge(exchange_params[:metadata] || {}),
-        created_at: Time.current,
-        expires_at: 15.minutes.from_now
-      )
-
-      # Create fee breakdown record
-      create_fee_breakdown!(transaction, exchange_params[:fee_breakdown])
-
-      # Create initial compliance check
-      create_compliance_check!(transaction, :initiated)
-
-      transaction
-    end
+    MultiCurrencyExchangeTransactionCreationService.create_exchange_transaction!(wallet, exchange_params, user_context)
   end
 
-  # Update transaction status with comprehensive logging
+  # Delegated to MultiCurrencyExchangeTransactionStatusService
   def update_status!(new_status, update_context = {})
-    return false if status == new_status.to_s
-
-    MultiCurrencyExchangeTransaction.transaction do
-      old_status = status
-      new_expires_at = calculate_expiry_for_status(new_status)
-
-      update!(
-        status: new_status,
-        status_updated_at: Time.current,
-        status_updated_by: update_context[:updated_by],
-        previous_status: old_status,
-        expires_at: new_expires_at,
-        status_metadata: {
-          previous_status: old_status,
-          status_change_reason: update_context[:reason],
-          automated_update: update_context[:automated] || false,
-          compliance_verified: update_context[:compliance_verified] || false
-        }.merge(update_context[:metadata] || {})
-      )
-
-      # Record status change activity
-      record_status_change_activity!(old_status, new_status, update_context)
-
-      # Trigger status-specific actions
-      trigger_status_specific_actions(new_status, update_context)
-
-      true
-    end
-  rescue ActiveRecord::RecordInvalid => e
-    Rails.logger.error "Failed to update exchange transaction status: #{e.message}"
-    false
+    @status_service ||= MultiCurrencyExchangeTransactionStatusService.new(self)
+    @status_service.update_status!(new_status, update_context)
   end
 
-  # Calculate final exchange amounts with all fees applied
+  # Delegated to MultiCurrencyExchangeTransactionCalculationService
   def final_exchange_amounts
-    return {} if status != 'completed' || !exchange_type?
-
-    {
-      from_amount_cents: amount_cents,
-      to_amount_cents: (amount_cents * exchange_rate).round,
-      fee_cents: fee_cents,
-      net_to_amount_cents: ((amount_cents * exchange_rate) - fee_cents).round,
-      exchange_rate_used: exchange_rate,
-      effective_rate: (amount_cents * exchange_rate - fee_cents).to_f / amount_cents
-    }
+    @calculation_service ||= MultiCurrencyExchangeTransactionCalculationService.new(self)
+    @calculation_service.final_exchange_amounts
   end
 
-  # Get exchange performance metrics
+  # Delegated to MultiCurrencyExchangeTransactionCalculationService
   def exchange_performance_metrics
-    return {} if status != 'completed'
-
-    processing_time_ms = if processed_at && created_at
-      ((processed_at - created_at) * 1000).round
-    end
-
-    {
-      total_duration_ms: processing_time_ms,
-      fee_percentage: calculate_fee_percentage,
-      rate_efficiency: calculate_rate_efficiency,
-      liquidity_score: exchange_metadata['liquidity_score'],
-      execution_quality: calculate_execution_quality(processing_time_ms)
-    }
+    @calculation_service ||= MultiCurrencyExchangeTransactionCalculationService.new(self)
+    @calculation_service.exchange_performance_metrics
   end
 
-  # Check if transaction requires attention
+  # Delegated to MultiCurrencyExchangeTransactionCalculationService
   def requires_attention?
-    return true if status == 'failed'
-    return true if status == 'pending' && expires_at && expires_at < 5.minutes.from_now
-    return true if status == 'processing' && created_at < 10.minutes.ago
-
-    false
+    @calculation_service ||= MultiCurrencyExchangeTransactionCalculationService.new(self)
+    @calculation_service.requires_attention?
   end
 
   # Get transaction summary for user display

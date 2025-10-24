@@ -8,179 +8,119 @@ class OmnichannelCustomer < ApplicationRecord
   
   # Get unified customer profile
   def unified_profile
-    {
-      user_id: user.id,
-      total_orders: total_orders_count,
-      total_spent: total_lifetime_value,
-      favorite_channel: favorite_channel,
-      channels_used: channels_used,
-      last_interaction: last_interaction_at,
-      customer_segment: customer_segment,
-      preferences: unified_preferences,
-      journey_summary: journey_summary
-    }
+    profile_service.unified_profile
   end
-  
+
   # Get favorite channel
   def favorite_channel
-    channel_interactions
-      .group(:sales_channel_id)
-      .count
-      .max_by { |_, count| count }
-      &.first
-      &.then { |id| SalesChannel.find(id).name }
+    profile_service.favorite_channel
   end
-  
+
   # Get all channels used
   def channels_used
-    channel_interactions
-      .joins(:sales_channel)
-      .distinct
-      .pluck('sales_channels.name')
+    profile_service.channels_used
   end
-  
+
   # Get total orders across all channels
   def total_orders_count
-    Order.where(user: user).count
+    profile_service.total_orders_count
   end
-  
+
   # Get total lifetime value across all channels
   def total_lifetime_value
-    Order.where(user: user, status: 'completed').sum(:total)
+    profile_service.total_lifetime_value
   end
-  
+
   # Get customer segment
   def customer_segment
-    ltv = total_lifetime_value
-    orders = total_orders_count
-    
-    if ltv > 10000 && orders > 20
-      'vip'
-    elsif ltv > 5000 && orders > 10
-      'high_value'
-    elsif ltv > 1000 && orders > 5
-      'regular'
-    elsif orders > 0
-      'new'
-    else
-      'prospect'
-    end
+    profile_service.customer_segment
   end
-  
+
   # Get unified preferences across channels
   def unified_preferences
-    prefs = {}
-    
-    channel_preferences.each do |cp|
-      prefs[cp.sales_channel.name] = cp.preferences_data
-    end
-    
-    # Merge and find common preferences
-    {
-      by_channel: prefs,
-      common: find_common_preferences(prefs)
-    }
+    profile_service.unified_preferences
   end
   
   # Track interaction
   def track_interaction(channel, interaction_type, metadata = {})
-    channel_interactions.create!(
-      sales_channel: channel,
-      interaction_type: interaction_type,
-      interaction_data: metadata,
-      occurred_at: Time.current
-    )
-    
-    update!(last_interaction_at: Time.current)
+    journey_service.track_interaction(channel, interaction_type, metadata)
   end
-  
+
   # Get customer journey
   def journey_summary
-    journeys = cross_channel_journeys.order(started_at: :desc).limit(10)
-    
-    {
-      total_journeys: cross_channel_journeys.count,
-      completed_journeys: cross_channel_journeys.where(completed: true).count,
-      average_touchpoints: cross_channel_journeys.average(:touchpoint_count).to_f.round(2),
-      average_duration: average_journey_duration,
-      recent_journeys: journeys.map(&:summary)
-    }
+    journey_service.journey_summary
   end
-  
+
   # Start a new journey
   def start_journey(channel, intent)
-    cross_channel_journeys.create!(
-      sales_channel: channel,
-      intent: intent,
-      started_at: Time.current,
-      touchpoint_count: 1,
-      journey_data: { channels: [channel.name] }
-    )
+    journey_service.start_journey(channel, intent)
   end
   
   # Get channel-specific metrics
   def channel_metrics(channel)
-    interactions = channel_interactions.where(sales_channel: channel)
-    orders = Order.where(user: user, sales_channel: channel)
-    
-    {
-      interaction_count: interactions.count,
-      last_interaction: interactions.maximum(:occurred_at),
-      order_count: orders.count,
-      total_spent: orders.where(status: 'completed').sum(:total),
-      average_order_value: orders.where(status: 'completed').average(:total).to_f.round(2),
-      conversion_rate: calculate_conversion_rate(interactions.count, orders.count)
-    }
+    analytics_service.channel_metrics(channel)
   end
-  
+
   # Get cross-channel behavior
   def cross_channel_behavior
-    {
-      channel_switching_rate: calculate_channel_switching_rate,
-      preferred_journey: most_common_journey_path,
-      device_preferences: device_usage_distribution,
-      time_preferences: interaction_time_distribution
-    }
+    analytics_service.cross_channel_behavior
   end
-  
+
   # Sync customer data across channels
   def sync_across_channels!
-    profile_data = {
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      preferences: unified_preferences[:common],
-      segment: customer_segment,
-      lifetime_value: total_lifetime_value
-    }
-    
-    SalesChannel.active_channels.each do |channel|
-      # This would integrate with each channel's API
-      # For now, just update our records
-      pref = channel_preferences.find_or_initialize_by(sales_channel: channel)
-      pref.update!(
-        preferences_data: profile_data,
-        last_synced_at: Time.current
-      )
-    end
+    sync_service.sync_across_channels!
   end
-  
+
   # Get next best action
   def next_best_action
-    # AI-powered recommendation for next best action
-    recent_behavior = channel_interactions.order(occurred_at: :desc).limit(10)
-    
-    if recent_behavior.where(interaction_type: 'cart_abandonment').exists?
-      { action: 'send_cart_reminder', channel: favorite_channel, priority: 'high' }
-    elsif total_orders_count == 0
-      { action: 'send_welcome_offer', channel: favorite_channel, priority: 'medium' }
-    elsif (Time.current - last_interaction_at) > 30.days
-      { action: 'send_winback_campaign', channel: favorite_channel, priority: 'medium' }
-    else
-      { action: 'send_personalized_recommendations', channel: favorite_channel, priority: 'low' }
-    end
+    recommendation_service.next_best_action
   end
-  
+
+  # Additional methods that delegate to services
+  def engagement_score
+    analytics_service.engagement_score
+  end
+
+  def lifetime_value_prediction
+    analytics_service.lifetime_value_prediction
+  end
+
+  def recommended_products(limit = 10)
+    recommendation_service.recommended_products(limit)
+  end
+
+  def recommended_channel_for_action(action_type)
+    recommendation_service.recommended_channel_for_action(action_type)
+  end
+
+  def personalized_campaigns
+    recommendation_service.personalized_campaigns
+  end
+
+  def optimal_send_time
+    recommendation_service.optimal_send_time
+  end
+
+  def channel_performance_comparison
+    analytics_service.channel_performance_comparison
+  end
+
+  def sync_to_channel(channel, profile_data = nil)
+    sync_service.sync_to_channel(channel, profile_data)
+  end
+
+  def sync_from_channel(channel, channel_data)
+    sync_service.sync_from_channel(channel, channel_data)
+  end
+
+  def sync_preferences_only!
+    sync_service.sync_preferences_only!
+  end
+
+  def validate_channel_sync_status
+    sync_service.validate_channel_sync_status
+  end
+
   private
   
   def find_common_preferences(channel_prefs)
