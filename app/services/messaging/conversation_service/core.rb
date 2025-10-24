@@ -420,14 +420,19 @@ module ConversationService
 
     # ==================== EVENT CONSTRUCTION ====================
     def build_conversation_creation_event(conversation_data)
-      EventSourcing::ConversationCreatedEvent.new(
-        aggregate_id: SecureRandom.uuid,
-        participants: conversation_data[:participants].map(&:id),
-        conversation_type: conversation_data[:conversation_type],
-        created_by: conversation_data[:created_by]&.id,
+      ConversationCreationEvent.new(
+        entity_id: SecureRandom.uuid,
+        entity_type: 'Conversation',
+        event_type: 'conversation_created',
+        data: {
+          participants: conversation_data[:participants].map(&:id),
+          conversation_type: conversation_data[:conversation_type],
+          sender_id: conversation_data[:participants].first&.id,
+          recipient_id: conversation_data[:participants].second&.id
+        },
         metadata: extract_conversation_metadata(conversation_data),
-        timestamp: Time.current,
-        version: 1
+        creator_id: conversation_data[:created_by]&.id,
+        sequence_number: 1
       )
     end
 
@@ -484,7 +489,16 @@ module ConversationService
 
     # ==================== EVENT EXECUTION ====================
     def execute_conversation_creation(event)
-      conversation = conversation_repository.create_from_event(event)
+      # Create conversation from event data
+      conversation = Conversation.new(
+        id: event.entity_id,
+        sender_id: event.data[:sender_id],
+        recipient_id: event.data[:recipient_id],
+        conversation_type: event.data[:conversation_type],
+        created_at: event.created_at,
+        updated_at: event.created_at
+      )
+      conversation.save!
       conversation
     end
 

@@ -1,8 +1,21 @@
 class KeyboardShortcut < ApplicationRecord
+  include CircuitBreaker
+  include Retryable
+
   belongs_to :user, optional: true
-  
+
   validates :key_combination, presence: true
   validates :action, presence: true
+
+  # Caching
+  after_create :clear_shortcut_cache
+  after_update :clear_shortcut_cache
+  after_destroy :clear_shortcut_cache
+
+  # Lifecycle callbacks
+  after_create :publish_created_event
+  after_update :publish_updated_event
+  after_destroy :publish_destroyed_event
   
   enum action: {
     navigate_home: 0,
@@ -53,128 +66,146 @@ class KeyboardShortcut < ApplicationRecord
   
   # Create default shortcuts for user
   def self.create_defaults_for_user(user)
-    DEFAULT_SHORTCUTS.each do |key_combo, action_name|
-      create!(
-        user: user,
-        key_combination: key_combo,
-        action: action_name,
-        enabled: true,
-        is_default: true
-      )
-    end
+    KeyboardShortcutManagementService.create_defaults_for_user(user)
   end
-  
+
   # Get all shortcuts for user
   def self.for_user(user)
-    where(user: user, enabled: true).order(:action)
+    KeyboardShortcutManagementService.get_shortcuts_for_user(user)
   end
-  
+
   # Get shortcut by action
   def self.find_by_action(user, action_name)
-    find_by(user: user, action: action_name, enabled: true)
+    KeyboardShortcutManagementService.find_shortcut_by_action(user, action_name)
   end
-  
+
   # Get JavaScript mapping
   def self.javascript_mapping(user)
-    shortcuts = for_user(user)
-    
-    shortcuts.map do |shortcut|
-      {
-        keys: shortcut.key_combination,
-        action: shortcut.action,
-        description: shortcut.description_text,
-        preventDefault: shortcut.prevent_default
-      }
-    end
+    KeyboardShortcutManagementService.generate_javascript_mapping(user)
   end
-  
+
   # Get description text
   def description_text
-    case action.to_sym
-    when :navigate_home
-      'Navigate to home page'
-    when :navigate_search
-      'Navigate to search page'
-    when :navigate_cart
-      'Navigate to shopping cart'
-    when :navigate_account
-      'Navigate to account page'
-    when :navigate_orders
-      'Navigate to orders page'
-    when :navigate_wishlist
-      'Navigate to wishlist'
-    when :open_menu
-      'Open navigation menu'
-    when :close_menu
-      'Close current menu or dialog'
-    when :skip_to_content
-      'Skip to main content'
-    when :skip_to_navigation
-      'Skip to navigation'
-    when :skip_to_footer
-      'Skip to footer'
-    when :toggle_accessibility_menu
-      'Toggle accessibility menu'
-    when :increase_font_size
-      'Increase font size'
-    when :decrease_font_size
-      'Decrease font size'
-    when :toggle_high_contrast
-      'Toggle high contrast mode'
-    when :toggle_dark_mode
-      'Toggle dark mode'
-    when :focus_search
-      'Focus search input'
-    when :submit_form
-      'Submit current form'
-    when :cancel_action
-      'Cancel current action'
-    when :open_help
-      'Open help menu'
-    else
-      'Custom action'
-    end
+    KeyboardShortcutAccessibilityService.get_description_text(action)
   end
-  
+
   # Check if shortcut conflicts with another
   def conflicts_with?(other_shortcut)
     key_combination == other_shortcut.key_combination &&
       user_id == other_shortcut.user_id &&
       id != other_shortcut.id
   end
-  
+
   # Get all shortcuts as help text
   def self.help_text(user)
-    shortcuts = for_user(user).group_by { |s| shortcut_category(s.action) }
-    
-    help = {}
-    shortcuts.each do |category, category_shortcuts|
-      help[category] = category_shortcuts.map do |shortcut|
-        {
-          keys: shortcut.key_combination,
-          description: shortcut.description_text
-        }
-      end
-    end
-    
-    help
+    KeyboardShortcutAccessibilityService.generate_help_text(user)
   end
   
-  private
-  
-  def self.shortcut_category(action)
-    case action.to_s
-    when /navigate_/
-      'Navigation'
-    when /skip_/
-      'Skip Links'
-    when /toggle_/, /increase_/, /decrease_/
-      'Accessibility'
-    when /open_/, /close_/, /focus_/
-      'Interface'
-    else
-      'Other'
+  def self.cached_find(id)
+    Rails.cache.fetch("keyboard_shortcut:#{id}", expires_in: 30.minutes) do
+      find_by(id: id)
     end
+  end
+
+  def self.cached_for_user(user_id)
+    user = User.find(user_id)
+    KeyboardShortcutManagementService.get_shortcuts_for_user(user)
+  end
+
+  def self.cached_by_action(user_id, action)
+    user = User.find(user_id)
+    KeyboardShortcutManagementService.find_shortcut_by_action(user, action)
+  end
+
+  def self.get_stats(user_id)
+    user = User.find(user_id)
+    KeyboardShortcutManagementService.get_shortcut_stats(user)
+  end
+
+  def self.get_compliance_report(user_id)
+    user = User.find(user_id)
+    KeyboardShortcutAccessibilityService.get_accessibility_compliance_report(user)
+  end
+
+  def self.get_analytics(user_id)
+    user = User.find(user_id)
+    KeyboardShortcutAccessibilityService.get_shortcut_analytics(user)
+  end
+
+  def self.suggest_improvements(user_id)
+    user = User.find(user_id)
+    KeyboardShortcutAccessibilityService.suggest_improvements(user)
+  end
+
+  def self.check_conflicts(user_id, key_combination, exclude_shortcut_id = nil)
+    user = User.find(user_id)
+    KeyboardShortcutManagementService.check_conflicts(user, key_combination, exclude_shortcut_id)
+  end
+
+  def self.import_shortcuts(user_id, shortcuts_data)
+    user = User.find(user_id)
+    KeyboardShortcutManagementService.import_shortcuts(user, shortcuts_data)
+  end
+
+  def self.export_shortcuts(user_id)
+    user = User.find(user_id)
+    KeyboardShortcutManagementService.export_shortcuts(user)
+  end
+
+  def self.validate_combination(key_combination)
+    KeyboardShortcutAccessibilityService.validate_shortcut_combination(key_combination)
+  end
+
+  def presenter
+    @presenter ||= KeyboardShortcutPresenter.new(self)
+  end
+
+  private
+
+  def clear_shortcut_cache
+    if user_id
+      KeyboardShortcutManagementService.clear_user_cache(user_id)
+      KeyboardShortcutAccessibilityService.clear_accessibility_cache(user_id)
+    end
+
+    # Clear related caches
+    Rails.cache.delete("keyboard_shortcut:#{id}")
+    Rails.cache.delete("shortcuts:user:#{user_id}")
+  end
+
+  def publish_created_event
+    EventPublisher.publish('keyboard_shortcut.created', {
+      shortcut_id: id,
+      user_id: user_id,
+      key_combination: key_combination,
+      action: action,
+      enabled: enabled,
+      is_default: is_default,
+      created_at: created_at
+    })
+  end
+
+  def publish_updated_event
+    EventPublisher.publish('keyboard_shortcut.updated', {
+      shortcut_id: id,
+      user_id: user_id,
+      key_combination: key_combination,
+      action: action,
+      enabled: enabled,
+      is_default: is_default,
+      updated_at: updated_at
+    })
+  end
+
+  def publish_destroyed_event
+    EventPublisher.publish('keyboard_shortcut.destroyed', {
+      shortcut_id: id,
+      user_id: user_id,
+      key_combination: key_combination,
+      action: action,
+      enabled: enabled,
+      is_default: is_default
+    })
   end
 end
 

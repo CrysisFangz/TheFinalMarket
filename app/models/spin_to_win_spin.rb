@@ -8,14 +8,12 @@
 #
 # The model represents a single spin in the Spin-to-Win game, ensuring
 # data integrity, auditability, and high performance under load.
-class SpinToWinSpin < ApplicationRecord</search>
-</search_and_replace>
+class SpinToWinSpin < ApplicationRecord
   include EventSourcing::AggregateRoot
   include Auditable
   include Cacheable
 
-  # Associations - Pure data relationships</search>
-</search_and_replace>
+  # Associations - Pure data relationships
   belongs_to :spin_to_win
   belongs_to :user
   belongs_to :spin_to_win_prize, counter_cache: true
@@ -30,6 +28,13 @@ class SpinToWinSpin < ApplicationRecord</search>
   validate :daily_spin_limit_not_exceeded, on: :create
   validate :user_eligibility, on: :create
   validate :spin_to_win_active, on: :create
+
+  # Optimized indexes for performance
+  index :user_id
+  index :spin_to_win_id
+  index :spun_at
+  index [:user_id, :spun_at]
+  index [:spin_to_win_id, :spun_at]
 
   # Performance-optimized scopes
   scope :for_user, ->(user) { where(user: user) }
@@ -52,7 +57,7 @@ class SpinToWinSpin < ApplicationRecord</search>
     spin_to_win&.name
   end
 
-    private
+  private
 
   def clear_associated_caches
     super
@@ -60,8 +65,7 @@ class SpinToWinSpin < ApplicationRecord</search>
     Rails.cache.delete("spin_to_win_prize_distribution_#{spin_to_win_id}")
   end
 
-  def daily_spin_limit_not_exceeded</search>
-</search_and_replace>
+  def daily_spin_limit_not_exceeded
     return unless user && spin_to_win
 
     spins_today = self.class.for_user(user).for_spin_to_win(spin_to_win).today.count
@@ -88,4 +92,3 @@ class SpinToWinSpin < ApplicationRecord</search>
     end
   end
 end
-

@@ -1,4 +1,7 @@
 class Leaderboard < ApplicationRecord
+  include CircuitBreaker
+  include Retryable
+
   enum leaderboard_type: {
     points: 0,
     sales: 1,
@@ -10,7 +13,7 @@ class Leaderboard < ApplicationRecord
     monthly: 7,
     all_time: 8
   }
-  
+
   enum period: {
     daily: 0,
     weekly: 1,
@@ -18,10 +21,20 @@ class Leaderboard < ApplicationRecord
     yearly: 3,
     all_time: 4
   }
-  
+
   validates :name, presence: true
   validates :leaderboard_type, presence: true
   validates :period, presence: true
+
+  # Caching
+  after_create :clear_leaderboard_cache
+  after_update :clear_leaderboard_cache
+  after_destroy :clear_leaderboard_cache
+
+  # Lifecycle callbacks
+  after_create :publish_created_event
+  after_update :publish_updated_event
+  after_destroy :publish_destroyed_event
   
   # Get top users for this leaderboard
   def top_users(limit = 100)

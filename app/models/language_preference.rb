@@ -1,8 +1,21 @@
 class LanguagePreference < ApplicationRecord
+  include CircuitBreaker
+  include Retryable
+
   belongs_to :user
-  
+
   validates :user, presence: true
   validates :primary_language, presence: true
+
+  # Caching
+  after_create :clear_preference_cache
+  after_update :clear_preference_cache
+  after_destroy :clear_preference_cache
+
+  # Lifecycle callbacks
+  after_create :publish_created_event
+  after_update :publish_updated_event
+  after_destroy :publish_destroyed_event
   
   # Supported languages (50+ languages)
   SUPPORTED_LANGUAGES = {
