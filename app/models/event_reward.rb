@@ -1,63 +1,64 @@
 class EventReward < ApplicationRecord
+  include CircuitBreaker
+  include Retryable
+
   belongs_to :seasonal_event
-  
+
   validates :seasonal_event, presence: true
   validates :reward_type, presence: true
   validates :reward_name, presence: true
-  
+
   enum reward_type: {
     milestone: 0,
     leaderboard: 1,
     participation: 2,
     random_drop: 3
   }
-  
+
+  # Lifecycle callbacks
+  after_create :publish_created_event
+  after_update :publish_updated_event
+  after_destroy :publish_destroyed_event
+
   # Award reward to user
   def award_to(user)
-    case prize_type
-    when 'coins'
-      user.increment!(:coins, prize_value)
-    when 'experience'
-      user.increment!(:experience_points, prize_value)
-    when 'tokens'
-      user.loyalty_token&.earn(prize_value, 'seasonal_event')
-    when 'badge'
-      award_badge(user)
-    when 'product'
-      award_product(user)
+    with_retry do
+      RewardDistributionService.award_to(self, user)
     end
-    
-    # Record the award
-    record_award(user)
-    
-    # Notify user
-    notify_user(user)
   end
-  
+
   private
-  
-  def award_badge(user)
-    # Implementation depends on your badge system
+
+  def publish_created_event
+    EventPublisher.publish('event_reward.created', {
+      reward_id: id,
+      seasonal_event_id: seasonal_event_id,
+      reward_name: reward_name,
+      reward_type: reward_type,
+      prize_type: prize_type,
+      prize_value: prize_value,
+      created_at: created_at
+    })
   end
-  
-  def award_product(user)
-    # Implementation depends on your product/voucher system
+
+  def publish_updated_event
+    EventPublisher.publish('event_reward.updated', {
+      reward_id: id,
+      seasonal_event_id: seasonal_event_id,
+      reward_name: reward_name,
+      reward_type: reward_type,
+      prize_type: prize_type,
+      prize_value: prize_value,
+      updated_at: updated_at
+    })
   end
-  
-  def record_award(user)
-    # Track that user received this reward
-    user.claimed_event_rewards.create!(event_reward: self, claimed_at: Time.current)
-  end
-  
-  def notify_user(user)
-    Notification.create!(
-      recipient: user,
-      notifiable: self,
-      notification_type: 'event_reward',
-      title: "Event Reward: #{reward_name}!",
-      message: "You've earned a reward from #{seasonal_event.name}!",
-      data: { prize_type: prize_type, prize_value: prize_value }
-    )
+
+  def publish_destroyed_event
+    EventPublisher.publish('event_reward.destroyed', {
+      reward_id: id,
+      seasonal_event_id: seasonal_event_id,
+      reward_name: reward_name,
+      reward_type: reward_type
+    })
   end
 end
-

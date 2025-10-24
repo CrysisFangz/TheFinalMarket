@@ -1,17 +1,20 @@
 class FraudCheck < ApplicationRecord
+  include CircuitBreaker
+  include Retryable
+
   belongs_to :checkable, polymorphic: true
   belongs_to :user, optional: true
-  
+
   validates :check_type, presence: true
   validates :risk_score, presence: true, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100 }
-  
+
   scope :recent, -> { where('created_at > ?', 30.days.ago) }
   scope :high_risk, -> { where('risk_score >= ?', 70) }
   scope :medium_risk, -> { where('risk_score >= ? AND risk_score < ?', 40, 70) }
   scope :low_risk, -> { where('risk_score < ?', 40) }
   scope :flagged, -> { where(flagged: true) }
   scope :for_user, ->(user) { where(user: user) }
-  
+
   # Check types
   enum check_type: {
     account_creation: 0,
@@ -25,7 +28,7 @@ class FraudCheck < ApplicationRecord
     withdrawal_request: 8,
     password_reset: 9
   }
-  
+
   # Risk levels
   enum risk_level: {
     low: 0,
@@ -33,7 +36,7 @@ class FraudCheck < ApplicationRecord
     high: 2,
     critical: 3
   }
-  
+
   # Actions taken
   enum action_taken: {
     none: 0,
@@ -43,55 +46,82 @@ class FraudCheck < ApplicationRecord
     account_suspended: 4,
     transaction_cancelled: 5
   }
-  
+
+  # Lifecycle callbacks
+  after_create :publish_created_event
+  after_update :publish_updated_event
+  after_destroy :publish_destroyed_event
+
   # Calculate risk level from score
   before_save :set_risk_level
-  
+
   def set_risk_level
-    self.risk_level = if risk_score >= 80
-      :critical
-    elsif risk_score >= 70
-      :high
-    elsif risk_score >= 40
-      :medium
-    else
-      :low
-    end
+    RiskAssessmentService.set_risk_level(self)
   end
-  
+
   # Check if this is a high-risk check
   def high_risk?
-    risk_score >= 70
+    RiskAssessmentService.high_risk?(self)
   end
-  
+
   # Check if action is required
   def requires_action?
-    high_risk? && action_taken == 'none'
+    RiskAssessmentService.requires_action?(self)
   end
-  
+
   # Get human-readable risk description
   def risk_description
-    case risk_level.to_sym
-    when :critical
-      "Critical Risk - Immediate action required"
-    when :high
-      "High Risk - Review recommended"
-    when :medium
-      "Medium Risk - Monitor closely"
-    when :low
-      "Low Risk - Normal activity"
-    end
+    RiskAssessmentService.get_risk_description(self)
   end
-  
+
   # Get risk factors as array
   def risk_factors_array
-    factors['factors'] || []
+    RiskFactorsService.get_risk_factors_array(self)
   end
-  
+
   # Add a risk factor
   def add_risk_factor(factor, weight)
-    self.factors ||= { 'factors' => [] }
-    self.factors['factors'] << { 'factor' => factor, 'weight' => weight }
+    RiskFactorsService.add_risk_factor(self, factor, weight)
+  end
+
+  private
+
+  def publish_created_event
+    EventPublisher.publish('fraud_check.created', {
+      check_id: id,
+      checkable_type: checkable_type,
+      checkable_id: checkable_id,
+      user_id: user_id,
+      check_type: check_type,
+      risk_score: risk_score,
+      risk_level: risk_level,
+      created_at: created_at
+    })
+  end
+
+  def publish_updated_event
+    EventPublisher.publish('fraud_check.updated', {
+      check_id: id,
+      checkable_type: checkable_type,
+      checkable_id: checkable_id,
+      user_id: user_id,
+      check_type: check_type,
+      risk_score: risk_score,
+      risk_level: risk_level,
+      action_taken: action_taken,
+      flagged: flagged?,
+      updated_at: updated_at
+    })
+  end
+
+  def publish_destroyed_event
+    EventPublisher.publish('fraud_check.destroyed', {
+      check_id: id,
+      checkable_type: checkable_type,
+      checkable_id: checkable_id,
+      user_id: user_id,
+      check_type: check_type,
+      risk_score: risk_score
+    })
   end
 end
-

@@ -30,33 +30,26 @@ class WalletCard < ApplicationRecord
   scope :active_cards, -> { where(status: :active) }
   scope :default_cards, -> { where(is_default: true) }
   
-  # Set as default card
-  def set_as_default!
-    mobile_wallet.wallet_cards.update_all(is_default: false)
-    update!(is_default: true)
+  # Business logic methods are now handled by WalletCardService for separation of concerns.
+  # Use WalletCardService.new(self).set_as_default! instead of direct method call.
+
+  # Presentation methods are now handled by WalletCardPresenter.
+  # Use WalletCardPresenter.new(self).display_name instead of direct method call.
+
+  # Delegate to service for business operations
+  delegate :set_as_default!, :expired?, :remove!, to: :service
+
+  # Delegate to presenter for display operations
+  delegate :masked_number, :display_name, to: :presenter
+
+  private
+
+  def service
+    @service ||= WalletCardService.new(self)
   end
-  
-  # Check if card is expired
-  def expired?
-    return false unless expiry_month && expiry_year
-    
-    expiry_date = Date.new(expiry_year, expiry_month, -1)
-    expiry_date < Date.current
-  end
-  
-  # Remove card
-  def remove!
-    update!(status: :removed, removed_at: Time.current)
-  end
-  
-  # Get masked card number
-  def masked_number
-    "•••• •••• •••• #{last_four}"
-  end
-  
-  # Get card display name
-  def display_name
-    "#{card_brand.titleize} #{card_type.titleize.gsub('_', ' ')} ••#{last_four}"
+
+  def presenter
+    @presenter ||= WalletCardPresenter.new(self)
   end
 end
 

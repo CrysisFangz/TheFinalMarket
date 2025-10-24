@@ -22,14 +22,16 @@ class ShippingController < ApplicationController
     
     # Get all shipping options
     options = zone.shipping_rates.active.map do |rate|
-      next unless rate.applies_to_weight?(weight_grams)
-      
+      next unless ShippingRateValidator.applies_to_weight?(rate, weight_grams)
+
+      cost_cents = ShippingCostCalculator.calculate(rate, weight_grams)
+
       {
         service_level: rate.service_level,
         carrier_name: rate.carrier_name,
-        cost_cents: rate.calculate_cost(weight_grams),
-        cost_formatted: country.currency.format_amount(rate.calculate_cost(weight_grams)),
-        delivery_estimate: rate.delivery_estimate,
+        cost_cents: cost_cents,
+        cost_formatted: country.currency.format_amount(cost_cents),
+        delivery_estimate: DeliveryEstimate.new(rate.min_delivery_days, rate.max_delivery_days).to_s,
         min_delivery_days: rate.min_delivery_days,
         max_delivery_days: rate.max_delivery_days,
         includes_tracking: rate.includes_tracking,

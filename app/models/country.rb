@@ -17,7 +17,7 @@ class Country < ApplicationRecord
   
   # Get shipping zone for this country
   def shipping_zone
-    shipping_zones.active.by_priority.first
+    ShippingZoneService.for_country(code)
   end
   
   # Get tax rate for this country

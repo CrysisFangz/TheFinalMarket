@@ -122,14 +122,23 @@ class OfflineSync < ApplicationRecord
   def sync_wishlist_action
     case action_data['action']
     when 'add_item'
-      wishlist = user.wishlist || user.create_wishlist!
       product = Product.find(action_data['product_id'])
-      wishlist.add_item(product)
-      { success: true, data: { wishlist_id: wishlist.id } }
+      service = WishlistService.new
+      result = service.add_product(user, product)
+      if result.success?
+        { success: true, data: { wishlist_id: user.wishlist.id } }
+      else
+        { success: false, error: result.failure.message }
+      end
     when 'remove_item'
-      wishlist = user.wishlist
-      wishlist&.remove_item(action_data['product_id'])
-      { success: true, data: { wishlist_id: wishlist&.id } }
+      product = Product.find(action_data['product_id'])
+      service = WishlistService.new
+      result = service.remove_product(user, product)
+      if result.success?
+        { success: true, data: { wishlist_id: user.wishlist&.id } }
+      else
+        { success: false, error: result.failure.message }
+      end
     else
       { success: false, error: 'Unknown wishlist action' }
     end

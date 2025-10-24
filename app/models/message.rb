@@ -5,6 +5,7 @@ class Message < ApplicationRecord
 
   validates :body, presence: true, unless: :has_attachments?
   validates :message_type, presence: true
+  validates :attachments, allow_nil: true
 
   enum message_type: {
     text: 'text',
@@ -20,18 +21,15 @@ class Message < ApplicationRecord
     failed: 'failed'
   }
 
-  after_create_commit :broadcast_message
-  after_create_commit :update_conversation
+  after_create_commit :broadcast_and_update
   after_update_commit :broadcast_status_change, if: :saved_change_to_status?
 
   def mark_as_read!(by_user)
-    return if by_user == user || read?
-    
-    update(status: :read, read_at: Time.current)
+    MessageService.new(self).mark_as_read!(by_user)
   end
 
   def mark_as_delivered!
-    update(status: :delivered) if sent?
+    MessageService.new(self).mark_as_delivered!
   end
 
   def has_attachments?

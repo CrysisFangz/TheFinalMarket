@@ -13,6 +13,9 @@ class Nft < ApplicationRecord
   validates :contract_address, presence: true
   validates :name, presence: true
   validates :nft_type, presence: true
+  validates :blockchain, presence: true
+  validates :metadata, allow_nil: true
+  validates :royalty_percentage, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100 }, allow_nil: true
   
   scope :for_sale, -> { where(for_sale: true) }
   scope :by_type, ->(type) { where(nft_type: type) }
@@ -40,59 +43,12 @@ class Nft < ApplicationRecord
   
   # Mint NFT
   def self.mint(creator:, name:, description:, nft_type:, metadata: {})
-    token_id = generate_token_id
-    contract_address = get_contract_address(nft_type)
-    
-    nft = create!(
-      creator: creator,
-      owner: creator,
-      name: name,
-      description: description,
-      nft_type: nft_type,
-      token_id: token_id,
-      contract_address: contract_address,
-      blockchain: :polygon, # Default to Polygon for lower gas fees
-      metadata: metadata,
-      minted_at: Time.current
-    )
-    
-    # Mint on blockchain
-    mint_on_blockchain(nft)
-    
-    nft
+    NftMintingService.mint(creator: creator, name: name, description: description, nft_type: nft_type, metadata: metadata)
   end
   
   # Transfer NFT
   def transfer_to(new_owner, price_cents = 0)
-    return false if owner == new_owner
-    
-    transaction do
-      # Create transfer record
-      transfer = nft_transfers.create!(
-        from_user: owner,
-        to_user: new_owner,
-        price_cents: price_cents,
-        transaction_hash: generate_transaction_hash,
-        transferred_at: Time.current
-      )
-      
-      # Update ownership
-      update!(
-        owner: new_owner,
-        last_sale_price_cents: price_cents > 0 ? price_cents : last_sale_price_cents,
-        transfer_count: transfer_count + 1
-      )
-      
-      # Execute blockchain transfer
-      transfer_on_blockchain(new_owner.wallet_address)
-      
-      # Pay royalties to creator
-      if price_cents > 0 && royalty_percentage > 0
-        pay_royalties(price_cents)
-      end
-      
-      transfer
-    end
+    NftTransferService.new(self).transfer_to(new_owner, price_cents)
   end
   
   # List for sale
@@ -115,23 +71,12 @@ class Nft < ApplicationRecord
   
   # Place bid
   def place_bid(bidder, amount_cents)
-    nft_bids.create!(
-      bidder: bidder,
-      amount_cents: amount_cents,
-      expires_at: 24.hours.from_now
-    )
+    NftBiddingService.new(self).place_bid(bidder, amount_cents)
   end
-  
+
   # Accept bid
   def accept_bid(bid)
-    return false unless bid.active?
-    
-    transfer_to(bid.bidder, bid.amount_cents)
-    
-    # Cancel other bids
-    nft_bids.active.where.not(id: bid.id).update_all(status: :cancelled)
-    
-    bid.update!(status: :accepted)
+    NftBiddingService.new(self).accept_bid(bid)
   end
   
   # Get metadata URI
@@ -146,10 +91,10 @@ class Nft < ApplicationRecord
   
   # Get rarity score
   def rarity_score
-    return metadata['rarity_score'] if metadata['rarity_score']
-    
-    # Calculate based on traits
-    calculate_rarity_score
+    cache_key = "nft_rarity:#{id}"
+    Rails.cache.fetch(cache_key, expires_in: 1.hour) do
+      metadata['rarity_score'] || calculate_rarity_score
+    end
   end
   
   # Verify authenticity

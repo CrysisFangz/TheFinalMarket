@@ -18,15 +18,11 @@ class Review < ApplicationRecord
     scope: [:reviewable_type, :reviewable_id],
     message: "can only review once"
   }
-  validate :cannot_review_own_item
-  validate :must_have_purchased_item, if: :item_review?
-  validate :must_have_transaction_with_seller, if: :seller_review?
-  validate :ensure_no_dispute_in_progress, if: :review_invitation
+  validate :validate_moderation_rules
 
   # Callbacks
-  after_create :update_reviewable_rating
-  after_create :award_points
-  after_create_commit :notify_owner
+  after_create :trigger_post_create_operations
+  after_create_commit :trigger_notification_operations
 
   # Scopes
   scope :for_items, -> { where(reviewable_type: 'Item') }
@@ -36,13 +32,11 @@ class Review < ApplicationRecord
   scope :by_rating, -> { order(rating: :desc) }
 
   def helpful!(user)
-    helpful_votes.create!(user: user)
-    increment!(:helpful_count)
+    ReviewManagementService.mark_helpful(self, user)
   end
 
   def unhelpful!(user)
-    helpful_votes.find_by(user: user)&.destroy
-    decrement!(:helpful_count)
+    ReviewManagementService.mark_unhelpful(self, user)
   end
 
   private
@@ -51,88 +45,96 @@ class Review < ApplicationRecord
     [:content]
   end
 
-  def cannot_review_own_item
-    if item_review? && reviewable.user_id == reviewer_id
-      errors.add(:base, "You cannot review your own item")
-    end
-  end
-
-  def must_have_purchased_item
-    unless OrderItem.exists?(item: reviewable, order: { user_id: reviewer_id })
-      errors.add(:base, "You must purchase this item before reviewing it")
-    end
-  end
-
-  def must_have_transaction_with_seller
-    if reviewable_type == 'User' && !Order.joins(:items)
-        .where(user_id: reviewer_id, items: { user_id: reviewable_id })
-        .exists?
-      errors.add(:base, "You must have completed a transaction with this seller to review them")
-    end
-  end
-
-  def update_reviewable_rating
-    avg_rating = Review.where(reviewable: reviewable).average(:rating) || 0
-    
-    if reviewable_type == 'User'
-      reviewable.update(seller_rating: avg_rating)
-    else
-      reviewable.update(rating: avg_rating)
-    end
-  end
-
-  def award_points
-    points = calculate_review_points
-    reviewer.increment!(:points, points)
-    
-    # Award points to the item/seller owner for receiving a review
-    if rating >= 4
-      owner_points = rating * 5 # More points for better ratings
-      reviewable.user.increment!(:points, owner_points)
-    end
-  end
-
-  def ensure_no_dispute_in_progress
-    if dispute&.active?
-      errors.add(:base, "cannot review while dispute is active")
-    end
-  end
-
-  def calculate_review_points
-    base_points = 10
-    points = base_points
-
-    # Bonus points for detailed reviews
-    points += 5 if content.length >= 100
-    points += 5 if content.length >= 200
-    points += 3 if pros.present?
-    points += 3 if cons.present?
-
-    # Bonus for adding first review
-    points += 10 unless Review.exists?(reviewable: reviewable)
-
-    # Time bonus for quick reviews after order completion
-    if order&.completed? && (Time.current - order.completed_at) <= 7.days
-      points += 5
-    end
-
-    points
-  end
-
-  def notify_owner
-    owner = reviewable_type == 'User' ? reviewable : reviewable.user
-    owner.notify(
-      actor: reviewer,
-      action: 'new_review',
-      notifiable: self
-    )
-  end
-
   def item_review?
     reviewable_type == 'Item'
   end
 
   def seller_review?
     reviewable_type == 'User'
+  end
+
+  def self.cached_find(id)
+    Rails.cache.fetch("review:#{id}", expires_in: 30.minutes) do
+      find_by(id: id)
+    end
+  end
+
+  def self.cached_for_reviewable(reviewable_type, reviewable_id)
+    Rails.cache.fetch("reviews:#{reviewable_type}:#{reviewable_id}", expires_in: 15.minutes) do
+      where(reviewable_type: reviewable_type, reviewable_id: reviewable_id).includes(:reviewer).to_a
+    end
+  end
+
+  def self.cached_helpful_count(review_id)
+    Rails.cache.fetch("review_helpful_count:#{review_id}", expires_in: 10.minutes) do
+      find(review_id).helpful_count
+    end
+  end
+
+  def presenter
+    @presenter ||= ReviewPresenter.new(self)
+  end
+
+  private
+
+  def validate_moderation_rules
+    ReviewModerationService.moderate_review(self)
+  end
+
+  def trigger_post_create_operations
+    ReviewRatingService.update_reviewable_rating(self)
+    ReviewRatingService.award_review_points(self)
+  end
+
+  def trigger_notification_operations
+    ReviewNotificationService.notify_owner(self)
+    ReviewNotificationService.notify_mentioned_users(self)
+  end
+
+  def clear_review_cache
+    ReviewManagementService.clear_review_cache(id)
+    ReviewRatingService.clear_rating_cache(reviewable_type, reviewable_id)
+    ReviewNotificationService.clear_notification_cache(id)
+    ReviewModerationService.clear_moderation_cache(id)
+
+    # Clear related caches
+    Rails.cache.delete("review:#{id}")
+    Rails.cache.delete("reviews:#{reviewable_type}:#{reviewable_id}")
+    Rails.cache.delete("review_helpful_count:#{id}")
+  end
+
+  def publish_created_event
+    EventPublisher.publish('review.created', {
+      review_id: id,
+      reviewer_id: reviewer_id,
+      reviewable_type: reviewable_type,
+      reviewable_id: reviewable_id,
+      rating: rating,
+      helpful_count: helpful_count,
+      created_at: created_at
+    })
+  end
+
+  def publish_updated_event
+    EventPublisher.publish('review.updated', {
+      review_id: id,
+      reviewer_id: reviewer_id,
+      reviewable_type: reviewable_type,
+      reviewable_id: reviewable_id,
+      rating: rating,
+      helpful_count: helpful_count,
+      updated_at: updated_at
+    })
+  end
+
+  def publish_destroyed_event
+    EventPublisher.publish('review.destroyed', {
+      review_id: id,
+      reviewer_id: reviewer_id,
+      reviewable_type: reviewable_type,
+      reviewable_id: reviewable_id,
+      rating: rating,
+      helpful_count: helpful_count
+    })
   end
 end

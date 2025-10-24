@@ -1,13 +1,16 @@
 class ExchangeRate < ApplicationRecord
+  include CircuitBreaker
+  include Retryable
+
   belongs_to :currency
-  
+
   validates :rate, presence: true, numericality: { greater_than: 0 }
   validates :source, presence: true
-  
+
   scope :recent, -> { order(created_at: :desc) }
   scope :for_currency, ->(currency) { where(currency: currency) }
   scope :today, -> { where('created_at >= ?', Date.current.beginning_of_day) }
-  
+
   # Sources for exchange rates
   enum source: {
     manual: 0,
@@ -16,53 +19,56 @@ class ExchangeRate < ApplicationRecord
     api_currencyapi: 3,
     api_exchangerate: 4
   }
-  
+
+  # Lifecycle callbacks
+  after_create :publish_created_event
+  after_update :publish_updated_event
+  after_destroy :publish_destroyed_event
+
   # Get the latest rate for a currency pair
   def self.latest_rate(from_currency, to_currency)
-    return 1.0 if from_currency.code == to_currency.code
-    
-    # Try to find recent rate (within last 24 hours)
-    rate_record = where(currency: to_currency)
-                   .where('created_at > ?', 24.hours.ago)
-                   .order(created_at: :desc)
-                   .first
-    
-    rate_record&.rate
+    RateLookupService.latest_rate(from_currency, to_currency)
   end
-  
+
   # Calculate cross rate between two currencies
   def self.cross_rate(from_currency, to_currency)
-    return 1.0 if from_currency.code == to_currency.code
-    
-    base_currency = Currency.base_currency
-    
-    # If one of them is base currency
-    if from_currency.is_base?
-      return to_currency.current_exchange_rate
-    elsif to_currency.is_base?
-      return 1.0 / from_currency.current_exchange_rate
-    end
-    
-    # Calculate cross rate through base currency
-    from_to_base = from_currency.current_exchange_rate
-    to_to_base = to_currency.current_exchange_rate
-    
-    return 1.0 unless from_to_base && to_to_base
-    
-    to_to_base / from_to_base
+    RateCalculationService.cross_rate(from_currency, to_currency)
   end
-  
+
   # Check if rate has changed significantly
   def significant_change?(threshold_percentage = 2)
-    previous_rate = currency.exchange_rates
-                           .where('created_at < ?', created_at)
-                           .order(created_at: :desc)
-                           .first
-    
-    return false unless previous_rate
-    
-    change_percentage = ((rate - previous_rate.rate).abs / previous_rate.rate * 100)
-    change_percentage >= threshold_percentage
+    RateAnalysisService.significant_change?(self, threshold_percentage)
+  end
+
+  private
+
+  def publish_created_event
+    EventPublisher.publish('exchange_rate.created', {
+      rate_id: id,
+      currency_id: currency_id,
+      rate: rate,
+      source: source,
+      created_at: created_at
+    })
+  end
+
+  def publish_updated_event
+    EventPublisher.publish('exchange_rate.updated', {
+      rate_id: id,
+      currency_id: currency_id,
+      rate: rate,
+      source: source,
+      significant_change: significant_change?,
+      updated_at: updated_at
+    })
+  end
+
+  def publish_destroyed_event
+    EventPublisher.publish('exchange_rate.destroyed', {
+      rate_id: id,
+      currency_id: currency_id,
+      rate: rate,
+      source: source
+    })
   end
 end
-

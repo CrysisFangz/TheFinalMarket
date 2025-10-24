@@ -4,9 +4,10 @@ class ProductImage < ApplicationRecord
   has_one_attached :thumbnail
 
   validates :image, presence: true
+  validates :thumbnail, allow_nil: true
   validate :acceptable_image
 
-  after_create :generate_thumbnail
+  after_create :schedule_thumbnail_generation
 
   # Position handling for ordering images
   acts_as_list scope: :product
@@ -26,26 +27,7 @@ class ProductImage < ApplicationRecord
     end
   end
 
-  def generate_thumbnail
-    return unless image.attached?
-
-    # Generate and attach thumbnail
-    thumbnail_path = image.blob.service.send(:path_for, image.key)
-    processed_thumbnail = MiniMagick::Image.open(thumbnail_path)
-    processed_thumbnail.resize "300x300>"
-    
-    # Create a temporary file for the processed thumbnail
-    temp_file = Tempfile.new(['thumbnail', '.jpg'])
-    processed_thumbnail.write(temp_file.path)
-    
-    # Attach the processed thumbnail
-    thumbnail.attach(
-      io: File.open(temp_file.path),
-      filename: "thumbnail_#{image.filename}",
-      content_type: 'image/jpeg'
-    )
-  ensure
-    temp_file&.close
-    temp_file&.unlink
+  def schedule_thumbnail_generation
+    GenerateThumbnailJob.perform_later(id)
   end
 end

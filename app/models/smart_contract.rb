@@ -5,7 +5,8 @@ class SmartContract < ApplicationRecord
   has_many :contract_executions, dependent: :destroy
   
   validates :contract_type, presence: true
-  validates :contract_address, presence: true
+  validates :contract_address, presence: true, uniqueness: true
+  validates :contract_code, presence: true, if: :draft?
   
   scope :active, -> { where(status: :active) }
   scope :by_type, ->(type) { where(contract_type: type) }
@@ -31,78 +32,58 @@ class SmartContract < ApplicationRecord
   
   # Deploy contract
   def deploy!
-    return false unless draft?
-    
-    # Deploy to blockchain
-    deployment = deploy_to_blockchain
-    
-    update!(
-      status: :deployed,
-      contract_address: deployment[:address],
-      deployment_hash: deployment[:tx_hash],
-      deployed_at: Time.current
-    )
+    service = SmartContractDeploymentService.new(self)
+    result = service.call
+    result.success?
   end
-  
+
+  def deploy_sync!
+    service = SmartContractDeploymentService.new(self)
+    result = service.call_sync
+    result.success? ? result.value : false
+  end
+
   # Activate contract
   def activate!
-    return false unless deployed?
-    
-    update!(status: :active, activated_at: Time.current)
+    service = SmartContractActivationService.new(self)
+    result = service.call
+    result.success?
   end
-  
+
   # Execute contract function
   def execute_function(function_name, params = {})
-    return false unless active?
-    
-    execution = contract_executions.create!(
-      function_name: function_name,
-      parameters: params,
-      status: :pending,
-      executed_at: Time.current
-    )
-    
-    # Execute on blockchain
-    result = execute_on_blockchain(function_name, params)
-    
-    execution.update!(
-      status: :completed,
-      result: result,
-      transaction_hash: result[:tx_hash],
-      gas_used: result[:gas_used]
-    )
-    
-    result
+    service = SmartContractExecutionService.new(self)
+    result = service.call(function_name, params)
+    result.success?
   end
-  
+
+  def execute_function_sync(function_name, params = {})
+    service = SmartContractExecutionService.new(self)
+    result = service.call_sync(function_name, params)
+    result.success? ? result.value : false
+  end
+
   # Escrow functions
   def deposit_to_escrow(amount_cents)
     execute_function('deposit', { amount: amount_cents })
   end
-  
+
   def release_escrow(recipient_address)
     execute_function('release', { to: recipient_address })
   end
-  
+
   def refund_escrow(sender_address)
     execute_function('refund', { to: sender_address })
   end
-  
+
   # Get contract balance
   def balance
-    query_blockchain('getBalance')
+    SmartContractQueryService.balance(self)
   end
-  
+
   # Get contract state
   def contract_state
-    {
-      address: contract_address,
-      status: status,
-      balance: balance,
-      executions: contract_executions.count,
-      deployed_at: deployed_at,
-      blockchain_url: blockchain_explorer_url
-    }
+    SmartContractQueryService.contract_state(self)
   end
   
   # Get blockchain explorer URL
@@ -113,31 +94,28 @@ class SmartContract < ApplicationRecord
   end
   
   private
-  
-  def deploy_to_blockchain
-    # This would deploy actual smart contract
-    # For now, return mock data
-    {
-      address: "0x#{SecureRandom.hex(20)}",
-      tx_hash: "0x#{SecureRandom.hex(32)}"
-    }
-  end
-  
-  def execute_on_blockchain(function_name, params)
-    # This would execute smart contract function
-    # For now, return mock data
-    {
-      success: true,
-      tx_hash: "0x#{SecureRandom.hex(32)}",
-      gas_used: rand(21000..100000),
-      result: { status: 'success' }
-    }
-  end
-  
-  def query_blockchain(function_name)
-    # This would query blockchain
-    # For now, return mock data
-    0
+
+  # Clear cache after state changes
+  after_update :clear_cache_if_needed
+
+  def clear_cache_if_needed
+    if saved_change_to_status? || saved_change_to_contract_address?
+      SmartContractQueryService.clear_cache(self)
+    end
   end
 end
 
+
+  # Log events for state changes
+  def log_event(event_type, data = {})
+    events.create!(
+      event_type: event_type,
+      data: data,
+      occurred_at: Time.current
+    )
+  end
+  # Indexes for scalability
+  index :contract_address, unique: true
+  index :status
+  index :contract_type
+  index :creator_id

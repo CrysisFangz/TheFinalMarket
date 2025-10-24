@@ -1,206 +1,77 @@
-# frozen_string_literal: true
-
-# Service for handling geolocation features
 class GeolocationService
-  EARTH_RADIUS_KM = 6371.0
-
-  def initialize(latitude, longitude)
-    @latitude = latitude.to_f
-    @longitude = longitude.to_f
-    validate_coordinates!
-  end
-
-  # Find nearby stores
-  def nearby_stores(radius_km: 10, limit: 10)
-    Store.where(
-      "earth_distance(ll_to_earth(?, ?), ll_to_earth(latitude, longitude)) <= ?",
-      @latitude, @longitude, radius_km * 1000
+  def self.record_event(user, event_type, latitude, longitude, device: nil, metadata: {})
+    event = GeolocationEvent.create!(
+      user: user,
+      mobile_device: device,
+      event_type: event_type,
+      latitude: latitude,
+      longitude: longitude,
+      accuracy: metadata[:accuracy],
+      altitude: metadata[:altitude],
+      speed: metadata[:speed],
+      heading: metadata[:heading],
+      recorded_at: Time.current,
+      event_data: metadata
     )
-    .select("*, earth_distance(ll_to_earth(#{@latitude}, #{@longitude}), ll_to_earth(latitude, longitude)) as distance")
-    .order('distance')
-    .limit(limit)
-    .map do |store|
-      {
-        id: store.id,
-        name: store.name,
-        address: store.address,
-        distance_km: (store.distance / 1000.0).round(2),
-        latitude: store.latitude,
-        longitude: store.longitude,
-        phone: store.phone,
-        hours: store.business_hours,
-        is_open: store.open_now?
-      }
+
+    # Check for nearby stores
+    nearby_stores = find_nearby_stores(latitude, longitude)
+    if nearby_stores.any?
+      event.update!(store_location: nearby_stores.first)
+    end
+
+    event
+  end
+
+  def self.find_nearby_stores(latitude, longitude, radius_km = 5)
+    Rails.cache.fetch("nearby_stores:#{latitude}:#{longitude}:#{radius_km}", expires_in: 1.hour) do
+      # Haversine formula to find nearby stores
+      # This is a simplified version - in production use PostGIS or similar
+      StoreLocation.where(
+        "ST_DWithin(
+          ST_MakePoint(?, ?),
+          ST_MakePoint(longitude, latitude),
+          ?
+        )",
+        longitude, latitude, radius_km * 1000
+      )
     end
   end
 
-  # Find local deals near user
-  def local_deals(radius_km: 5)
-    nearby_store_ids = nearby_stores(radius_km: radius_km).map { |s| s[:id] }
-    
-    Deal.active
-        .where(store_id: nearby_store_ids)
-        .includes(:product, :store)
-        .order(discount_percentage: :desc)
-        .limit(20)
-        .map do |deal|
-          {
-            id: deal.id,
-            product: deal.product.name,
-            original_price: deal.product.price,
-            deal_price: deal.discounted_price,
-            discount: deal.discount_percentage,
-            store: deal.store.name,
-            distance_km: calculate_distance(deal.store.latitude, deal.store.longitude),
-            expires_at: deal.expires_at,
-            image: deal.product.images.first&.url
-          }
-        end
-  end
+  def self.calculate_distance(lat1, lng1, lat2, lng2)
+    Rails.cache.fetch("distance:#{lat1}:#{lng1}:#{lat2}:#{lng2}", expires_in: 1.hour) do
+      # Haversine formula
+      rad_per_deg = Math::PI / 180
+      rkm = 6371 # Earth radius in kilometers
 
-  # Get delivery zones
-  def delivery_available?
-    DeliveryZone.where(
-      "ST_Contains(boundary, ST_SetSRID(ST_MakePoint(?, ?), 4326))",
-      @longitude, @latitude
-    ).exists?
-  end
+      dlat_rad = (lat2 - lat1) * rad_per_deg
+      dlon_rad = (lng2 - lng1) * rad_per_deg
 
-  def delivery_info
-    zone = DeliveryZone.where(
-      "ST_Contains(boundary, ST_SetSRID(ST_MakePoint(?, ?), 4326))",
-      @longitude, @latitude
-    ).first
+      lat1_rad = lat1 * rad_per_deg
+      lat2_rad = lat2 * rad_per_deg
 
-    return { available: false } unless zone
+      a = Math.sin(dlat_rad / 2)**2 + Math.cos(lat1_rad) * Math.cos(lat2_rad) * Math.sin(dlon_rad / 2)**2
+      c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 
-    {
-      available: true,
-      zone_name: zone.name,
-      delivery_fee: zone.delivery_fee,
-      minimum_order: zone.minimum_order,
-      estimated_time: zone.estimated_delivery_time,
-      free_delivery_threshold: zone.free_delivery_threshold
-    }
-  end
-
-  # Find products available nearby
-  def nearby_products(category: nil, limit: 50)
-    nearby_store_ids = nearby_stores.map { |s| s[:id] }
-    
-    products = Product.joins(:store_inventories)
-                     .where(store_inventories: { store_id: nearby_store_ids, quantity: 1.. })
-                     .distinct
-
-    products = products.where(category: category) if category
-    
-    products.limit(limit).map do |product|
-      available_stores = product.store_inventories
-                               .where(store_id: nearby_store_ids, quantity: 1..)
-                               .includes(:store)
-      
-      {
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        image: product.images.first&.url,
-        available_at: available_stores.map do |inv|
-          store = inv.store
-          {
-            store_name: store.name,
-            distance_km: calculate_distance(store.latitude, store.longitude),
-            stock: inv.quantity
-          }
-        end
-      }
+      rkm * c
     end
   end
 
-  # Get user's location context
-  def location_context
-    {
-      coordinates: { latitude: @latitude, longitude: @longitude },
-      nearby_stores_count: nearby_stores.count,
-      delivery_available: delivery_available?,
-      nearest_store: nearest_store,
-      local_deals_count: local_deals.count,
-      timezone: timezone,
-      weather: weather_info
-    }
-  end
-
-  # Calculate distance between two points
-  def calculate_distance(lat2, lon2)
-    lat1_rad = @latitude * Math::PI / 180
-    lat2_rad = lat2 * Math::PI / 180
-    delta_lat = (lat2 - @latitude) * Math::PI / 180
-    delta_lon = (lon2 - @longitude) * Math::PI / 180
-
-    a = Math.sin(delta_lat / 2) ** 2 +
-        Math.cos(lat1_rad) * Math.cos(lat2_rad) *
-        Math.sin(delta_lon / 2) ** 2
-    
-    c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-    
-    (EARTH_RADIUS_KM * c).round(2)
-  end
-
-  # Geocode address to coordinates
-  def self.geocode_address(address)
-    # Integration with geocoding service (Google Maps, Mapbox, etc.)
-    # For now, return mock data
-    
-    {
-      latitude: 40.7128,
-      longitude: -74.0060,
-      formatted_address: address,
-      city: 'New York',
-      state: 'NY',
-      country: 'USA',
-      postal_code: '10001'
-    }
-  end
-
-  # Reverse geocode coordinates to address
-  def reverse_geocode
-    # Integration with reverse geocoding service
-    
-    {
-      address: '123 Main St',
-      city: 'New York',
-      state: 'NY',
-      country: 'USA',
-      postal_code: '10001',
-      formatted_address: '123 Main St, New York, NY 10001'
-    }
-  end
-
-  private
-
-  def validate_coordinates!
-    unless @latitude.between?(-90, 90) && @longitude.between?(-180, 180)
-      raise ArgumentError, "Invalid coordinates: #{@latitude}, #{@longitude}"
+  def self.get_user_history(user, limit: 50)
+    Rails.cache.fetch("user:#{user.id}:location_history:#{limit}", expires_in: 30.minutes) do
+      GeolocationEvent.where(user: user)
+                     .order(recorded_at: :desc)
+                     .limit(limit)
     end
   end
 
-  def nearest_store
-    stores = nearby_stores(limit: 1)
-    stores.first
-  end
-
-  def timezone
-    # Determine timezone based on coordinates
-    # Integration with timezone API
-    'America/New_York'
-  end
-
-  def weather_info
-    # Integration with weather API
-    {
-      temperature: 72,
-      condition: 'Sunny',
-      humidity: 65
-    }
+  def self.get_popular_locations(limit: 10)
+    Rails.cache.fetch("popular_locations:#{limit}", expires_in: 1.hour) do
+      GeolocationEvent.select('latitude, longitude, COUNT(*) as visit_count')
+                     .where('recorded_at > ?', 30.days.ago)
+                     .group('latitude, longitude')
+                     .order('visit_count DESC')
+                     .limit(limit)
+    end
   end
 end
-

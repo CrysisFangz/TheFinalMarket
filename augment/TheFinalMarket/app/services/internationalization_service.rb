@@ -57,12 +57,14 @@ class InternationalizationService
     return [] unless zone
     
     zone.shipping_rates.active.map do |rate|
-      next unless rate.applies_to_weight?(weight_grams)
-      
+      next unless ShippingRateValidator.applies_to_weight?(rate, weight_grams)
+
+      cost_cents = ShippingCostCalculator.calculate(rate, weight_grams)
+
       {
         service_level: rate.service_level,
-        cost_cents: rate.calculate_cost(weight_grams),
-        delivery_estimate: rate.delivery_estimate,
+        cost_cents: cost_cents,
+        delivery_estimate: DeliveryEstimate.new(rate.min_delivery_days, rate.max_delivery_days).to_s,
         currency: country.currency
       }
     end.compact

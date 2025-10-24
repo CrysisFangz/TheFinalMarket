@@ -1,13 +1,27 @@
 class InventoryForecast < ApplicationRecord
+  include CircuitBreaker
+  include Retryable
+
   belongs_to :product
   belongs_to :seller, class_name: 'User'
-  
+
   validates :forecast_date, presence: true
   validates :forecast_method, presence: true
-  
+
+  # Enhanced scopes with caching
   scope :for_date_range, ->(start_date, end_date) { where(forecast_date: start_date..end_date) }
   scope :recent, -> { where('forecast_date >= ?', Date.current) }
   scope :by_method, ->(method) { where(forecast_method: method) }
+
+  # Caching
+  after_create :clear_forecast_cache
+  after_update :clear_forecast_cache
+  after_destroy :clear_forecast_cache
+
+  # Lifecycle callbacks
+  after_create :publish_created_event
+  after_update :publish_updated_event
+  after_destroy :publish_destroyed_event
   
   # Forecast methods
   enum forecast_method: {
@@ -20,120 +34,22 @@ class InventoryForecast < ApplicationRecord
   
   # Generate forecast
   def self.generate_for_product(product, days_ahead = 30, method = :moving_average)
-    seller = product.seller
-    historical_data = get_historical_sales(product, 90)
-    
-    forecasts = []
-    
-    (1..days_ahead).each do |day|
-      forecast_date = Date.current + day.days
-      
-      predicted_demand = case method
-      when :moving_average
-        calculate_moving_average(historical_data)
-      when :exponential_smoothing
-        calculate_exponential_smoothing(historical_data)
-      when :linear_regression
-        calculate_linear_regression(historical_data, day)
-      when :seasonal_decomposition
-        calculate_seasonal_forecast(historical_data, day)
-      else
-        calculate_moving_average(historical_data)
-      end
-      
-      forecast = create!(
-        product: product,
-        seller: seller,
-        forecast_date: forecast_date,
-        forecast_method: method,
-        predicted_demand: predicted_demand.round,
-        confidence_level: calculate_confidence(historical_data),
-        current_stock: product.stock_quantity,
-        recommended_reorder: calculate_reorder_quantity(product, predicted_demand),
-        stockout_risk: calculate_stockout_risk(product, predicted_demand)
-      )
-      
-      forecasts << forecast
-    end
-    
-    forecasts
+    InventoryForecastingService.generate_product_forecast(product, days_ahead, method)
   end
-  
+
   # Get reorder recommendations
   def self.reorder_recommendations(seller)
-    products = seller.products.where('stock_quantity < reorder_point')
-    
-    recommendations = []
-    
-    products.each do |product|
-      forecast = where(product: product)
-                .where('forecast_date >= ?', Date.current)
-                .order(:forecast_date)
-                .first
-      
-      next unless forecast
-      
-      recommendations << {
-        product: product,
-        current_stock: product.stock_quantity,
-        reorder_point: product.reorder_point,
-        predicted_demand: forecast.predicted_demand,
-        recommended_quantity: forecast.recommended_reorder,
-        urgency: calculate_urgency(product, forecast),
-        estimated_stockout_date: estimate_stockout_date(product, forecast)
-      }
-    end
-    
-    recommendations.sort_by { |r| -r[:urgency] }
+    InventoryPredictionService.get_reorder_recommendations(seller)
   end
-  
+
   # Get overstocked products
   def self.overstocked_products(seller)
-    products = seller.products
-    
-    overstocked = []
-    
-    products.each do |product|
-      next if product.stock_quantity.zero?
-      
-      forecast = where(product: product)
-                .where('forecast_date >= ?', Date.current)
-                .limit(30)
-                .sum(:predicted_demand)
-      
-      days_of_inventory = product.stock_quantity.to_f / (forecast / 30.0)
-      
-      if days_of_inventory > 90
-        overstocked << {
-          product: product,
-          current_stock: product.stock_quantity,
-          days_of_inventory: days_of_inventory.round,
-          predicted_30_day_demand: forecast,
-          recommendation: 'Consider promotion or discount'
-        }
-      end
-    end
-    
-    overstocked.sort_by { |o| -o[:days_of_inventory] }
+    InventoryPredictionService.get_overstocked_products(seller)
   end
-  
+
   # Accuracy metrics
   def self.forecast_accuracy(product, period = 30)
-    forecasts = where(product: product)
-               .where('forecast_date >= ? AND forecast_date < ?', period.days.ago, Date.current)
-    
-    return nil if forecasts.empty?
-    
-    errors = forecasts.map do |forecast|
-      actual = get_actual_sales(product, forecast.forecast_date)
-      (forecast.predicted_demand - actual).abs
-    end
-    
-    {
-      mean_absolute_error: errors.sum / errors.count.to_f,
-      mean_absolute_percentage_error: calculate_mape(forecasts),
-      forecast_bias: calculate_bias(forecasts)
-    }
+    InventoryPredictionService.get_forecast_accuracy(product, period)
   end
   
   private
@@ -312,8 +228,92 @@ class InventoryForecast < ApplicationRecord
       actual = get_actual_sales(forecast.product, forecast.forecast_date)
       forecast.predicted_demand - actual
     end
-    
+
     errors.sum / errors.count.to_f
+  end
+
+  def self.cached_find(id)
+    Rails.cache.fetch("inventory_forecast:#{id}", expires_in: 30.minutes) do
+      find_by(id: id)
+    end
+  end
+
+  def self.cached_for_product(product_id)
+    Rails.cache.fetch("inventory_forecasts:product:#{product_id}", expires_in: 15.minutes) do
+      where(product_id: product_id).includes(:product, :seller).order(:forecast_date).to_a
+    end
+  end
+
+  def self.cached_for_seller(seller_id)
+    Rails.cache.fetch("inventory_forecasts:seller:#{seller_id}", expires_in: 15.minutes) do
+      joins(:product).where(products: { user_id: seller_id }).includes(:product).order(:forecast_date).to_a
+    end
+  end
+
+  def self.get_demand_trends(product_id)
+    product = Product.find(product_id)
+    InventoryPredictionService.get_demand_trends(product)
+  end
+
+  def self.get_stockout_alerts(seller_id)
+    seller = User.find(seller_id)
+    InventoryPredictionService.get_stockout_alerts(seller)
+  end
+
+  def presenter
+    @presenter ||= InventoryForecastPresenter.new(self)
+  end
+
+  private
+
+  def clear_forecast_cache
+    InventoryForecastingService.clear_forecasting_cache(product_id)
+    InventoryPredictionService.clear_prediction_cache(seller_id)
+    InventoryCalculationService.clear_calculation_cache(product_id)
+
+    # Clear related caches
+    Rails.cache.delete("inventory_forecast:#{id}")
+    Rails.cache.delete("inventory_forecasts:product:#{product_id}")
+    Rails.cache.delete("inventory_forecasts:seller:#{seller_id}")
+  end
+
+  def publish_created_event
+    EventPublisher.publish('inventory_forecast.created', {
+      forecast_id: id,
+      product_id: product_id,
+      seller_id: seller_id,
+      forecast_date: forecast_date,
+      forecast_method: forecast_method,
+      predicted_demand: predicted_demand,
+      confidence_level: confidence_level,
+      stockout_risk: stockout_risk,
+      created_at: created_at
+    })
+  end
+
+  def publish_updated_event
+    EventPublisher.publish('inventory_forecast.updated', {
+      forecast_id: id,
+      product_id: product_id,
+      seller_id: seller_id,
+      forecast_date: forecast_date,
+      forecast_method: forecast_method,
+      predicted_demand: predicted_demand,
+      confidence_level: confidence_level,
+      stockout_risk: stockout_risk,
+      updated_at: updated_at
+    })
+  end
+
+  def publish_destroyed_event
+    EventPublisher.publish('inventory_forecast.destroyed', {
+      forecast_id: id,
+      product_id: product_id,
+      seller_id: seller_id,
+      forecast_date: forecast_date,
+      forecast_method: forecast_method,
+      predicted_demand: predicted_demand
+    })
   end
 end
 

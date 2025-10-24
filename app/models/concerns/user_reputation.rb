@@ -6,7 +6,8 @@ module UserReputation
   end
 
   def reputation_score
-    reputation_events.sum(:points)
+    # Use cached reputation_score for performance
+    self[:reputation_score] || reputation_events.sum(:points)
   end
 
   def reputation_level

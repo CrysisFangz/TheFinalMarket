@@ -63,6 +63,13 @@ class AddPerformanceIndexes < ActiveRecord::Migration[8.0]
     add_index :users, [:user_type, :seller_status] unless index_exists?(:users, [:user_type, :seller_status])
     add_index :users, :reputation_score unless index_exists?(:users, :reputation_score)
     
+    # === User Reputation Events Performance ===
+    # Optimize reputation event queries for sum and filtering
+    add_index :user_reputation_events, :user_id unless index_exists?(:user_reputation_events, :user_id)
+    add_index :user_reputation_events, :created_at unless index_exists?(:user_reputation_events, :created_at)
+    add_index :user_reputation_events, [:user_id, :created_at] unless index_exists?(:user_reputation_events, [:user_id, :created_at])
+    add_index :user_reputation_events, :points unless index_exists?(:user_reputation_events, :points)
+
     # === Full-text search optimization (PostgreSQL specific) ===
     # Uncomment if you need full-text search without Elasticsearch
     # execute <<-SQL

@@ -26,41 +26,45 @@ class QuestObjective < ApplicationRecord
     current_progress(user) >= target_value
   end
   
-  # Get current progress for user
+  # Get current progress for user with caching and optimization
   def current_progress(user)
-    case objective_type.to_sym
-    when :purchase_product
-      user.orders.completed.joins(:line_items)
-          .where(line_items: { product_id: product_id })
-          .count
-    when :purchase_from_category
-      user.orders.completed.joins(line_items: :product)
-          .where(products: { category_id: category_id })
-          .count
-    when :spend_amount
-      user.orders.completed
-          .where('created_at >= ?', shopping_quest.starts_at)
-          .sum(:total_cents) / 100.0
-    when :purchase_count
-      user.orders.completed
-          .where('created_at >= ?', shopping_quest.starts_at)
-          .count
-    when :review_product
-      user.reviews.where(product_id: product_id).count
-    when :share_product
-      # Implementation depends on your sharing system
-      0
-    when :refer_friend
-      user.referrals.where('created_at >= ?', shopping_quest.starts_at).count
-    when :visit_store
-      # Implementation depends on your analytics system
-      0
-    when :add_to_wishlist
-      user.wishlist_items.where(product_id: product_id).count
-    when :complete_profile
-      user.profile_completion_percentage
-    else
-      0
+    cache_key = "quest_objective:#{id}:progress:#{user.id}"
+
+    Rails.cache.fetch(cache_key, expires_in: 10.minutes) do
+      case objective_type.to_sym
+      when :purchase_product
+        user.orders.completed.joins(:line_items)
+            .where(line_items: { product_id: product_id })
+            .count
+      when :purchase_from_category
+        user.orders.completed.joins(line_items: :product)
+            .where(products: { category_id: category_id })
+            .count
+      when :spend_amount
+        user.orders.completed
+            .where('created_at >= ?', shopping_quest.starts_at)
+            .sum(:total_cents) / 100.0
+      when :purchase_count
+        user.orders.completed
+            .where('created_at >= ?', shopping_quest.starts_at)
+            .count
+      when :review_product
+        user.reviews.where(product_id: product_id).count
+      when :share_product
+        # Implementation depends on your sharing system
+        0
+      when :refer_friend
+        user.referrals.where('created_at >= ?', shopping_quest.starts_at).count
+      when :visit_store
+        # Implementation depends on your analytics system
+        0
+      when :add_to_wishlist
+        user.wishlist_items.where(product_id: product_id).count
+      when :complete_profile
+        user.profile_completion_percentage
+      else
+        0
+      end
     end
   end
   

@@ -110,6 +110,9 @@ class ChannelProduct < ApplicationRecord
     synchronization_service.synchronize_from_product(self, sync_context)
     reload # Ensure fresh data after sync
     self
+  rescue StandardError => e
+    Rails.logger.error("Error syncing channel product from product: #{e.message}")
+    raise
   end
 
   def sync_inventory!(inventory_data, update_context = {})
@@ -120,6 +123,9 @@ class ChannelProduct < ApplicationRecord
     )
     reload
     self
+  rescue StandardError => e
+    Rails.logger.error("Error syncing inventory: #{e.message}")
+    raise
   end
 
   def sync_pricing!(pricing_data, update_context = {})
@@ -130,17 +136,23 @@ class ChannelProduct < ApplicationRecord
     )
     reload
     self
+  rescue StandardError => e
+    Rails.logger.error("Error syncing pricing: #{e.message}")
+    raise
   end
 
   # 🚀 PERFORMANCE ANALYTICS
   # ML-powered performance insights with predictive analytics
 
   def performance_metrics(time_range = 30.days)
-    performance_service.calculate_performance_metrics(
-      self,
-      time_range: time_range,
-      context: { include_predictions: true }
-    )
+    cache_key = "channel_product_metrics:#{id}:#{time_range}"
+    Rails.cache.fetch(cache_key, expires_in: 1.hour) do
+      performance_service.calculate_performance_metrics(
+        self,
+        time_range: time_range,
+        context: { include_predictions: true }
+      )
+    end
   end
 
   def comparative_performance_metrics(comparison_periods = [7.days, 90.days])
@@ -230,18 +242,13 @@ class ChannelProduct < ApplicationRecord
   # Hyperscale bulk operations with intelligent batching
 
   def self.bulk_sync_from_products(product_ids, sync_context = {})
-    products = Product.where(id: product_ids).includes(:channel_products)
+    BulkSyncChannelProductsJob.perform_later(product_ids, sync_context)
 
-    results = products.flat_map do |product|
-      product.channel_products.map do |channel_product|
-        channel_product.sync_from_product!(sync_context)
-      end
-    end
-
+    # Return a placeholder result since it's async
     BulkSynchronizationResult.new(
-      total_processed: results.size,
-      successful: results.count(&:persisted?),
-      failed: results.count { |r| r.errors.any? }
+      total_processed: product_ids.size,
+      successful: 0,
+      failed: 0
     )
   end
 

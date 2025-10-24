@@ -5,15 +5,32 @@ class Wishlist < ApplicationRecord
 
   validates :user_id, presence: true
 
-  def add_product(product)
-    wishlist_items.find_or_create_by!(product: product)
-  end
-
-  def remove_product(product)
-    wishlist_items.find_by(product: product)&.destroy
-  end
-
+  # Optimized has_product? using direct query to avoid loading all products
   def has_product?(product)
-    products.include?(product)
+    wishlist_items.exists?(product: product)
+  end
+
+  # Delegate business logic to service layer
+  def add_product(product, options: {})
+    service = WishlistService.new
+    service.add_product(user, product, options: options)
+  end
+
+  def remove_product(product, options: {})
+    service = WishlistService.new
+    service.remove_product(user, product, options: options)
+  end
+
+  # Get items with caching
+  def items(options: {})
+    service = WishlistService.new
+    service.get_items(user, options: options)
+  end
+
+  private
+
+  # Ensure wishlist exists for user
+  def ensure_wishlist_exists
+    user.create_wishlist! unless user.wishlist
   end
 end

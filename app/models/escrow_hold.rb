@@ -1,4 +1,7 @@
 class EscrowHold < ApplicationRecord
+  include CircuitBreaker
+  include Retryable
+
   belongs_to :payment_account
   belongs_to :order, optional: true
 
@@ -14,44 +17,65 @@ class EscrowHold < ApplicationRecord
   validates :reason, presence: true
   validates :status, presence: true
 
-  before_create :set_expiry
-  after_create :schedule_expiry_check
-
   scope :expiring, -> { active.where('expires_at <= ?', 24.hours.from_now) }
 
-  def release!
-    return false unless active?
+  # Lifecycle callbacks
+  after_create :publish_created_event
+  after_update :publish_updated_event
+  after_destroy :publish_destroyed_event
 
-    transaction do
-      update!(status: :released, released_at: Time.current)
-      payment_account.release_funds(amount, reason)
+  def release!
+    with_retry do
+      EscrowManagementService.release!(self)
     end
-    true
   end
 
   def expire!
-    return false unless active?
-    return false unless expires_at <= Time.current
-
-    transaction do
-      update!(status: :expired)
-      payment_account.release_funds(amount, "Expired: #{reason}")
+    with_retry do
+      EscrowManagementService.expire!(self)
     end
-    true
+  end
+
+  def expiring_soon?
+    expires_at <= 24.hours.from_now
+  end
+
+  def days_until_expiry
+    (expires_at.to_date - Date.current).to_i
   end
 
   private
 
-  def set_expiry
-    self.expires_at ||= case reason
-    when /bond/i
-      30.days.from_now
-    else
-      7.days.from_now
-    end
+  def publish_created_event
+    EventPublisher.publish('escrow_hold.created', {
+      escrow_hold_id: id,
+      payment_account_id: payment_account_id,
+      order_id: order_id,
+      amount: amount,
+      reason: reason,
+      expires_at: expires_at,
+      created_at: created_at
+    })
   end
 
-  def schedule_expiry_check
-    CheckEscrowExpiryJob.set(wait_until: expires_at).perform_later(self)
+  def publish_updated_event
+    EventPublisher.publish('escrow_hold.updated', {
+      escrow_hold_id: id,
+      payment_account_id: payment_account_id,
+      order_id: order_id,
+      amount: amount,
+      status: status,
+      released_at: released_at,
+      updated_at: updated_at
+    })
+  end
+
+  def publish_destroyed_event
+    EventPublisher.publish('escrow_hold.destroyed', {
+      escrow_hold_id: id,
+      payment_account_id: payment_account_id,
+      order_id: order_id,
+      amount: amount
+    })
   end
 end

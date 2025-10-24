@@ -42,6 +42,17 @@
         "LOG_LEVEL": "error",
         "DISABLE_CONSOLE_OUTPUT": "true"
       }
+    },
+    "sequentialthinking": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
+      "alwaysAllow": [
+        "sequentialthinking"
+      ],
+      "timeout": 300
     }
   }
 }

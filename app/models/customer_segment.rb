@@ -1,14 +1,15 @@
 class CustomerSegment < ApplicationRecord
+  include CircuitBreaker
+
   has_many :customer_segment_members, dependent: :destroy
   has_many :users, through: :customer_segment_members
-  
+
   validates :name, presence: true
   validates :segment_type, presence: true
-  
+
   scope :active, -> { where(active: true) }
   scope :auto_segments, -> { where(auto_update: true) }
-  
-  # Segment types
+
   enum segment_type: {
     behavioral: 0,
     demographic: 1,
@@ -17,101 +18,53 @@ class CustomerSegment < ApplicationRecord
     engagement: 4,
     custom: 9
   }
-  
-  # Update segment members
+
+  after_create :publish_created_event
+  after_update :publish_updated_event
+  after_destroy :publish_destroyed_event
+
   def update_members!
-    case segment_type.to_sym
-    when :rfm
-      update_rfm_segment
-    when :value_based
-      update_value_segment
-    when :engagement
-      update_engagement_segment
-    when :behavioral
-      update_behavioral_segment
-    when :custom
-      update_custom_segment
+    with_retry do
+      CustomerSegmentService.new.update_members(self)
     end
-    
-    update!(last_updated_at: Time.current, member_count: users.count)
   end
-  
-  # Get segment statistics
+
   def statistics
-    {
-      member_count: users.count,
-      total_revenue: users.joins(:orders).where(orders: { status: 'completed' }).sum('orders.total_cents'),
-      avg_order_value: users.joins(:orders).where(orders: { status: 'completed' }).average('orders.total_cents'),
-      total_orders: users.joins(:orders).where(orders: { status: 'completed' }).count,
-      avg_orders_per_customer: users.joins(:orders).where(orders: { status: 'completed' }).count / [users.count, 1].max.to_f
-    }
+    Rails.cache.fetch("segment:#{id}:statistics", expires_in: 1.hour) do
+      {
+        member_count: users.count,
+        total_revenue: users.joins(:orders).where(orders: { status: 'completed' }).sum('orders.total_cents'),
+        avg_order_value: users.joins(:orders).where(orders: { status: 'completed' }).average('orders.total_cents'),
+        total_orders: users.joins(:orders).where(orders: { status: 'completed' }).count,
+        avg_orders_per_customer: users.joins(:orders).where(orders: { status: 'completed' }).count / [users.count, 1].max.to_f
+      }
+    end
   end
-  
+
   private
-  
-  def update_rfm_segment
-    # RFM: Recency, Frequency, Monetary
-    criteria = criteria_config
-    
-    user_ids = User.joins(:orders)
-                   .where(orders: { status: 'completed' })
-                   .group('users.id')
-                   .having('MAX(orders.created_at) > ?', criteria['recency_days'].days.ago)
-                   .having('COUNT(orders.id) >= ?', criteria['min_frequency'])
-                   .having('SUM(orders.total_cents) >= ?', criteria['min_monetary'])
-                   .pluck('users.id')
-    
-    sync_members(user_ids)
+
+  def publish_created_event
+    EventPublisher.publish('customer_segment.created', { segment_id: id, name: name })
   end
-  
-  def update_value_segment
-    criteria = criteria_config
-    
-    user_ids = User.joins(:orders)
-                   .where(orders: { status: 'completed' })
-                   .group('users.id')
-                   .having('SUM(orders.total_cents) >= ?', criteria['min_value'])
-                   .pluck('users.id')
-    
-    sync_members(user_ids)
+
+  def publish_updated_event
+    EventPublisher.publish('customer_segment.updated', { segment_id: id, name: name })
   end
-  
-  def update_engagement_segment
-    criteria = criteria_config
-    
-    user_ids = User.where('sign_in_count >= ?', criteria['min_logins'])
-                   .where('last_sign_in_at > ?', criteria['active_days'].days.ago)
-                   .pluck(:id)
-    
-    sync_members(user_ids)
+
+  def publish_destroyed_event
+    EventPublisher.publish('customer_segment.destroyed', { segment_id: id, name: name })
   end
-  
-  def update_behavioral_segment
-    # Custom behavioral logic based on criteria
-    user_ids = []
-    sync_members(user_ids)
-  end
-  
-  def update_custom_segment
-    # Execute custom SQL query if provided
-    if criteria_config['sql_query'].present?
-      user_ids = User.connection.select_values(criteria_config['sql_query'])
-      sync_members(user_ids)
+
+  def with_retry(max_retries: 3, &block)
+    retries = 0
+    begin
+      yield
+    rescue StandardError => e
+      retries += 1
+      retry if retries < max_retries
+      Rails.logger.error("Failed after #{retries} retries: #{e.message}")
+      raise e
     end
-  end
-  
-  def sync_members(user_ids)
-    # Remove users no longer in segment
-    customer_segment_members.where.not(user_id: user_ids).destroy_all
-    
-    # Add new users to segment
-    user_ids.each do |user_id|
-      customer_segment_members.find_or_create_by!(user_id: user_id)
-    end
-  end
-  
-  def criteria_config
-    criteria || {}
   end
 end
 

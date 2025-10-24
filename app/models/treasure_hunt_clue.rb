@@ -2,12 +2,12 @@ class TreasureHuntClue < ApplicationRecord
   belongs_to :treasure_hunt
   belongs_to :product, optional: true
   belongs_to :category, optional: true
-  
+
   validates :treasure_hunt, presence: true
   validates :clue_text, presence: true
   validates :clue_order, presence: true
   validates :clue_type, presence: true
-  
+
   enum clue_type: {
     product_based: 0,
     category_based: 1,
@@ -16,45 +16,28 @@ class TreasureHuntClue < ApplicationRecord
     image_based: 4,
     qr_code: 5
   }
-  
-  # Check if answer is correct
+
+  after_update :log_state_change
+
+  # Delegate business logic to services
   def correct_answer?(answer)
-    return false if answer.blank?
-    
-    case clue_type.to_sym
-    when :product_based
-      answer.to_i == product_id
-    when :category_based
-      answer.to_i == category_id
-    when :riddle, :location_based
-      normalize_answer(answer) == normalize_answer(correct_answer)
-    when :qr_code
-      answer == qr_code_value
-    else
-      false
-    end
+    TreasureHunt::ClueValidationService.new(self, answer).call.success?
   end
-  
-  # Get hint (if available)
+
   def get_hint(hint_level = 1)
-    hints = hint_text&.split('||') || []
-    hints[hint_level - 1]
+    service = TreasureHunt::HintService.new(self, hint_level)
+    result = service.call
+    result.success? ? result.data : nil
   end
-  
-  # Generate QR code for this clue
+
   def generate_qr_code!
-    return unless qr_code?
-    
-    require 'securerandom'
-    code = SecureRandom.hex(16)
-    update!(qr_code_value: code)
-    code
+    TreasureHunt::QRCodeService.new(self).call
   end
-  
+
   private
-  
-  def normalize_answer(text)
-    text.to_s.downcase.strip.gsub(/[^a-z0-9]/, '')
+
+  def log_state_change
+    Rails.logger.info("TreasureHuntClue state changed: id=#{id}, changes=#{changes}")
   end
 end
 

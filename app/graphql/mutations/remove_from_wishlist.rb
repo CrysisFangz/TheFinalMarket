@@ -12,12 +12,14 @@ module Mutations
     def resolve(product_id:)
       require_authentication!
 
-      wishlist_item = current_user.wishlist.wishlist_items.find_by(product_id: product_id)
+      product = Product.find(product_id)
+      service = WishlistService.new
+      result = service.remove_product(current_user, product)
 
-      if wishlist_item&.destroy
+      if result.success?
         { success: true, errors: [] }
       else
-        { success: false, errors: ["Wishlist item not found"] }
+        { success: false, errors: [result.failure.message] }
       end
     end
   end

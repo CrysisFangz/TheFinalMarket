@@ -1,7 +1,9 @@
-#Go to extentions, search for Kilocode: download. Then Make and account, you should get a pop up with an API key. Copy this, put it into the kilocode ext.
+#Go to extentions, search for Kilocode: download. Then Make and account, you should get a pop up with
+ an API key. Copy this, put it into the kilocode ext.
 #
 
-#Then pick Supernova for the model, and put reasoning to high, go to advanced settings, change temp to 0.25. 
+#Then pick Supernova for the model, and put reasoning to high, 
+go to advanced settings, change temp to 0.25. 
 #
 Go to experimental select all boxes.
 Go to promptss select improve code, And input this into box:

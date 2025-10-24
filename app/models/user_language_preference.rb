@@ -387,11 +387,17 @@ class UserLanguagePreference < ApplicationRecord
   # Supporting methods for advanced preference management
 
   def preferred_language_object
-    @preferred_language_object ||= SupportedLanguage.find_by(code: language_code)
+    return @preferred_language_object if defined?(@preferred_language_object)
+    @preferred_language_object = Rails.cache.fetch("preferred_language_#{language_code}", expires_in: 1.hour) do
+      SupportedLanguage.find_by(code: language_code)
+    end
   end
 
   def native_language_object
-    @native_language_object ||= SupportedLanguage.find_by(code: native_language_code)
+    return @native_language_object if defined?(@native_language_object)
+    @native_language_object = Rails.cache.fetch("native_language_#{native_language_code}", expires_in: 1.hour) do
+      SupportedLanguage.find_by(code: native_language_code)
+    end
   end
 
   def requires_translation?(target_language)
@@ -433,21 +439,30 @@ class UserLanguagePreference < ApplicationRecord
   end
 
   def trigger_language_preference_events
-    EventPublisher.publish(
-      event: :user_language_preference_updated,
-      data: preference_update_event_data,
-      channels: [:user_preferences, :internationalization, :analytics],
-      priority: :medium
-    )
-  end
+    begin
+      EventPublisher.publish(
+        event: :user_language_preference_updated,
+        data: preference_update_event_data,
+        channels: [:user_preferences, :internationalization, :analytics],
+        priority: :medium
+      )
+    rescue => e
+      Rails.logger.error("Failed to publish language preference event: #{e.message}")
+      # Optionally, retry or handle error
+    end
+  end</search>
 
   def broadcast_language_preference_changes
-    PreferenceChangeBroadcaster.broadcast(
-      preference: self,
-      change_type: :updated,
-      affected_systems: [:translation, :localization, :user_experience],
-      cultural_context: :preserved
-    )
+    begin
+      PreferenceChangeBroadcaster.broadcast(
+        preference: self,
+        change_type: :updated,
+        affected_systems: [:translation, :localization, :user_experience],
+        cultural_context: :preserved
+      )
+    rescue => e
+      Rails.logger.error("Failed to broadcast preference change: #{e.message}")
+    end
   end
 
   def preference_update_event_data
@@ -501,227 +516,5 @@ class UserLanguagePreference < ApplicationRecord
   end
 end
 
-# 🚀 SUPPORTING SERVICE CLASSES
-# Enterprise-grade services for language preference management
 
-class LanguageDetectionService
-  def self.execute(user_context:, detection_strategy:, cultural_intelligence:, geographic_signals:, user_behavior_patterns:)
-    # Advanced language detection implementation
-    'en' # Default implementation
-  end
-end
 
-class NativeLanguageDetectionService
-  def self.execute(user_context:, detection_strategy:, linguistic_patterns:, family_background:, education_history:)
-    # Native language detection implementation
-    'en' # Default implementation
-  end
-end
-
-class ProficiencyAssessmentService
-  def self.execute(user_context:, assessment_strategy:, baseline_evaluation:, cultural_context:, adaptive_benchmarking:)
-    # Proficiency assessment implementation
-    'intermediate' # Default implementation
-  end
-end
-
-class LanguagePreferenceUpdateService
-  def self.execute(current_preferences:, new_preferences:, update_context:, validation_strategy:, impact_analysis:, rollback_capability:)
-    # Preference update implementation
-    current_preferences
-  end
-end
-
-class TranslationOptimizationService
-  def self.execute(user_preference:, user_behavior_data:, optimization_strategy:, cultural_intelligence:, real_time_adaptation:)
-    # Translation optimization implementation
-  end
-end
-
-class CulturalContextOptimizationService
-  def self.execute(user_preference:, cultural_context:, optimization_strategy:, communication_style:, relationship_building:, conflict_prevention:)
-    # Cultural context optimization implementation
-  end
-end
-
-class CulturalCommunicationAnalysisService
-  def self.execute(user_preference:, communication_context:, analysis_strategy:, cultural_dimensions:, real_time_adaptation:, learning_capabilities:)
-    # Cultural communication analysis implementation
-  end
-end
-
-class CulturalAdaptationStrategyService
-  def self.execute(user_preference:, cultural_context:, strategy_generation:, adaptation_scope:, effectiveness_validation:, continuous_optimization:)
-    # Cultural adaptation strategy implementation
-  end
-end
-
-class RealTimePreferenceAdaptationService
-  def self.execute(user_preference:, user_behavior_signals:, adaptation_strategy:, cultural_context:, performance_optimization:, user_experience:)
-    # Real-time preference adaptation implementation
-  end
-end
-
-class LanguageUsagePatternMonitor
-  def self.execute(user_preference:, monitoring_context:, pattern_analysis:, cultural_context:, real_time_reporting:, adaptive_insights:)
-    # Language usage pattern monitoring implementation
-  end
-end
-
-class LanguageLearningRecommendationService
-  def self.execute(user_preference:, learning_context:, recommendation_strategy:, cultural_context:, effectiveness_tracking:, continuous_adaptation:)
-    # Language learning recommendation implementation
-  end
-end
-
-class TranslationQualityConfigurationService
-  def self.execute(user_preference:, quality_requirements:, configuration_strategy:, real_time_optimization:, cultural_context:, quality_assurance:)
-    # Translation quality configuration implementation
-  end
-end
-
-class TranslationQualityExpectationService
-  def self.execute(user_preference:, expectation_context:, expectation_management:, cultural_sensitivity:, user_satisfaction:, quality_improvement:)
-    # Translation quality expectation management implementation
-  end
-end
-
-class TranslationPerformanceOptimizationService
-  def self.execute(user_preference:, performance_context:, optimization_strategy:, real_time_adaptation:, cultural_context:, user_experience:)
-    # Translation performance optimization implementation
-  end
-end
-
-class CrossCulturalCommunicationService
-  def self.execute(user_preference:, communication_context:, feature_enablement:, relationship_building:, conflict_prevention:, cultural_bridge_building:)
-    # Cross-cultural communication implementation
-  end
-end
-
-class CulturalMediationService
-  def self.execute(user_preference:, mediation_context:, mediation_strategy:, relationship_preservation:, cultural_understanding:, resolution_effectiveness:)
-    # Cultural mediation implementation
-  end
-end
-
-class CulturalIntelligenceInsightsService
-  def self.execute(user_preference:, insight_context:, insight_generation:, cultural_dimensions:, real_time_analysis:, actionable_recommendations:)
-    # Cultural intelligence insights implementation
-  end
-end
-
-class PreferenceSynchronizationService
-  def self.execute(user_preference:, sync_context:, synchronization_strategy:, platform_coverage:, cultural_context:, real_time_sync:)
-    # Preference synchronization implementation
-  end
-end
-
-class SessionPreferenceConsistencyService
-  def self.execute(user_preference:, session_context:, consistency_strategy:, cultural_context:, user_experience:, performance_optimization:)
-    # Session preference consistency implementation
-  end
-end
-
-class PreferenceConflictResolutionService
-  def self.execute(user_preference:, conflict_context:, resolution_strategy:, cultural_sensitivity:, relationship_impact:, resolution_effectiveness:)
-    # Preference conflict resolution implementation
-  end
-end
-
-class LanguagePreferenceAnalyticsService
-  def self.execute(user_preference:, analytics_context:, analytics_strategy:, cultural_context:, real_time_reporting:, actionable_insights:)
-    # Language preference analytics implementation
-  end
-end
-
-class LanguageUsageEffectivenessService
-  def self.execute(user_preference:, effectiveness_context:, tracking_strategy:, cultural_context:, improvement_recommendations:, real_time_optimization:)
-    # Language usage effectiveness implementation
-  end
-end
-
-class PersonalizedLanguageInsightsService
-  def self.execute(user_preference:, insight_context:, insight_strategy:, cultural_context:, actionable_recommendations:, continuous_learning:)
-    # Personalized language insights implementation
-  end
-end
-
-class PreferenceIntegrityValidationService
-  def self.execute(user_preference:, validation_context:, validation_strategy:, real_time_verification:, consistency_assurance:, quality_standards:)
-    # Preference integrity validation implementation
-  end
-end
-
-class PreferenceBackupAndRestoreService
-  def self.execute(user_preference:, backup_context:, backup_strategy:, restoration_strategy:, cultural_context:, user_experience:)
-    # Preference backup and restore implementation
-  end
-end
-
-class HistoricalPreferenceArchivalService
-  def self.execute(user_preference:, archive_context:, archival_strategy:, cultural_context:, learning_insights:, compliance_requirements:)
-    # Historical preference archival implementation
-  end
-end
-
-class UserTranslationService
-  def initialize(user_preference)
-    @user_preference = user_preference
-  end
-
-  def translate_content(content, target_language = nil)
-    # User-specific translation implementation
-  end
-end
-
-class UserCulturalService
-  def initialize(user_preference)
-    @user_preference = user_preference
-  end
-
-  def apply_cultural_context(content, cultural_context = {})
-    # User-specific cultural context application implementation
-  end
-end
-
-class UserPreferenceOptimizationService
-  def initialize(user_preference)
-    @user_preference = user_preference
-  end
-
-  def optimize_for_user(user_behavior_data = {})
-    # User-specific preference optimization implementation
-  end
-end
-
-class EventPublisher
-  def self.publish(event:, data:, channels:, priority:)
-    # Event publishing implementation
-  end
-end
-
-class PreferenceChangeBroadcaster
-  def self.broadcast(preference:, change_type:, affected_systems:, cultural_context:)
-    # Preference change broadcasting implementation
-  end
-end
-
-# 🚀 DATABASE SCHEMA INFORMATION
-# This model uses the following database structure:
-#
-# create_table "user_language_preferences", force: :cascade do |t|
-#   t.bigint "user_id", null: false
-#   t.string "language_code", limit: 2, null: false
-#   t.string "native_language_code", limit: 2
-#   t.string "proficiency_level"
-#   t.boolean "auto_translation_enabled", default: true, null: false
-#   t.boolean "cultural_context_awareness", default: true, null: false
-#   t.boolean "real_time_adaptation", default: true, null: false
-#   t.string "translation_quality_preference", default: "standard"
-#   t.integer "preference_version", default: 0
-#   t.jsonb "preference_metadata", default: {}
-#   t.datetime "last_preference_update"
-#   t.timestamps
-#   t.index ["user_id"], name: "index_user_language_preferences_on_user_id", unique: true
-#   t.index ["language_code"], name: "index_user_language_preferences_on_language_code"
-# end

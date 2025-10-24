@@ -32,6 +32,7 @@ class WalletPass < ApplicationRecord
   }
   
   # Scopes
+  # Note: For optimal performance, ensure database indexes on status, expiry_date, and pass_type
   scope :active_passes, -> { where(status: :active).where('expiry_date IS NULL OR expiry_date > ?', Date.current) }
   scope :by_type, ->(type) { where(pass_type: type) }
   
@@ -40,32 +41,33 @@ class WalletPass < ApplicationRecord
     expiry_date.present? && expiry_date < Date.current
   end
   
-  # Redeem pass
+  # Redeem pass using service
   def redeem!
-    return false if redeemed? || expired?
-    
-    update!(
-      status: :redeemed,
-      redeemed_at: Time.current
-    )
+    service = WalletPassRedeemService.new(self)
+    if service.call
+      # TODO: Publish event for event sourcing or CQRS
+      true
+    else
+      errors.add(:base, service.errors.join(', '))
+      false
+    end
   end
-  
-  # Remove pass
+
+  # Remove pass using service
   def remove!
-    update!(status: :removed, removed_at: Time.current)
+    service = WalletPassRemoveService.new(self)
+    if service.call
+      # TODO: Publish event for event sourcing or CQRS
+      true
+    else
+      errors.add(:base, service.errors.join(', '))
+      false
+    end
   end
-  
-  # Get pass details
+
+  # Get pass details using presenter
   def details
-    {
-      pass_type: pass_type,
-      pass_name: pass_name,
-      barcode_value: barcode_value,
-      barcode_format: barcode_format,
-      expiry_date: expiry_date,
-      status: status,
-      data: pass_data
-    }
+    WalletPassPresenter.new(self).details
   end
 end
 

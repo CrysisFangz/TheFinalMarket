@@ -4,9 +4,19 @@ class SeasonalEvent < ApplicationRecord
   has_many :participants, through: :event_participations, source: :user
   has_many :event_rewards, dependent: :destroy
   
-  validates :name, presence: true
-  validates :event_type, presence: true
-  validates :status, presence: true
+  validates :name, presence: true, length: { maximum: 100 }
+  validates :event_type, presence: true, inclusion: { in: event_types.keys }
+  validates :status, presence: true, inclusion: { in: statuses.keys }
+  validates :starts_at, presence: true
+  validates :ends_at, presence: true
+  validate :ends_after_starts
+
+  private
+
+  def ends_after_starts
+    return unless starts_at && ends_at
+    errors.add(:ends_at, "must be after starts_at") if ends_at <= starts_at
+  end
   
   enum event_type: {
     holiday: 0,
@@ -28,142 +38,77 @@ class SeasonalEvent < ApplicationRecord
   scope :upcoming_events, -> { where(status: :upcoming).where('starts_at > ?', Time.current) }
   scope :by_type, ->(type) { where(event_type: type) }
   
-  # Start the event
-  def start!
-    update!(status: :active, started_at: Time.current)
-    notify_all_users
-  end
-  
-  # End the event
-  def end!
-    update!(status: :ended, ended_at: Time.current)
-    award_final_prizes
-  end
-  
-  # Join event
-  def join(user)
-    return false unless active?
-    return false if participants.include?(user)
-    
-    participation = event_participations.create!(
-      user: user,
-      joined_at: Time.current,
-      points: 0,
-      rank: 0
-    )
-    
-    participation
-  end
-  
   # Get user's participation
   def participation_for(user)
     event_participations.find_by(user: user)
   end
-  
-  # Award points to user
-  def award_points(user, points, reason = nil)
-    participation = participation_for(user)
-    return unless participation
-    
-    participation.increment!(:points, points)
-    update_leaderboard
-    
-    # Check for milestone rewards
-    check_milestone_rewards(user, participation.points)
-  end
-  
-  # Get leaderboard
-  def leaderboard(limit: 100)
-    event_participations
-      .order(points: :desc, joined_at: :asc)
-      .limit(limit)
-      .includes(:user)
-      .map.with_index(1) do |participation, index|
-        participation.update!(rank: index) if participation.rank != index
-        {
-          rank: index,
-          user: participation.user,
-          points: participation.points,
-          joined_at: participation.joined_at
-        }
-      end
-  end
-  
-  # Get user's rank
-  def user_rank(user)
-    participation = participation_for(user)
-    return nil unless participation
-    
-    event_participations.where('points > ?', participation.points).count + 1
-  end
-  
-  # Get statistics
-  def statistics
-    {
-      total_participants: participants.count,
-      total_points_awarded: event_participations.sum(:points),
-      average_points: event_participations.average(:points).to_f.round(2),
-      top_score: event_participations.maximum(:points),
-      challenges_completed: event_challenges.sum(:completion_count),
-      event_type: event_type,
-      days_remaining: days_remaining
-    }
-  end
-  
+
   # Get active challenges
   def active_challenges
     event_challenges.where(active: true)
   end
-  
+
   # Check if event is currently active
   def currently_active?
     active? && starts_at <= Time.current && ends_at >= Time.current
   end
-  
+
   # Days remaining
   def days_remaining
     return 0 unless currently_active?
     ((ends_at - Time.current) / 1.day).ceil
   end
-  
-  private
-  
-  def update_leaderboard
-    # Recalculate ranks
-    event_participations.order(points: :desc, joined_at: :asc).each.with_index(1) do |participation, index|
-      participation.update_column(:rank, index)
-    end
+
+  # Delegated methods to services
+  def start!
+    SeasonalEventLifecycleService.start_event(self)
+  rescue => e
+    Rails.logger.error("Failed to start event #{id}: #{e.message}")
+    false
+  end
+
+  def end!
+    SeasonalEventLifecycleService.end_event(self)
+  rescue => e
+    Rails.logger.error("Failed to end event #{id}: #{e.message}")
+    false
+  end
+
+  def join(user)
+    SeasonalEventLifecycleService.join_event(self, user)
+  rescue => e
+    Rails.logger.error("Failed to join event #{id} for user #{user.id}: #{e.message}")
+    false
+  end
+
+  def award_points(user, points, reason = nil)
+    SeasonalEventParticipationService.new(self).award_points(user, points, reason)
+  rescue => e
+    Rails.logger.error("Failed to award points for event #{id}, user #{user.id}: #{e.message}")
+    false
+  end
+
+  def leaderboard(limit: 100)
+    SeasonalEventLeaderboardService.new(self).leaderboard(limit: limit)
+  rescue => e
+    Rails.logger.error("Failed to get leaderboard for event #{id}: #{e.message}")
+    []
+  end
+
+  def user_rank(user)
+    SeasonalEventLeaderboardService.new(self).user_rank(user)
+  rescue => e
+    Rails.logger.error("Failed to get user rank for event #{id}, user #{user.id}: #{e.message}")
+    nil
+  end
+
+  def statistics
+    SeasonalEventPresenter.new(self).statistics
+  rescue => e
+    Rails.logger.error("Failed to get statistics for event #{id}: #{e.message}")
+    {}
   end
   
-  def check_milestone_rewards(user, points)
-    event_rewards.where(reward_type: :milestone)
-                 .where('threshold <= ?', points)
-                 .where.not(id: user.claimed_event_rewards.select(:event_reward_id))
-                 .each do |reward|
-      reward.award_to(user)
-    end
-  end
   
-  def award_final_prizes
-    # Award prizes to top performers
-    leaderboard(limit: 10).each do |entry|
-      reward = event_rewards.find_by(reward_type: :leaderboard, rank: entry[:rank])
-      reward&.award_to(entry[:user])
-    end
-  end
-  
-  def notify_all_users
-    # Send notification to all users about event start
-    User.find_each do |user|
-      Notification.create!(
-        recipient: user,
-        notifiable: self,
-        notification_type: 'seasonal_event_started',
-        title: "#{name} Has Started!",
-        message: description,
-        data: { event_type: event_type, ends_at: ends_at }
-      )
-    end
-  end
 end
 
