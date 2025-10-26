@@ -1,31 +1,116 @@
-<!-- app/views/admin/disputes/index.html.erb -->
-<h1>Disputes</h1>
+<main class="container mx-auto px-4 py-8">
+  <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+    <h1 class="text-3xl font-bold text-gray-900 mb-4 sm:mb-0 flex items-center">
+      <svg class="w-8 h-8 text-yellow-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+      </svg>
+      Disputes Management
+    </h1>
+    <div class="flex flex-col sm:flex-row gap-3">
+      <button class="inline-flex items-center px-4 py-2 border border-blue-300 rounded-md text-sm font-medium text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200" type="button">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z"/>
+        </svg>
+        Filter
+      </button>
+      <button class="inline-flex items-center px-4 py-2 border border-green-300 rounded-md text-sm font-medium text-green-700 bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200" type="button">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        Export
+      </button>
+    </div>
+  </header>
 
-<table class="table">
-  <thead>
-    <tr>
-      <th>Order ID</th>
-      <th>Buyer</th>
-      <th>Seller</th>
-      <th>Status</th>
-      <th>Moderator</th>
-      <th>Created At</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @disputes.each do |dispute| %>
-      <tr>
-        <td><%= link_to dispute.order_id, order_path(dispute.order) %></td>
-        <td><%= link_to dispute.buyer.username, admin_user_path(dispute.buyer) %></td>
-        <td><%= link_to dispute.seller.username, admin_user_path(dispute.seller) %></td>
-        <td><%= dispute.status.humanize %></td>
-        <td><%= dispute.moderator&.username || "Unassigned" %></td>
-        <td><%= l(dispute.created_at, format: :long) %></td>
-        <td><%= link_to "View", admin_dispute_path(dispute), class: "btn btn-sm btn-secondary" %></td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
+  <% if @disputes.any? %>
+    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200" role="table" aria-label="Disputes List">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Buyer</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Seller</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Moderator</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <% @disputes.each do |dispute| %>
+              <tr class="hover:bg-gray-50 transition-colors duration-200">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <%= link_to dispute.order_id, order_path(dispute.order), class: "text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200" %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10">
+                      <div class="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center">
+                        <span class="text-sm font-medium text-white"><%= dispute.buyer.username.first.upcase %></span>
+                      </div>
+                    </div>
+                    <div class="ml-4">
+                      <%= link_to dispute.buyer.username, admin_user_path(dispute.buyer), class: "text-blue-600 hover:text-blue-800 transition-colors duration-200" %>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10">
+                      <div class="h-10 w-10 rounded-full bg-green-500 flex items-center justify-center">
+                        <span class="text-sm font-medium text-white"><%= dispute.seller.username.first.upcase %></span>
+                      </div>
+                    </div>
+                    <div class="ml-4">
+                      <%= link_to dispute.seller.username, admin_user_path(dispute.seller), class: "text-blue-600 hover:text-blue-800 transition-colors duration-200" %>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= dispute.status == 'resolved' ? 'bg-green-100 text-green-800' : (dispute.status == 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800') %>">
+                    <%= dispute.status.humanize %>
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <%= dispute.moderator&.username || '<span class="text-gray-400">Unassigned</span>'.html_safe %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <%= l(dispute.created_at, format: :long) %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <div class="flex justify-end space-x-2">
+                    <%= link_to "View", admin_dispute_path(dispute), class: "inline-flex items-center px-3 py-1 border border-blue-300 rounded-md text-sm font-medium text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200" %>
+                    <%= link_to "Resolve", resolve_admin_dispute_path(dispute), class: "inline-flex items-center px-3 py-1 border border-green-300 rounded-md text-sm font-medium text-green-700 bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200" %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
-<%= paginate @disputes %>
+    <div class="flex justify-center mt-6">
+      <%= paginate @disputes, theme: 'twitter-bootstrap-4', nav_class: 'flex space-x-2' %>
+    </div>
+  <% else %>
+    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+      <div class="text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No Disputes Found</h3>
+        <p class="mt-1 text-sm text-gray-500">All disputes have been resolved or there are no active disputes.</p>
+        <div class="mt-6">
+          <button class="inline-flex items-center px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200" type="button">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+            Refresh
+          </button>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</main>

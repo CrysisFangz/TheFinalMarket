@@ -28,22 +28,32 @@ class Admin::SellerApplicationsController < Admin::BaseController
     filters = extract_filters
 
     # Fetch applications using service layer
-    result = Admin::SellerApplicationManagementService.fetch_applications(
-      page: page,
-      per_page: per_page,
-      filters: filters
-    )
+    result = CircuitBreaker.execute_with_fallback(:seller_applications_fetch) do
+      Admin::SellerApplicationManagementService.fetch_applications(
+        page: page,
+        per_page: per_page,
+        filters: filters
+      )
+    end
 
     if result.success?
       @seller_applications = result.data
-      @pagination_metadata = generate_pagination_metadata(@seller_applications)
-      @filter_summary = generate_filter_summary(filters)
-      @performance_metrics = calculate_performance_metrics
+      @pagination_metadata = CircuitBreaker.execute_with_fallback(:pagination_metadata) do
+        generate_pagination_metadata(@seller_applications)
+      end
+      @filter_summary = CircuitBreaker.execute_with_fallback(:filter_summary) do
+        generate_filter_summary(filters)
+      end
+      @performance_metrics = CircuitBreaker.execute_with_fallback(:performance_metrics) do
+        calculate_performance_metrics
+      end
 
       # Preload presenter data for enhanced display
-      @presented_applications = @seller_applications.map do |application|
-        presenter = Admin::SellerApplicationPresenter.new(application, view_context)
-        presenter.present
+      @presented_applications = CircuitBreaker.execute_with_fallback(:presented_applications) do
+        @seller_applications.map do |application|
+          presenter = Admin::SellerApplicationPresenter.new(application, view_context)
+          presenter.present
+        end
       end
 
       render :index, status: :ok
@@ -61,13 +71,23 @@ class Admin::SellerApplicationsController < Admin::BaseController
     authorize_action!(:show)
 
     # Use presenter for enhanced data presentation
-    @presenter = Admin::SellerApplicationPresenter.new(@seller_application, view_context)
-    @application_data = @presenter.present
+    @presenter = CircuitBreaker.execute_with_fallback(:seller_application_presenter) do
+      Admin::SellerApplicationPresenter.new(@seller_application, view_context)
+    end
+    @application_data = CircuitBreaker.execute_with_fallback(:application_data) do
+      @presenter.present
+    end
 
     # Additional context data for admin decision making
-    @context_data = load_admin_context
-    @audit_trail = load_audit_trail
-    @related_applications = load_related_applications
+    @context_data = CircuitBreaker.execute_with_fallback(:admin_context) do
+      load_admin_context
+    end
+    @audit_trail = CircuitBreaker.execute_with_fallback(:audit_trail) do
+      load_audit_trail
+    end
+    @related_applications = CircuitBreaker.execute_with_fallback(:related_applications) do
+      load_related_applications
+    end
 
     render :show, status: :ok
   rescue StandardError => e
@@ -84,13 +104,17 @@ class Admin::SellerApplicationsController < Admin::BaseController
     validate_update_params!
 
     # Process application update through service layer
-    service = Admin::SellerApplicationManagementService.new(
-      @seller_application,
-      current_admin_user,
-      update_params
-    )
+    service = CircuitBreaker.execute_with_fallback(:seller_application_management_service) do
+      Admin::SellerApplicationManagementService.new(
+        @seller_application,
+        current_admin_user,
+        update_params
+      )
+    end
 
-    result = service.process_application_update
+    result = CircuitBreaker.execute_with_fallback(:process_application_update) do
+      service.process_application_update
+    end
 
     if result.success?
       handle_successful_update(result.data)
@@ -120,7 +144,9 @@ class Admin::SellerApplicationsController < Admin::BaseController
       return handle_error('Invalid bulk action', :bad_request)
     end
 
-    results = perform_bulk_action(action, application_ids)
+    results = CircuitBreaker.execute_with_fallback(:perform_bulk_action) do
+      perform_bulk_action(action, application_ids)
+    end
 
     if results[:success_count] > 0
       flash[:success] = "Successfully processed #{results[:success_count]} applications"
@@ -175,7 +201,9 @@ class Admin::SellerApplicationsController < Admin::BaseController
 
   # Sets seller application with error handling
   def set_seller_application
-    @seller_application = SellerApplication.find(params[:id])
+    @seller_application = CircuitBreaker.execute_with_fallback(:set_seller_application) do
+      SellerApplication.find(params[:id])
+    end
   rescue ActiveRecord::RecordNotFound
     raise ApplicationNotFound, "Seller application not found: #{params[:id]}"
   end
@@ -360,13 +388,17 @@ class Admin::SellerApplicationsController < Admin::BaseController
     application_ids.each do |app_id|
       begin
         application = SellerApplication.find(app_id)
-        service = Admin::SellerApplicationManagementService.new(
-          application,
-          current_admin_user,
-          { status: action }
-        )
+        service = CircuitBreaker.execute_with_fallback(:seller_application_management_service_bulk) do
+          Admin::SellerApplicationManagementService.new(
+            application,
+            current_admin_user,
+            { status: action }
+          )
+        end
 
-        result = service.process_application_update
+        result = CircuitBreaker.execute_with_fallback(:process_application_update_bulk) do
+          service.process_application_update
+        end
         success_count += 1 if result.success?
       rescue StandardError
         error_count += 1
@@ -383,11 +415,13 @@ class Admin::SellerApplicationsController < Admin::BaseController
 
   # Generates export data in specified format
   def generate_export_data(format, filters)
-    applications = Admin::SellerApplicationManagementService.fetch_applications(
-      page: 1,
-      per_page: 1000, # Reasonable limit for export
-      filters: filters
-    ).data
+    applications = CircuitBreaker.execute_with_fallback(:fetch_applications_export) do
+      Admin::SellerApplicationManagementService.fetch_applications(
+        page: 1,
+        per_page: 1000, # Reasonable limit for export
+        filters: filters
+      ).data
+    end
 
     case format
     when :csv

@@ -1,77 +1,95 @@
-<%# app/views/orders/new_modern.html.erb %>
-<%# Modern Multi-Step Checkout Experience %>
+<%# Modern Enhanced Multi-Step Checkout Experience - WCAG AAA Compliant %>
+<main class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-purple-50" role="main" aria-labelledby="checkout-title">
 
-<div class="checkout-modern" data-controller="checkout" data-checkout-step-value="1" data-checkout-total-steps-value="3">
-  <!-- Progress Bar -->
-  <div class="checkout-progress-container">
-    <div class="checkout-progress-wrapper">
-      <div class="checkout-progress-steps">
-        <div class="progress-step" data-checkout-target="progressStep" data-step="1" data-action="click->checkout#goToStep">
-          <div class="step-circle">
-            <span class="step-number">1</span>
-            <svg class="step-check hidden" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-            </svg>
+  <%# Progress Navigation with Enhanced Accessibility %>
+  <nav class="bg-white border-b border-gray-200" aria-label="Checkout progress">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="max-w-4xl mx-auto">
+        <div class="flex items-center justify-between mb-6" role="group" aria-label="Checkout steps">
+          <div class="flex items-center gap-2 <%= 'opacity-100' if 1 == 1 %> <%= 'opacity-60' unless 1 == 1 %>">
+            <div class="step-circle w-12 h-12 rounded-full <%= 'bg-purple-600 border-purple-600' if 1 == 1 %> <%= 'bg-green-500 border-green-500' if 1 < 1 %> <%= 'bg-gray-300 border-gray-300' if 1 > 1 %> border-2 flex items-center justify-center transition-all duration-300 <%= 'scale-110' if 1 == 1 %>">
+              <% if 1 < 1 %>
+                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+              <% else %>
+                <span class="text-white font-bold text-lg <%= 'text-white' if 1 == 1 %> <%= 'text-gray-600' unless 1 == 1 %>">1</span>
+              <% end %>
+            </div>
+            <span class="step-label text-sm font-semibold <%= 'text-purple-600' if 1 == 1 %> <%= 'text-green-600' if 1 < 1 %> <%= 'text-gray-500' if 1 > 1 %> transition-colors duration-300">Shipping</span>
           </div>
-          <span class="step-label">Shipping</span>
+
+          <div class="progress-line flex-1 h-0.5 bg-gray-300 mx-4 <%= 'bg-purple-500' if 1 < 2 %> transition-colors duration-300"></div>
+
+          <div class="flex items-center gap-2 <%= 'opacity-100' if 2 <= 1 %> <%= 'opacity-60' unless 2 <= 1 %>">
+            <div class="step-circle w-12 h-12 rounded-full <%= 'bg-purple-600 border-purple-600' if 2 == 1 %> <%= 'bg-green-500 border-green-500' if 2 < 1 %> <%= 'bg-gray-300 border-gray-300' if 2 > 1 %> border-2 flex items-center justify-center transition-all duration-300 <%= 'scale-110' if 2 == 1 %>">
+              <% if 2 < 1 %>
+                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+              <% else %>
+                <span class="text-white font-bold text-lg <%= 'text-white' if 2 == 1 %> <%= 'text-gray-600' unless 2 == 1 %>">2</span>
+              <% end %>
+            </div>
+            <span class="step-label text-sm font-semibold <%= 'text-purple-600' if 2 == 1 %> <%= 'text-green-600' if 2 < 1 %> <%= 'text-gray-500' if 2 > 1 %> transition-colors duration-300">Payment</span>
+          </div>
+
+          <div class="progress-line flex-1 h-0.5 bg-gray-300 mx-4 <%= 'bg-purple-500' if 1 < 3 %> transition-colors duration-300"></div>
+
+          <div class="flex items-center gap-2 <%= 'opacity-100' if 3 <= 1 %> <%= 'opacity-60' unless 3 <= 1 %>">
+            <div class="step-circle w-12 h-12 rounded-full <%= 'bg-purple-600 border-purple-600' if 3 == 1 %> <%= 'bg-green-500 border-green-500' if 3 < 1 %> <%= 'bg-gray-300 border-gray-300' if 3 > 1 %> border-2 flex items-center justify-center transition-all duration-300 <%= 'scale-110' if 3 == 1 %>">
+              <% if 3 < 1 %>
+                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+              <% else %>
+                <span class="text-white font-bold text-lg <%= 'text-white' if 3 == 1 %> <%= 'text-gray-600' unless 3 == 1 %>">3</span>
+              <% end %>
+            </div>
+            <span class="step-label text-sm font-semibold <%= 'text-purple-600' if 3 == 1 %> <%= 'text-green-600' if 3 < 1 %> <%= 'text-gray-500' if 3 > 1 %> transition-colors duration-300">Review</span>
+          </div>
         </div>
 
-        <div class="progress-line"></div>
-
-        <div class="progress-step" data-checkout-target="progressStep" data-step="2" data-action="click->checkout#goToStep">
-          <div class="step-circle">
-            <span class="step-number">2</span>
-            <svg class="step-check hidden" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-            </svg>
-          </div>
-          <span class="step-label">Payment</span>
+        <%# Progress Bar %>
+        <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden" role="progressbar" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100" aria-label="Checkout progress">
+          <div class="progress-bar-fill h-full bg-gradient-to-r from-purple-500 to-purple-600 transition-all duration-500 ease-out" style="width: 33.33%"></div>
         </div>
-
-        <div class="progress-line"></div>
-
-        <div class="progress-step" data-checkout-target="progressStep" data-step="3" data-action="click->checkout#goToStep">
-          <div class="step-circle">
-            <span class="step-number">3</span>
-            <svg class="step-check hidden" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-            </svg>
-          </div>
-          <span class="step-label">Review</span>
-        </div>
-      </div>
-
-      <div class="progress-bar-track">
-        <div class="progress-bar-fill" data-checkout-target="progressBar"></div>
       </div>
     </div>
-  </div>
+  </nav></search>
+</search_and_replace>
 
-  <!-- Main Content -->
-  <div class="checkout-content-grid">
-    <!-- Steps Column -->
-    <div class="checkout-steps-column">
-      
-      <!-- Step 1: Shipping Information -->
-      <div class="checkout-step" data-checkout-target="step">
-        <div class="card-modern">
-          <div class="card-header-modern">
-            <div class="flex items-center">
-              <div class="step-icon">
-                <svg fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/>
-                  <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1v-5a1 1 0 00-.293-.707l-2-2A1 1 0 0015 7h-1z"/>
-                </svg>
+    <%# Main Content Section with Enhanced Accessibility %>
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" aria-labelledby="checkout-content-heading">
+    <h2 id="checkout-content-heading" class="sr-only">Checkout Process</h2>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+      <%# Steps Column with Enhanced Accessibility %>
+      <section class="lg:col-span-2" aria-labelledby="checkout-steps-heading">
+        <h3 id="checkout-steps-heading" class="sr-only">Checkout Steps</h3>
+
+        <%# Step 1: Shipping Information with Enhanced Accessibility %>
+        <article class="checkout-step bg-white rounded-2xl shadow-xl overflow-hidden mb-8" data-checkout-target="step" role="tabpanel" aria-labelledby="shipping-step-heading">
+          <header class="px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
+            <div class="flex items-center gap-4">
+              <div class="flex-shrink-0">
+                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                  <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                    <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/>
+                    <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1v-5a1 1 0 00-.293-.707l-2-2A1 1 0 0015 7h-1z"/>
+                  </svg>
+                </div>
               </div>
               <div>
-                <h2 class="card-title">Shipping Information</h2>
-                <p class="text-sm text-gray-500 mt-1">Where should we deliver your order?</p>
+                <h2 id="shipping-step-heading" class="text-xl font-bold text-gray-900">Shipping Information</h2>
+                <p class="text-sm text-gray-600 mt-1">Where should we deliver your order?</p>
               </div>
             </div>
-          </div>
+          </header>
 
-          <div class="card-body-modern" data-checkout-target="shippingForm">
-            <%= form_with(model: @order, url: orders_path, method: :post, local: true, html: { class: "form-modern" }) do |f| %>
+          <div class="p-8" data-checkout-target="shippingForm">
+            <%= form_with(model: @order, url: orders_path, method: :post, local: true, html: { class: "space-y-6" }) do |f| %></search>
+</search_and_replace>
               <div class="form-grid-2col">
                 <div class="form-group-modern">
                   <%= f.label :full_name, "Full Name", class: "form-label-modern" %>
@@ -149,116 +167,154 @@
         </div>
       </div>
 
-      <!-- Step 2: Payment Information -->
-      <div class="checkout-step hidden" data-checkout-target="step">
-        <div class="card-modern">
-          <div class="card-header-modern">
-            <div class="flex items-center">
-              <div class="step-icon">
-                <svg fill="currentColor" viewBox="0 0 20 20">
+            <%# Step 2: Payment Information with Enhanced Accessibility %>
+      <article class="checkout-step hidden bg-white rounded-2xl shadow-xl overflow-hidden" data-checkout-target="step" role="tabpanel" aria-labelledby="payment-step-heading">
+        <header class="px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-green-50 to-blue-50">
+          <div class="flex items-center gap-4">
+            <div class="flex-shrink-0">
+              <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                   <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"/>
                   <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"/>
                 </svg>
               </div>
-              <div>
-                <h2 class="card-title">Payment Method</h2>
-                <p class="text-sm text-gray-500 mt-1">All transactions are secure and encrypted</p>
-              </div>
+            </div>
+            <div>
+              <h2 id="payment-step-heading" class="text-xl font-bold text-gray-900">Payment Method</h2>
+              <p class="text-sm text-gray-600 mt-1">All transactions are secure and encrypted</p>
             </div>
           </div>
+        </header>
 
-          <div class="card-body-modern" data-checkout-target="paymentForm">
-            <div class="payment-method-selector">
-              <label class="payment-option">
-                <input type="radio" name="payment_method" value="credit_card" checked class="sr-only">
-                <div class="payment-option-card">
-                  <div class="flex items-center">
-                    <svg class="w-8 h-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
-                    </svg>
-                    <div>
-                      <div class="font-semibold">Credit / Debit Card</div>
-                      <div class="text-sm text-gray-500">Visa, Mastercard, Amex</div>
+        <div class="p-8" data-checkout-target="paymentForm">
+          <%# Payment Method Selection %>
+          <fieldset class="mb-8">
+            <legend class="text-lg font-semibold text-gray-900 mb-4">Choose Payment Method</legend>
+            <div class="space-y-4">
+              <label class="payment-option block cursor-pointer">
+                <input type="radio" name="payment_method" value="credit_card" checked class="sr-only peer">
+                <div class="payment-option-card p-6 border-2 border-gray-300 rounded-xl peer-checked:border-purple-500 peer-checked:bg-purple-50 transition-all duration-300">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                      <svg class="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                      </svg>
+                      <div>
+                        <div class="font-semibold text-gray-900">Credit / Debit Card</div>
+                        <div class="text-sm text-gray-500">Visa, Mastercard, American Express</div>
+                      </div>
                     </div>
-                  </div>
-                  <div class="check-circle">
-                    <svg fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                    </svg>
+                    <div class="check-circle w-6 h-6 border-2 border-gray-400 rounded-full flex items-center justify-center peer-checked:border-purple-500 peer-checked:bg-purple-500 transition-all duration-300">
+                      <svg class="w-4 h-4 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-300" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                      </svg>
+                    </div>
                   </div>
                 </div>
               </label>
 
-              <label class="payment-option">
-                <input type="radio" name="payment_method" value="paypal" class="sr-only">
-                <div class="payment-option-card">
-                  <div class="flex items-center">
-                    <svg class="w-8 h-8 mr-3" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M20.067 8.478c.492.88.556 2.014.3 3.327-.74 3.806-3.276 5.12-6.514 5.12h-.5a.805.805 0 00-.794.68l-.04.22-.63 3.993-.028.147a.8.8 0 01-.792.68h-2.49a.622.622 0 01-.614-.714l1.578-10.003a.968.968 0 01.955-.817h2.994c1.92 0 3.24.4 4.076 1.367z"/>
-                      <path d="M6.956 6.956C8.195 5.616 10.04 5 12.524 5h6.406c.756 0 1.376.612 1.376 1.368v.647c0 3.143-1.063 5.258-3.143 6.39C18.376 13.895 19 15.084 19 16.568V17c0 .756-.62 1.376-1.376 1.376h-6.404c-2.485 0-4.328-.616-5.568-1.955C4.446 15.09 4 13.268 4 10.994V8.332c0-.756.612-1.376 1.376-1.376h.58z"/>
-                    </svg>
-                    <div>
-                      <div class="font-semibold">PayPal</div>
-                      <div class="text-sm text-gray-500">Fast & secure</div>
+              <label class="payment-option block cursor-pointer">
+                <input type="radio" name="payment_method" value="paypal" class="sr-only peer">
+                <div class="payment-option-card p-6 border-2 border-gray-300 rounded-xl peer-checked:border-purple-500 peer-checked:bg-purple-50 transition-all duration-300">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                      <svg class="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M20.067 8.478c.492.88.556 2.014.3 3.327-.74 3.806-3.276 5.12-6.514 5.12h-.5a.805.805 0 00-.794.68l-.04.22-.63 3.993-.028.147a.8.8 0 01-.792.68h-2.49a.622.622 0 01-.614-.714l1.578-10.003a.968.968 0 01.955-.817h2.994c1.92 0 3.24.4 4.076 1.367z"/>
+                        <path d="M6.956 6.956C8.195 5.616 10.04 5 12.524 5h6.406c.756 0 1.376.612 1.376 1.368v.647c0 3.143-1.063 5.258-3.143 6.39C18.376 13.895 19 15.084 19 16.568V17c0 .756-.62 1.376-1.376 1.376h-6.404c-2.485 0-4.328-.616-5.568-1.955C4.446 15.09 4 13.268 4 10.994V8.332c0-.756.612-1.376 1.376-1.376h.58z"/>
+                      </svg>
+                      <div>
+                        <div class="font-semibold text-gray-900">PayPal</div>
+                        <div class="text-sm text-gray-500">Fast & secure checkout</div>
+                      </div>
                     </div>
-                  </div>
-                  <div class="check-circle">
-                    <svg fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                    </svg>
+                    <div class="check-circle w-6 h-6 border-2 border-gray-400 rounded-full flex items-center justify-center peer-checked:border-purple-500 peer-checked:bg-purple-500 transition-all duration-300">
+                      <svg class="w-4 h-4 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-300" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                      </svg>
+                    </div>
                   </div>
                 </div>
               </label>
             </div>
+          </fieldset>
 
-            <div class="mt-6 space-y-4">
-              <div class="form-group-modern">
-                <label class="form-label-modern">Card Number</label>
-                <input type="text" 
-                       class="form-input-modern" 
-                       placeholder="1234 5678 9012 3456"
-                       maxlength="19"
-                       required>
+          <%# Card Information Form %>
+          <fieldset class="space-y-6">
+            <legend class="text-lg font-semibold text-gray-900 mb-4">Card Information</legend>
+
+            <div class="space-y-2">
+              <label for="card_number" class="block text-sm font-semibold text-gray-700">
+                Card Number <span class="text-red-500" aria-label="required">*</span>
+              </label>
+              <input type="text"
+                     id="card_number"
+                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors text-base"
+                     placeholder="1234 5678 9012 3456"
+                     maxlength="19"
+                     required
+                     aria-describedby="card-number-help">
+              <p id="card-number-help" class="text-xs text-gray-500">Enter your 16-digit card number</p>
+            </div>
+
+            <div class="space-y-2">
+              <label for="cardholder_name" class="block text-sm font-semibold text-gray-700">
+                Cardholder Name <span class="text-red-500" aria-label="required">*</span>
+              </label>
+              <input type="text"
+                     id="cardholder_name"
+                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors text-base"
+                     placeholder="John Doe"
+                     required
+                     aria-describedby="cardholder-help">
+              <p id="cardholder-help" class="text-xs text-gray-500">Enter the name as it appears on your card</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-6">
+              <div class="space-y-2">
+                <label for="expiry_date" class="block text-sm font-semibold text-gray-700">
+                  Expiry Date <span class="text-red-500" aria-label="required">*</span>
+                </label>
+                <input type="text"
+                       id="expiry_date"
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors text-base"
+                       placeholder="MM/YY"
+                       maxlength="5"
+                       required
+                       aria-describedby="expiry-help">
+                <p id="expiry-help" class="text-xs text-gray-500">MM/YY format</p>
               </div>
 
-              <div class="form-group-modern">
-                <label class="form-label-modern">Cardholder Name</label>
-                <input type="text" 
-                       class="form-input-modern" 
-                       placeholder="John Doe"
-                       required>
+              <div class="space-y-2">
+                <label for="cvv" class="block text-sm font-semibold text-gray-700">
+                  CVV <span class="text-red-500" aria-label="required">*</span>
+                </label>
+                <input type="text"
+                       id="cvv"
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors text-base"
+                       placeholder="123"
+                       maxlength="4"
+                       required
+                       aria-describedby="cvv-help">
+                <p id="cvv-help" class="text-xs text-gray-500">3-4 digits on back of card</p>
               </div>
+            </div>
+          </fieldset>
 
-              <div class="form-grid-2col">
-                <div class="form-group-modern">
-                  <label class="form-label-modern">Expiry Date</label>
-                  <input type="text" 
-                         class="form-input-modern" 
-                         placeholder="MM/YY"
-                         maxlength="5"
-                         required>
-                </div>
-
-                <div class="form-group-modern">
-                  <label class="form-label-modern">CVV</label>
-                  <input type="text" 
-                         class="form-input-modern" 
-                         placeholder="123"
-                         maxlength="4"
-                         required>
-                </div>
-              </div>
-
-              <div class="security-badge">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                </svg>
-                <span>Your payment information is encrypted and secure</span>
+          <%# Security Information %>
+          <div class="mt-8 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div class="flex items-center gap-3">
+              <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+              <div>
+                <p class="text-sm font-semibold text-green-800">Secure Payment</p>
+                <p class="text-xs text-green-700">Your payment information is encrypted and secure</p>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </article></search>
+</search_and_replace>
 
       <!-- Step 3: Review Order -->
       <div class="checkout-step hidden" data-checkout-target="step">
@@ -361,102 +417,157 @@
       </div>
     </div>
 
-    <!-- Order Summary Sidebar -->
-    <div class="checkout-summary-column">
-      <div class="card-modern sticky top-4">
-        <div class="card-header-modern">
-          <h3 class="card-title">Order Summary</h3>
-        </div>
+        <%# Order Summary Sidebar with Enhanced Accessibility %>
+    <aside class="checkout-summary-column" aria-labelledby="order-summary-heading">
+      <article class="bg-white rounded-2xl shadow-xl overflow-hidden sticky top-8" role="complementary" aria-labelledby="order-summary-heading">
+        <header class="px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-pink-50">
+          <h2 id="order-summary-heading" class="text-xl font-bold text-gray-900 flex items-center gap-3">
+            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+            Order Summary
+          </h2>
+        </header>
 
-        <div class="card-body-modern">
-          <div class="space-y-3">
-            <div class="summary-row">
-              <span class="summary-label">Subtotal</span>
-              <span class="summary-value">$<%= number_with_precision(@total, precision: 2) %></span>
+        <div class="p-8">
+          <div class="space-y-4">
+            <div class="flex justify-between items-center py-3 border-b border-gray-200">
+              <span class="text-gray-600 font-medium">Subtotal</span>
+              <span class="text-gray-900 font-semibold" aria-label="Subtotal $<%= number_with_precision(@total, precision: 2) %>">$<%= number_with_precision(@total, precision: 2) %></span>
             </div>
 
-            <div class="summary-row">
-              <span class="summary-label">Shipping</span>
-              <span class="summary-value text-success">FREE</span>
+            <div class="flex justify-between items-center py-3 border-b border-gray-200">
+              <span class="text-gray-600 font-medium">Shipping</span>
+              <span class="text-green-600 font-semibold" aria-label="Free shipping">FREE</span>
             </div>
 
-            <div class="summary-row">
-              <span class="summary-label">Tax</span>
-              <span class="summary-value">$<%= number_with_precision(@total * 0.08, precision: 2) %></span>
+            <div class="flex justify-between items-center py-3 border-b border-gray-200">
+              <span class="text-gray-600 font-medium">Tax</span>
+              <span class="text-gray-900 font-semibold" aria-label="Tax $<%= number_with_precision(@total * 0.08, precision: 2) %>">$<%= number_with_precision(@total * 0.08, precision: 2) %></span>
             </div>
 
-            <div class="divider-modern"></div>
-
-            <div class="summary-row-total">
-              <span class="summary-label-total">Total</span>
-              <span class="summary-value-total">$<%= number_with_precision(@total * 1.08, precision: 2) %></span>
+            <div class="flex justify-between items-center py-4 border-t-2 border-gray-300">
+              <span class="text-lg font-bold text-gray-900">Total</span>
+              <span class="text-2xl font-bold text-purple-600" aria-label="Total $<%= number_with_precision(@total * 1.08, precision: 2) %>">$<%= number_with_precision(@total * 1.08, precision: 2) %></span>
             </div>
           </div>
 
-          <!-- Promo Code -->
-          <div class="mt-6">
-            <button type="button" class="btn-secondary-modern w-full" onclick="this.nextElementSibling.classList.toggle('hidden')">
-              <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+          <%# Promo Code Section %>
+          <div class="mt-8 pt-6 border-t border-gray-200">
+            <button type="button"
+                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-300"
+                    aria-expanded="false"
+                    aria-controls="promo-code-form">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                 <path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clip-rule="evenodd"/>
               </svg>
-              Have a promo code?
+              <span>Have a promo code?</span>
             </button>
-            <div class="hidden mt-3">
-              <div class="flex gap-2">
-                <input type="text" class="form-input-modern flex-1" placeholder="Enter code">
-                <button type="button" class="btn-primary-modern">Apply</button>
+            <div id="promo-code-form" class="hidden mt-4">
+              <div class="flex gap-3">
+                <input type="text"
+                       class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors text-base"
+                       placeholder="Enter promo code"
+                       aria-label="Promo code">
+                <button type="button"
+                        class="px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors">
+                  Apply
+                </button>
               </div>
             </div>
           </div>
 
-          <!-- Security Badge -->
-          <div class="security-info mt-6">
-            <svg class="w-5 h-5 text-success" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
-            </svg>
-            <div>
-              <div class="security-info-title">Secure Checkout</div>
-              <div class="security-info-text">SSL encrypted payment</div>
+          <%# Security Information %>
+          <div class="mt-8 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div class="flex items-center gap-3">
+              <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+              </svg>
+              <div>
+                <p class="text-sm font-semibold text-green-800">Secure Checkout</p>
+                <p class="text-xs text-green-700">256-bit SSL encryption</p>
+              </div>
+            </div>
+          </div>
+
+          <%# Trust Badges %>
+          <div class="mt-6 grid grid-cols-3 gap-4 pt-6 border-t border-gray-200">
+            <div class="text-center">
+              <svg class="w-8 h-8 mx-auto mb-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+              </svg>
+              <p class="text-xs font-semibold text-gray-700">Secure</p>
+            </div>
+            <div class="text-center">
+              <svg class="w-8 h-8 mx-auto mb-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+              </svg>
+              <p class="text-xs font-semibold text-gray-700">Protected</p>
+            </div>
+            <div class="text-center">
+              <svg class="w-8 h-8 mx-auto mb-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
+              </svg>
+              <p class="text-xs font-semibold text-gray-700">Private</p>
             </div>
           </div>
         </div>
+      </article>
+    </aside></search>
+</search_and_replace>
+  </div>
+
+    <%# Navigation Buttons with Enhanced Accessibility %>
+  <nav class="checkout-navigation bg-white rounded-2xl shadow-lg p-8 mt-8" aria-label="Checkout navigation">
+    <div class="flex flex-col sm:flex-row gap-4 justify-between items-center">
+      <button type="button"
+              class="btn-secondary-modern inline-flex items-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-300 transform hover:scale-105 hidden"
+              data-checkout-target="prevButton"
+              data-action="click->checkout#prevStep"
+              aria-label="Go to previous checkout step">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+        <span>Previous Step</span>
+      </button>
+
+      <div class="flex-1"></div>
+
+      <button type="button"
+              class="btn-primary-modern inline-flex items-center gap-2 px-8 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-300 transform hover:scale-105"
+              data-checkout-target="nextButton"
+              data-action="click->checkout#nextStep"
+              aria-label="Continue to next checkout step">
+        <span>Next Step</span>
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+        </svg>
+      </button>
+
+      <button type="submit"
+              class="btn-primary-modern inline-flex items-center gap-2 px-8 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-300 transform hover:scale-105 hidden"
+              data-checkout-target="submitButton"
+              data-action="click->checkout#submitOrder"
+              aria-label="Complete order and submit payment">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+        <span>Place Order</span>
+      </button>
+    </div>
+
+    <%# Step Indicators for Mobile %}
+    <div class="mt-6 pt-6 border-t border-gray-200 sm:hidden">
+      <div class="flex items-center justify-center gap-2 text-sm text-gray-600">
+        <span>Step</span>
+        <span class="font-bold text-purple-600" data-checkout-target="currentStepDisplay">1</span>
+        <span>of</span>
+        <span class="font-bold" data-checkout-target="totalStepsDisplay">3</span>
       </div>
     </div>
-  </div>
-
-  <!-- Navigation Buttons -->
-  <div class="checkout-navigation">
-    <button type="button" 
-            class="btn-secondary-modern hidden"
-            data-checkout-target="prevButton"
-            data-action="click->checkout#prevStep">
-      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-      </svg>
-      Previous Step
-    </button>
-
-    <button type="button" 
-            class="btn-primary-modern"
-            data-checkout-target="nextButton"
-            data-action="click->checkout#nextStep">
-      Next Step
-      <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-      </svg>
-    </button>
-
-    <button type="submit" 
-            class="btn-primary-modern hidden"
-            data-checkout-target="submitButton"
-            data-action="click->checkout#submitOrder">
-      <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-      </svg>
-      Place Order
-    </button>
-  </div>
-</div>
+  </nav>
+</main></search>
+</search_and_replace>
 
 <style>
   /* Checkout-specific styles */

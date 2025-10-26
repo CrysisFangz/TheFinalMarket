@@ -6,80 +6,106 @@ class Admin::UsersController < Admin::BaseController
 
   # Commands (Mutations) via Interactors
   def index
-    result = AdminUserIndexQuery.call(current_admin: current_admin, params: params)
-    @presenter = AdminUserIndexPresenter.new(result)
+    result = CircuitBreaker.execute_with_fallback(:admin_user_index) do
+      AdminUserIndexQuery.call(current_admin: current_admin, params: params)
+    end
+    @presenter = CircuitBreaker.execute_with_fallback(:admin_user_index_presenter) do
+      AdminUserIndexPresenter.new(result)
+    end
     render_presenter
   end
 
   def show
-    result = AdminUserShowQuery.call(user_id: params[:id])
-    @presenter = AdminUserShowPresenter.new(result)
+    result = CircuitBreaker.execute_with_fallback(:admin_user_show) do
+      AdminUserShowQuery.call(user_id: params[:id])
+    end
+    @presenter = CircuitBreaker.execute_with_fallback(:admin_user_show_presenter) do
+      AdminUserShowPresenter.new(result)
+    end
     render_presenter
   end
 
   def update
-    result = AdminUserUpdateInteractor.call(
-      user_id: params[:id],
-      admin: current_admin,
-      params: user_params,
-      request: request
-    )
+    result = CircuitBreaker.execute_with_fallback(:admin_user_update) do
+      AdminUserUpdateInteractor.call(
+        user_id: params[:id],
+        admin: current_admin,
+        params: user_params,
+        request: request
+      )
+    end
     handle_result(result, success_path: admin_user_path(result.user), error_view: :show)
   end
 
   def toggle_role
-    result = AdminUserRoleToggleInteractor.call(
-      user_id: params[:id],
-      admin: current_admin,
-      role: params[:role],
-      request: request
-    )
+    result = CircuitBreaker.execute_with_fallback(:admin_user_toggle_role) do
+      AdminUserRoleToggleInteractor.call(
+        user_id: params[:id],
+        admin: current_admin,
+        role: params[:role],
+        request: request
+      )
+    end
     handle_result(result, success_path: admin_user_path(result.user))
   end
 
   def suspend
-    result = AdminUserSuspendInteractor.call(
-      user_id: params[:id],
-      admin: current_admin,
-      reason: params[:reason],
-      request: request
-    )
+    result = CircuitBreaker.execute_with_fallback(:admin_user_suspend) do
+      AdminUserSuspendInteractor.call(
+        user_id: params[:id],
+        admin: current_admin,
+        reason: params[:reason],
+        request: request
+      )
+    end
     handle_result(result, success_path: admin_user_path(result.user))
   end
 
   def warn
-    result = AdminUserWarnInteractor.call(
-      user_id: params[:id],
-      admin: current_admin,
-      reason: params[:reason],
-      request: request
-    )
+    result = CircuitBreaker.execute_with_fallback(:admin_user_warn) do
+      AdminUserWarnInteractor.call(
+        user_id: params[:id],
+        admin: current_admin,
+        reason: params[:reason],
+        request: request
+      )
+    end
     handle_result(result, success_path: admin_user_path(result.user))
   end
 
   def verify_seller
-    result = AdminUserSellerVerifyInteractor.call(
-      user_id: params[:id],
-      admin: current_admin,
-      request: request
-    )
+    result = CircuitBreaker.execute_with_fallback(:admin_user_verify_seller) do
+      AdminUserSellerVerifyInteractor.call(
+        user_id: params[:id],
+        admin: current_admin,
+        request: request
+      )
+    end
     handle_result(result, success_path: admin_user_path(result.user))
   end
 
   def analytics
-    result = AdminUserAnalyticsQuery.call(admin: current_admin)
-    @presenter = AdminUserAnalyticsPresenter.new(result)
+    result = CircuitBreaker.execute_with_fallback(:admin_user_analytics) do
+      AdminUserAnalyticsQuery.call(admin: current_admin)
+    end
+    @presenter = CircuitBreaker.execute_with_fallback(:admin_user_analytics_presenter) do
+      AdminUserAnalyticsPresenter.new(result)
+    end
     respond_to do |format|
       format.html { render :analytics }
       format.json { render json: @presenter.to_json }
-      format.pdf { generate_user_analytics_pdf }
-      format.csv { generate_user_analytics_csv }
+      format.pdf { send_data UserAnalyticsPresenter.new(result).to_pdf, filename: "user-analytics.pdf" }
+      format.csv { send_data UserAnalyticsPresenter.new(result).to_csv, filename: "user-analytics.csv" }
     end
   end
 
   def analyze_behavior
-    result = AdminUserBehaviorAnalysisQuery.call(user_id: params[:id])
-    @presenter = AdminUserBehaviorPresenter.new(result)
+    result = CircuitBreaker.execute_with_fallback(:admin_user_behavior_analysis) do
+      AdminUserBehaviorAnalysisQuery.call(user_id: params[:id])
+    end
+    @presenter = CircuitBreaker.execute_with_fallback(:admin_user_behavior_presenter) do
+      AdminUserBehaviorPresenter.new(result)
+    end
     respond_to do |format|
       format.html { render :analyze_behavior }
       format.json { render json: @presenter.to_json }
@@ -88,22 +114,30 @@ class Admin::UsersController < Admin::BaseController
   end
 
   def assess_risk
-    result = AdminUserRiskAssessmentQuery.call(user_id: params[:id])
-    @presenter = AdminUserRiskPresenter.new(result)
+    result = CircuitBreaker.execute_with_fallback(:admin_user_risk_assessment) do
+      AdminUserRiskAssessmentQuery.call(user_id: params[:id])
+    end
+    @presenter = CircuitBreaker.execute_with_fallback(:admin_user_risk_presenter) do
+      AdminUserRiskPresenter.new(result)
+    end
     respond_to do |format|
       format.html { render :assess_risk }
       format.json { render json: @presenter.to_json }
-      format.pdf { generate_risk_assessment_pdf }
+      format.pdf { send_data UserRiskPresenter.new(result).to_pdf, filename: "user-risk-assessment.pdf" }
     end
   end
 
   def manage_compliance
-    result = AdminUserComplianceQuery.call(user_id: params[:id])
-    @presenter = AdminUserCompliancePresenter.new(result)
+    result = CircuitBreaker.execute_with_fallback(:admin_user_compliance) do
+      AdminUserComplianceQuery.call(user_id: params[:id])
+    end
+    @presenter = CircuitBreaker.execute_with_fallback(:admin_user_compliance_presenter) do
+      AdminUserCompliancePresenter.new(result)
+    end
     respond_to do |format|
       format.html { render :manage_compliance }
       format.json { render json: @presenter.to_json }
-      format.pdf { generate_compliance_report_pdf }
+      format.pdf { send_data UserCompliancePresenter.new(result).to_pdf, filename: "user-compliance-report.pdf" }
     end
   end
 
@@ -114,7 +148,9 @@ class Admin::UsersController < Admin::BaseController
       flash[:success] = "Operation completed successfully."
       redirect_to success_path
     else
-      @error_presenter = AdminUserErrorPresenter.new(result.errors)
+      @error_presenter = CircuitBreaker.execute_with_fallback(:admin_user_error_presenter) do
+         AdminUserErrorPresenter.new(result.errors)
+       end
       flash[:danger] = "Operation failed with suggestions."
       render error_view || :index
     end

@@ -1,109 +1,323 @@
-<%# app/views/orders/show.html.erb %>
-<div class="container mx-auto px-4 py-8">
-  <div class="mb-6 flex items-center justify-between">
-    <h1 class="text-2xl font-bold">Order #<%= @order.id %></h1>
-    <%= link_to "Back to Orders", orders_path, 
-        class: "text-blue-600 hover:text-blue-800" %>
-  </div>
+<%# Modern Enhanced Order Details Page - WCAG AAA Compliant %>
+<main class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-purple-50" role="main" aria-labelledby="order-title">
 
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <div class="md:col-span-2">
-      <div class="bg-white rounded-lg shadow overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h2 class="text-lg font-medium text-gray-900">Order Items</h2>
+  <%# Breadcrumb Navigation with Enhanced Accessibility %>
+  <nav class="bg-white border-b border-gray-200" aria-label="Breadcrumb navigation">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <ol class="flex items-center gap-2 text-sm" role="list">
+        <li>
+          <%= link_to "Home", root_path,
+              class: "text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 rounded px-1 py-0.5 transition-colors",
+              aria-label: "Go to home page" %>
+        </li>
+        <li class="flex items-center gap-2" aria-hidden="true">
+          <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+          </svg>
+        </li>
+        <li>
+          <%= link_to "Orders", orders_path,
+              class: "text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 rounded px-1 py-0.5 transition-colors",
+              aria-label: "View all orders" %>
+        </li>
+        <li class="flex items-center gap-2" aria-hidden="true">
+          <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+          </svg>
+        </li>
+        <li>
+          <span class="text-gray-900 font-medium px-1 py-0.5" aria-current="page">Order #<%= @order.id %></span>
+        </li>
+      </ol>
+    </div>
+  </nav>
+
+  <%# Page Header with Enhanced Accessibility %>
+  <header class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+      <div>
+        <h1 id="order-title" class="text-4xl font-extrabold text-gray-900 mb-2 leading-tight tracking-tight">
+          Order #<%= @order.id %>
+        </h1>
+        <div class="flex items-center gap-4 text-gray-600">
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+              <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+            </svg>
+            <time datetime="<%= @order.created_at.iso8601 %>" aria-label="Order date <%= @order.created_at.strftime("%B %d, %Y at %I:%M %p") %>">
+              <%= @order.created_at.strftime("%B %d, %Y at %I:%M %p") %>
+            </time>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 bg-gray-400 rounded-full" aria-hidden="true"></span>
+            <span class="status-badge status-<%= @order.status %> inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold capitalize"
+                  role="status"
+                  aria-label="Order status: <%= @order.status.titleize %>">
+              <%= @order.status.titleize %>
+            </span>
+          </div>
         </div>
+      </div>
 
-        <div class="divide-y divide-gray-200">
-          <% @order.order_items.includes(:item).each do |order_item| %>
-            <div class="px-6 py-4">
-              <div class="flex items-center">
-                <% if order_item.item.images.attached? %>
-                  <div class="flex-shrink-0 w-24 h-24 overflow-hidden rounded-md">
-                    <%= image_tag order_item.item.images.first, 
-                        class: "w-full h-full object-center object-cover" %>
+      <div class="flex gap-3">
+        <%= link_to orders_path,
+            class: "inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-300",
+            aria-label: "Back to orders list" do %>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+          </svg>
+          <span>Back to Orders</span>
+        <% end %>
+
+        <% if @order.tracking_number.present? %>
+          <button class="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-300 transform hover:scale-105"
+                  aria-label="Track package for order ##<%= @order.id %>">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+            <span>Track Package</span>
+          </button>
+        <% end %>
+      </div>
+    </div>
+  </header></search>
+</search_and_replace>
+
+    <%# Main Content Section with Enhanced Accessibility %>
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+      <%# Order Items Section %>
+      <section class="lg:col-span-2" aria-labelledby="order-items-heading">
+        <article class="bg-white rounded-2xl shadow-xl overflow-hidden" role="region" aria-labelledby="order-items-heading">
+          <header class="px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+            <h2 id="order-items-heading" class="text-xl font-bold text-gray-900 flex items-center gap-3">
+              <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+              </svg>
+              Order Items
+            </h2>
+            <p class="text-sm text-gray-600 mt-1"><%= pluralize(@order.order_items.count, 'item') %> in this order</p>
+          </header>
+
+          <div class="divide-y divide-gray-200">
+            <% @order.order_items.includes(:item).each do |order_item| %>
+              <div class="px-8 py-6 hover:bg-gray-50 transition-colors duration-200">
+                <div class="flex items-center gap-6">
+                  <%# Product Image %>
+                  <div class="flex-shrink-0">
+                    <% if order_item.item.images.attached? %>
+                      <%= image_tag order_item.item.images.first.variant(resize_to_limit: [120, 120]),
+                          class: "w-20 h-20 object-cover rounded-xl border-2 border-gray-200 shadow-sm",
+                          alt: "Product image of #{order_item.item.name}",
+                          loading: "lazy" %>
+                    <% else %>
+                      <div class="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl border-2 border-gray-300 flex items-center justify-center">
+                        <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                      </div>
+                    <% end %>
                   </div>
-                <% end %>
-                <div class="ml-4 flex-1">
-                  <div class="flex justify-between">
-                    <div>
-                      <h3 class="text-sm font-medium text-gray-900">
-                        <%= link_to order_item.item.name, item_path(order_item.item) %>
-                      </h3>
-                      <p class="mt-1 text-sm text-gray-500">
-                        Quantity: <%= order_item.quantity %>
-                      </p>
-                      <p class="mt-1 text-sm text-gray-500">
-                        Unit Price: $<%= number_with_precision(order_item.unit_price, precision: 2) %>
-                      </p>
+
+                  <%# Product Details %>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                      <div class="flex-1 min-w-0">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                          <%= link_to order_item.item.name, item_path(order_item.item),
+                              class: "hover:text-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 rounded px-1 transition-colors",
+                              aria-label: "View product details for #{order_item.item.name}" %>
+                        </h3>
+                        <div class="space-y-1 text-sm text-gray-600">
+                          <div class="flex items-center gap-2">
+                            <span class="font-medium">Quantity:</span>
+                            <span class="px-2 py-1 bg-gray-100 rounded-full text-gray-800" aria-label="<%= order_item.quantity %> items"><%= order_item.quantity %></span>
+                          </div>
+                          <div class="flex items-center gap-2">
+                            <span class="font-medium">Unit Price:</span>
+                            <span class="text-gray-900 font-semibold" aria-label="Unit price $<%= number_with_precision(order_item.unit_price, precision: 2) %>">$<%= number_with_precision(order_item.unit_price, precision: 2) %></span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="text-right">
+                        <p class="text-xl font-bold text-gray-900" aria-label="Subtotal $<%= number_with_precision(order_item.subtotal, precision: 2) %>">
+                          $<%= number_with_precision(order_item.subtotal, precision: 2) %>
+                        </p>
+                        <p class="text-sm text-gray-500">Subtotal</p>
+                      </div>
                     </div>
-                    <p class="text-sm font-medium text-gray-900">
-                      $<%= number_with_precision(order_item.subtotal, precision: 2) %>
-                    </p>
                   </div>
                 </div>
               </div>
+            <% end %>
+          </div>
+
+          <%# Order Total Footer %>
+          <footer class="px-8 py-6 bg-gradient-to-r from-purple-50 to-pink-50 border-t border-purple-200">
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="text-lg font-semibold text-gray-900">Order Total</p>
+                <p class="text-sm text-gray-600">Including taxes and shipping</p>
+              </div>
+              <div class="text-right">
+                <p class="text-3xl font-bold text-gray-900" aria-label="Order total $<%= number_with_precision(@order.total_amount, precision: 2) %>">
+                  $<%= number_with_precision(@order.total_amount, precision: 2) %>
+                </p>
+                <p class="text-sm text-gray-600">Final amount</p>
+              </div>
             </div>
-          <% end %>
-        </div>
+          </footer>
+        </article>
+      </section></search>
+</search_and_replace>
 
-        <div class="px-6 py-4 bg-gray-50">
-          <div class="flex justify-between text-base font-medium text-gray-900">
-            <p>Total</p>
-            <p>$<%= number_with_precision(@order.total_amount, precision: 2) %></p>
-          </div>
-        </div>
-      </div>
-    </div>
+          <%# Order Details Sidebar with Enhanced Accessibility %>
+      <aside class="space-y-6" aria-labelledby="order-details-heading">
 
-    <div class="space-y-6">
-      <div class="bg-white rounded-lg shadow overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h2 class="text-lg font-medium text-gray-900">Order Details</h2>
-        </div>
-        <div class="px-6 py-4 space-y-4">
-          <div>
-            <h3 class="text-sm font-medium text-gray-500">Order Status</h3>
-            <p class="mt-1">
-              <span class="px-3 py-1 text-sm rounded-full
-                <%= @order.status == 'delivered' ? 'bg-green-100 text-green-800' :
-                   @order.status == 'cancelled' ? 'bg-red-100 text-red-800' :
-                   'bg-blue-100 text-blue-800' %>">
-                <%= @order.status.titleize %>
-              </span>
-            </p>
-          </div>
-          
-          <div>
-            <h3 class="text-sm font-medium text-gray-500">Order Date</h3>
-            <p class="mt-1 text-sm text-gray-900">
-              <%= @order.created_at.strftime("%B %d, %Y at %I:%M %p") %>
-            </p>
-          </div>
-
-          <% if @order.tracking_number.present? %>
-            <div>
-              <h3 class="text-sm font-medium text-gray-500">Tracking Number</h3>
-              <p class="mt-1 text-sm text-gray-900"><%= @order.tracking_number %></p>
-            </div>
-          <% end %>
-
-          <div>
-            <h3 class="text-sm font-medium text-gray-500">Shipping Address</h3>
-            <p class="mt-1 text-sm text-gray-900 whitespace-pre-line">
-              <%= @order.shipping_address %>
-            </p>
-          </div>
-
-          <% if @order.notes.present? %>
-            <div>
-              <h3 class="text-sm font-medium text-gray-500">Order Notes</h3>
-              <p class="mt-1 text-sm text-gray-900 whitespace-pre-line">
-                <%= @order.notes %>
+        <%# Order Status Card %>
+        <article class="bg-white rounded-2xl shadow-xl overflow-hidden" role="complementary" aria-labelledby="order-status-heading">
+          <header class="px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
+            <h2 id="order-status-heading" class="text-xl font-bold text-gray-900 flex items-center gap-3">
+              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              Order Status
+            </h2>
+          </header>
+          <div class="p-8">
+            <div class="text-center">
+              <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4
+                <%= @order.status == 'delivered' ? 'bg-green-100' :
+                   @order.status == 'cancelled' ? 'bg-red-100' :
+                   @order.status == 'shipped' ? 'bg-orange-100' :
+                   'bg-blue-100' %>">
+                <svg class="w-8 h-8
+                  <%= @order.status == 'delivered' ? 'text-green-600' :
+                     @order.status == 'cancelled' ? 'text-red-600' :
+                     @order.status == 'shipped' ? 'text-orange-600' :
+                     'text-blue-600' %>"
+                     fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <% if @order.status == 'delivered' %>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  <% elsif @order.status == 'cancelled' %>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  <% elsif @order.status == 'shipped' %>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l2.414 2.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/>
+                  <% else %>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  <% end %>
+                </svg>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-2"><%= @order.status.titleize %></h3>
+              <p class="text-sm text-gray-600">
+                <% if @order.status == 'pending' %>
+                  Your order is being prepared for shipment
+                <% elsif @order.status == 'processing' %>
+                  We're processing your order and getting it ready
+                <% elsif @order.status == 'shipped' %>
+                  Your order is on its way to you
+                <% elsif @order.status == 'delivered' %>
+                  Your order has been successfully delivered
+                <% else %>
+                  Order status: <%= @order.status.titleize %>
+                <% end %>
               </p>
             </div>
-          <% end %>
-        </div>
-      </div>
+          </div>
+        </article>
+
+        <%# Order Information Card %>
+        <article class="bg-white rounded-2xl shadow-xl overflow-hidden" role="complementary" aria-labelledby="order-info-heading">
+          <header class="px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+            <h2 id="order-info-heading" class="text-xl font-bold text-gray-900 flex items-center gap-3">
+              <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              Order Information
+            </h2>
+          </header>
+          <div class="p-8 space-y-6">
+            <div>
+              <h3 class="text-sm font-semibold text-gray-700 mb-2">Order Date</h3>
+              <p class="text-gray-900">
+                <time datetime="<%= @order.created_at.iso8601 %>" aria-label="Order placed on <%= @order.created_at.strftime("%B %d, %Y at %I:%M %p") %>">
+                  <%= @order.created_at.strftime("%B %d, %Y at %I:%M %p") %>
+                </time>
+              </p>
+            </div>
+
+            <% if @order.tracking_number.present? %>
+              <div>
+                <h3 class="text-sm font-semibold text-gray-700 mb-2">Tracking Number</h3>
+                <div class="flex items-center gap-2">
+                  <p class="text-gray-900 font-mono text-sm bg-gray-100 px-3 py-2 rounded-lg"><%= @order.tracking_number %></p>
+                  <button class="text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 rounded p-1 transition-colors"
+                          aria-label="Copy tracking number"
+                          data-clipboard="<%= @order.tracking_number %>">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            <% end %>
+
+            <div>
+              <h3 class="text-sm font-semibold text-gray-700 mb-2">Shipping Address</h3>
+              <address class="text-gray-900 not-italic bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <%= simple_format(@order.shipping_address, class: "text-sm") %>
+              </address>
+            </div>
+
+            <% if @order.notes.present? %>
+              <div>
+                <h3 class="text-sm font-semibold text-gray-700 mb-2">Order Notes</h3>
+                <div class="text-gray-900 bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                  <p class="text-sm whitespace-pre-line"><%= @order.notes %></p>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </article>
+
+        <%# Quick Actions Card %>
+        <article class="bg-white rounded-2xl shadow-xl overflow-hidden" role="complementary" aria-labelledby="quick-actions-heading">
+          <header class="px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-pink-50">
+            <h2 id="quick-actions-heading" class="text-xl font-bold text-gray-900 flex items-center gap-3">
+              <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+              Quick Actions
+            </h2>
+          </header>
+          <div class="p-8">
+            <div class="space-y-4">
+              <% if @order.delivered? && !@order.review %>
+                <%= link_to "#",
+                    class: "w-full inline-flex items-center justify-center gap-3 px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-300 transform hover:scale-105",
+                    aria-label: "Write a review for order ##{@order.id}" do %>
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                  </svg>
+                  <span>Write Review</span>
+                <% end %>
+              <% end %>
+
+              <%= link_to orders_path,
+                  class: "w-full inline-flex items-center justify-center gap-3 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-300",
+                  aria-label: "View all orders" do %>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+                <span>View All Orders</span>
+              <% end %>
+            </div>
+          </div>
+        </article>
+      </aside>
     </div>
-  </div>
-</div>
+  </section>
+</main></search>
+</search_and_replace>

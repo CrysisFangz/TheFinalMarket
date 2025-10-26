@@ -1,28 +1,27 @@
+/**
+ * Prime Mandate Search Components - Tailwind CSS Optimized
+ *
+ * Search form styling using Tailwind CSS utilities and Prime Mandate design tokens.
+ * Optimized for performance, accessibility, and mobile-first responsive design.
+ */
+
+/* Use Tailwind CSS utilities instead of custom CSS */
 .search-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+  @apply max-w-7xl mx-auto px-5 py-5;
 }
 
 .search-form {
-  margin-bottom: 30px;
+  @apply mb-8;
 }
 
 .search-input-group {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  padding: 20px;
+  @apply bg-white rounded-xl shadow-lg p-5 border border-gray-200;
 }
 
 .search-input {
-  width: 100%;
-  padding: 12px;
-  font-size: 1.1em;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  margin-bottom: 20px;
-}
+  @apply w-full px-3 py-3 text-lg border-2 border-gray-200 rounded-lg mb-5 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none;
+}</search>
+</search_and_replace>
 
 .filters-container {
   display: grid;

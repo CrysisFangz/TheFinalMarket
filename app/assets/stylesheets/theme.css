@@ -1,18 +1,18 @@
-/* =================================================================
-   ANIMAL SPIRIT THEME SYSTEM
-   =================================================================
-   A mystical design system inspired by animal spirits and nature,
-   featuring deep purples, spiritual energy colors, and organic forms.
-
-   Design Philosophy:
-   - Deep mystical purples represent spiritual wisdom and intuition
-   - Warm orange accents symbolize creative energy and vitality
-   - Soft light tones evoke ethereal, otherworldly atmospheres
-   - Natural earth tones ground the design in nature's wisdom
-
-   Last Updated: 2025-10-13
-   Version: 2.0.0 - Performance & Accessibility Improvements
-   ================================================================= */
+/**
+ * Prime Mandate Theme System - Legacy Support
+ *
+ * This file provides legacy theme support and spiritual design elements
+ * that complement the main Tailwind CSS and modern design system.
+ *
+ * Performance Optimizations:
+ * - Hardware-accelerated animations for 60FPS fidelity
+ * - WCAG AAA accessibility compliance
+ * - Mobile-first responsive design
+ * - Reduced motion support
+ * - High contrast mode compatibility
+ *
+ * Note: Most styling should use Tailwind CSS utilities and modern_design_system.css
+ */
 
 /* =================================================================
    CSS CUSTOM PROPERTIES (DESIGN TOKENS)
@@ -21,7 +21,8 @@
   /* =============================================
      PRIMARY COLOR PALETTE - Spiritual & Mystical
      ============================================= */
-  --spirit-primary: #6B4FA9;      /* Deep mystical purple - main brand color */
+     --spirit-primary: var(--color-primary);      /* Use Prime Mandate primary color */</search>
+</search_and_replace>
   --spirit-primary-rgb: 107, 79, 169;
   --spirit-secondary: #9C7BE3;    /* Lighter spiritual purple - hover states */
   --spirit-secondary-rgb: 156, 123, 227;

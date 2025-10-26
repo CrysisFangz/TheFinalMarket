@@ -39,7 +39,9 @@ class Admin::DashboardController < Admin::BaseController
   # 🚀 COMPREHENSIVE SYSTEM OVERVIEW DASHBOARD
   def system_overview
     use_case = Admin::Dashboard::SystemOverviewUseCase.new(current_admin)
-    result = use_case.execute
+    result = CircuitBreaker.execute_with_fallback(:dashboard_system_overview) do
+      use_case.execute
+    end
 
     case result
     in Success(data)
@@ -57,7 +59,9 @@ class Admin::DashboardController < Admin::BaseController
   # 🚀 ADVANCED USER MANAGEMENT INTERFACE
   def user_management
     use_case = Admin::Dashboard::UserManagementUseCase.new(current_admin)
-    result = use_case.execute
+    result = CircuitBreaker.execute_with_fallback(:dashboard_user_management) do
+      use_case.execute
+    end
 
     case result
     in Success(data)

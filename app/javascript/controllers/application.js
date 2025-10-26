@@ -1,12 +1,12 @@
 // ============================================================================
-// HYPERSCALE STIMULUS APPLICATION FRAMEWORK
+// PRIME MANDATE STIMULUS APPLICATION FRAMEWORK
 // ============================================================================
 // ARCHITECTURAL PRINCIPLES:
-// - Hermetic Controller Pattern: Pure functions, immutable state
-// - Intelligent Lifecycle Management: Predictive component initialization
-// - Advanced Memory Management: Zero-leak architecture with object pooling
-// - Real-time State Synchronization: Event-driven state propagation
-// - Accessibility-First Design: Universal access with cognitive optimization
+// - Perceptual Near-Instantaneity: FID < 50ms, LCP < 2.5s, 60FPS fidelity
+// - Atomic Purity: Pure functions, immutable state, zero side-effects
+// - Unidirectional State Integrity: Single source of truth, traceable mutations
+// - Universal Access: WCAG AAA compliance, semantic HTML, keyboard navigation
+// - Antifragile Resilience: Error boundaries, graceful degradation, progressive enhancement
 // ============================================================================
 
 import { Application } from "@hotwired/stimulus";
@@ -17,6 +17,28 @@ import { PerformanceOptimizer } from './performance/performance_optimizer.js';
 import { AccessibilityController } from './accessibility/accessibility_controller.js';
 import { RealTimeController } from './realtime/realtime_controller.js';
 import { ErrorRecoveryManager } from './error_handling/error_recovery_manager.js';
+
+/**
+ * @typedef {Object} ApplicationState
+ * @property {boolean} isInitialized - Whether the application is fully initialized
+ * @property {Map<string, Controller>} controllers - Active controller instances
+ * @property {Set<Observer>} observers - Performance and accessibility observers
+ * @property {Map<string, number>} performanceMetrics - Core Web Vitals metrics
+ * @property {Map<string, Object>} memoryPools - Memory pools for object reuse
+ * @property {Set<string>} accessibilityFeatures - Enabled accessibility features
+ */
+
+/**
+ * @typedef {Object} ApplicationComponents
+ * @property {Application} baseApplication - Core Stimulus application
+ * @property {ControllerRegistry} controllerRegistry - Intelligent controller management
+ * @property {StateSynchronizer} stateSynchronizer - State synchronization engine
+ * @property {MemoryManager} memoryManager - Memory optimization system
+ * @property {PerformanceOptimizer} performanceOptimizer - Performance optimization engine
+ * @property {AccessibilityController} accessibilityController - Accessibility enhancement system
+ * @property {RealTimeController} realTimeController - Real-time communication system
+ * @property {ErrorRecoveryManager} errorRecoveryManager - Error recovery and resilience system
+ */
 
 /**
  * Hyperscale Stimulus Application

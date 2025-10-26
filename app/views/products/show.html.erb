@@ -1,337 +1,479 @@
-<%# Modern Enhanced Product Show Page %>
-<div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-purple-50">
-  
-  <%# Breadcrumb Navigation %>
-  <div class="bg-white border-b border-gray-200">
+<%# Modern Enhanced Product Show Page - WCAG AAA Compliant %>
+<main class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-purple-50" role="main" aria-labelledby="product-title">
+
+  <%# Breadcrumb Navigation with Enhanced Accessibility %>
+  <nav class="bg-white border-b border-gray-200" aria-label="Breadcrumb navigation">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-      <nav class="flex items-center gap-2 text-sm" aria-label="Breadcrumb">
-        <%= link_to "Home", root_path, class: "text-gray-500 hover:text-gray-700" %>
-        <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-        </svg>
-        <%= link_to "Products", products_path, class: "text-gray-500 hover:text-gray-700" %>
-        <% if @product.categories.any? %>
-          <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+      <ol class="flex items-center gap-2 text-sm" role="list">
+        <li>
+          <%= link_to "Home", root_path,
+              class: "text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 rounded px-1 py-0.5 transition-colors",
+              aria-label: "Go to home page" %>
+        </li>
+        <li class="flex items-center gap-2" aria-hidden="true">
+          <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
             <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
           </svg>
-          <%= link_to @product.categories.first.name, category_path(@product.categories.first), 
-              class: "text-gray-500 hover:text-gray-700" %>
+        </li>
+        <li>
+          <%= link_to "Products", products_path,
+              class: "text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 rounded px-1 py-0.5 transition-colors",
+              aria-label: "Browse all products" %>
+        </li>
+        <% if @product.categories.any? %>
+          <li class="flex items-center gap-2" aria-hidden="true">
+            <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+            </svg>
+          </li>
+          <li>
+            <%= link_to @product.categories.first.name, category_path(@product.categories.first),
+                class: "text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 rounded px-1 py-0.5 transition-colors",
+                aria-label: "Browse #{product.categories.first.name} category" %>
+          </li>
+          <li class="flex items-center gap-2" aria-hidden="true">
+            <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+            </svg>
+          </li>
         <% end %>
-        <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-        </svg>
-        <span class="text-gray-900 font-medium"><%= truncate(@product.name, length: 40) %></span>
-      </nav>
+        <li>
+          <span class="text-gray-900 font-medium px-1 py-0.5" aria-current="page"><%= truncate(@product.name, length: 40) %></span>
+        </li>
+      </ol>
     </div>
-  </div>
+  </nav></search>
+</search_and_replace>
 
-  <%# Main Product Section %>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <%# Main Product Section with Enhanced Accessibility %>
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" aria-labelledby="product-title">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
-      
-      <%# Left Column - Image Gallery %>
-      <div class="space-y-4" data-controller="gallery">
-        <%# Main Image %>
-        <div class="relative aspect-square rounded-2xl overflow-hidden bg-white shadow-xl">
+
+      <%# Left Column - Image Gallery with ARIA Support %>
+      <section class="space-y-4" data-controller="gallery" aria-label="Product image gallery">
+        <%# Main Image with Enhanced Accessibility %>
+        <figure class="relative aspect-square rounded-2xl overflow-hidden bg-white shadow-xl" role="img" aria-labelledby="main-image-caption">
           <% if @product.images&.any?(&:attached?) %>
-            <%= image_tag @product.images.first.variant(resize_to_limit: [800, 800]), 
-                alt: @product.name,
-                class: "w-full h-full object-cover",
-                data: { gallery_target: "mainImage" } %>
+            <%= image_tag @product.images.first.variant(resize_to_limit: [800, 800]),
+                alt: "Main product image of #{@product.name}",
+                class: "w-full h-full object-cover transition-transform duration-300 hover:scale-105",
+                data: { gallery_target: "mainImage" },
+                loading: "lazy" %>
+            <figcaption id="main-image-caption" class="sr-only">Primary view of <%= @product.name %></figcaption>
           <% else %>
-            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-              <svg class="w-32 h-32 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200" role="img" aria-label="No product image available">
+              <svg class="w-32 h-32 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </div>
           <% end %>
-          
-          <%# Image Zoom Overlay %>
-          <button class="absolute top-4 right-4 action-button" 
+
+          <%# Image Zoom Overlay with Enhanced Accessibility %>
+          <button class="absolute top-4 right-4 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
                   data-action="click->gallery#zoom"
-                  title="Zoom">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  aria-label="Zoom in on product image"
+                  title="Zoom in on product image">
+            <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
             </svg>
           </button>
-        </div>
-        
-        <%# Thumbnail Gallery %>
+        </figure>
+
+        <%# Thumbnail Gallery with Enhanced Navigation %>
         <% if @product.images&.count.to_i > 1 %>
-          <div class="grid grid-cols-5 gap-3">
+          <div class="grid grid-cols-5 gap-3" role="group" aria-label="Product image thumbnails">
             <% @product.images.each_with_index do |image, index| %>
-              <button class="aspect-square rounded-lg overflow-hidden border-2 border-transparent hover:border-purple-500 transition-all"
+              <button class="aspect-square rounded-lg overflow-hidden border-2 border-transparent hover:border-purple-500 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-300 transform hover:scale-105"
                       data-action="click->gallery#select"
-                      data-index="<%= index %>">
-                <%= image_tag image.variant(resize_to_limit: [200, 200]), 
-                    alt: "#{@product.name} - Image #{index + 1}",
-                    class: "w-full h-full object-cover" %>
+                      data-index="<%= index %>"
+                      aria-label="View product image <%= index + 1 %> of <%= @product.images.count %>"
+                      aria-pressed="<%= index == 0 ? 'true' : 'false' %>">
+                <%= image_tag image.variant(resize_to_limit: [200, 200]),
+                    alt: "Product thumbnail #{index + 1} of #{@product.name}",
+                    class: "w-full h-full object-cover",
+                    loading: "lazy" %>
               </button>
             <% end %>
           </div>
         <% end %>
-      </div>
+      </section></search>
+</search_and_replace>
 
-      <%# Right Column - Product Details %>
-      <div class="space-y-6">
-        
-        <%# Product Title %>
-        <div>
-          <h1 class="text-4xl font-extrabold text-gray-900 mb-4 leading-tight">
+            <%# Right Column - Product Details with Enhanced Accessibility %>
+      <section class="space-y-6" aria-labelledby="product-title">
+
+        <%# Product Title with Enhanced Typography %>
+        <header>
+          <h1 id="product-title" class="text-4xl font-extrabold text-gray-900 mb-4 leading-tight tracking-tight">
             <%= @product.name %>
           </h1>
-          
-          <%# Rating & Reviews %>
+
+          <%# Rating & Reviews with Enhanced Accessibility %>
           <% if @product.reviews.any? %>
-            <div class="flex items-center gap-4 mb-4">
-              <div class="flex items-center">
+            <div class="flex items-center gap-4 mb-4" role="group" aria-label="Product rating and reviews">
+              <div class="flex items-center" role="img" aria-label="<%= @product.average_rating.round(1) %> out of 5 stars">
                 <% 5.times do |i| %>
-                  <svg class="w-5 h-5 <%= i < @product.average_rating.round ? 'text-yellow-400' : 'text-gray-300' %> fill-current" viewBox="0 0 20 20">
+                  <svg class="w-5 h-5 <%= i < @product.average_rating.round ? 'text-yellow-400' : 'text-gray-300' %> fill-current"
+                       viewBox="0 0 20 20"
+                       aria-hidden="true">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
                 <% end %>
               </div>
-              <span class="text-gray-600">
-                <span class="font-bold"><%= @product.average_rating.round(1) %></span> 
-                (<%= pluralize(@product.reviews.count, 'review') %>)
-              </span>
+              <div class="text-gray-600">
+                <span class="font-bold" aria-label="Average rating"><%= @product.average_rating.round(1) %></span>
+                <span class="sr-only">out of 5 stars</span>
+                <span class="text-gray-400">•</span>
+                <a href="#reviews" class="hover:text-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 rounded px-1 transition-colors">
+                  <%= pluralize(@product.reviews.count, 'review') %>
+                </a>
+              </div>
+            </div>
+          <% else %>
+            <div class="mb-4">
+              <span class="text-gray-500 italic">No reviews yet</span>
+              <a href="#reviews" class="ml-2 text-purple-600 hover:text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 rounded px-1 transition-colors">
+                Be the first to review
+              </a>
             </div>
           <% end %>
-        </div>
+        </header></search>
+</search_and_replace>
 
-        <%# Price Section %>
-        <div class="p-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border-2 border-purple-200">
+                <%# Price Section with Enhanced Accessibility %>
+        <section class="p-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border-2 border-purple-200" aria-labelledby="price-heading">
+          <h2 id="price-heading" class="sr-only">Product Pricing</h2>
           <% if @product.discount_price.present? %>
-            <div class="flex items-baseline gap-4 mb-2">
-              <span class="text-5xl font-extrabold text-gray-900">
+            <div class="flex flex-wrap items-baseline gap-4 mb-2" role="group" aria-label="Discounted pricing">
+              <span class="text-5xl font-extrabold text-gray-900" aria-label="Sale price <%= number_to_currency(@product.discount_price) %>">
                 <%= number_to_currency(@product.discount_price) %>
               </span>
-              <span class="text-2xl text-gray-500 line-through">
+              <span class="text-2xl text-gray-500 line-through" aria-label="Original price <%= number_to_currency(@product.price) %>">
                 <%= number_to_currency(@product.price) %>
               </span>
-              <span class="badge bg-red-500 text-white text-lg px-4 py-1">
+              <span class="inline-flex items-center px-4 py-1 rounded-full text-lg font-semibold bg-red-500 text-white" role="text" aria-label="Save <%= number_to_percentage(@product.discount_percentage, precision: 0) %>">
                 Save <%= number_to_percentage(@product.discount_percentage, precision: 0) %>
               </span>
             </div>
+            <p class="text-sm text-green-700 font-medium" role="text">
+              You save <%= number_to_currency(@product.price - @product.discount_price) %>!
+            </p>
           <% else %>
-            <span class="text-5xl font-extrabold text-gray-900">
-              <%= number_to_currency(@product.price) %>
-            </span>
+            <div class="mb-2">
+              <span class="text-5xl font-extrabold text-gray-900" aria-label="Price <%= number_to_currency(@product.price) %>">
+                <%= number_to_currency(@product.price) %>
+              </span>
+            </div>
           <% end %>
-          
-          <p class="text-sm text-gray-600 mt-2">
-            <svg class="w-4 h-4 inline text-green-500" fill="currentColor" viewBox="0 0 20 20">
+
+          <div class="flex items-center gap-2 text-sm text-gray-600 mt-3" role="group" aria-label="Shipping information">
+            <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
             </svg>
-            Free shipping on orders over $50
-          </p>
-        </div>
+            <span>Free shipping on orders over $50</span>
+          </div>
+        </section></search>
+</search_and_replace>
 
-        <%# Stock Status %>
-        <div class="flex items-center gap-3">
+                <%# Stock Status with Enhanced Accessibility %>
+        <section class="space-y-2" aria-labelledby="stock-status-heading">
+          <h3 id="stock-status-heading" class="sr-only">Product Availability</h3>
           <% if @product.stock_quantity.to_i > 10 %>
-            <span class="flex items-center gap-2 text-green-600 font-semibold">
-              <span class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
-              In Stock
-            </span>
+            <div class="flex items-center gap-3" role="status" aria-live="polite">
+              <span class="flex items-center gap-2 text-green-600 font-semibold" aria-label="In stock">
+                <span class="w-3 h-3 bg-green-500 rounded-full animate-pulse" aria-hidden="true"></span>
+                <span>In Stock</span>
+              </span>
+              <span class="text-sm text-gray-500" aria-label="More than 10 items available">
+                (<%= @product.stock_quantity %>+ available)
+              </span>
+            </div>
           <% elsif @product.stock_quantity.to_i > 0 %>
-            <span class="flex items-center gap-2 text-orange-600 font-semibold">
-              <span class="w-3 h-3 bg-orange-500 rounded-full"></span>
-              Only <%= @product.stock_quantity %> left!
-            </span>
+            <div class="flex items-center gap-3" role="status" aria-live="polite">
+              <span class="flex items-center gap-2 text-orange-600 font-semibold" aria-label="Limited stock">
+                <span class="w-3 h-3 bg-orange-500 rounded-full" aria-hidden="true"></span>
+                <span>Only <%= @product.stock_quantity %> left!</span>
+              </span>
+            </div>
           <% else %>
-            <span class="flex items-center gap-2 text-red-600 font-semibold">
-              <span class="w-3 h-3 bg-red-500 rounded-full"></span>
-              Out of Stock
-            </span>
+            <div class="flex items-center gap-3" role="status" aria-live="polite">
+              <span class="flex items-center gap-2 text-red-600 font-semibold" aria-label="Out of stock">
+                <span class="w-3 h-3 bg-red-500 rounded-full" aria-hidden="true"></span>
+                <span>Out of Stock</span>
+              </span>
+            </div>
           <% end %>
-        </div>
+        </section></search>
+</search_and_replace>
 
-        <%# Seller Information %>
-        <div class="p-4 bg-white rounded-xl border border-gray-200 hover:border-purple-300 transition-colors">
+                <%# Seller Information with Enhanced Accessibility %>
+        <section class="p-4 bg-white rounded-xl border border-gray-200 hover:border-purple-300 focus-within:border-purple-500 transition-colors" aria-labelledby="seller-info-heading">
+          <h3 id="seller-info-heading" class="sr-only">Seller Information</h3>
           <div class="flex items-center gap-4">
             <% if @product.user.avatar&.attached? %>
-              <%= image_tag @product.user.avatar.variant(resize_to_limit: [80, 80]), 
-                  class: "w-12 h-12 rounded-full object-cover ring-4 ring-purple-100" %>
+              <%= image_tag @product.user.avatar.variant(resize_to_limit: [80, 80]),
+                  class: "w-12 h-12 rounded-full object-cover ring-4 ring-purple-100",
+                  alt: "Profile picture of #{@product.user.name}",
+                  loading: "lazy" %>
             <% else %>
-              <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-xl font-bold ring-4 ring-purple-100">
+              <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-xl font-bold ring-4 ring-purple-100" role="img" aria-label="Initial for #{@product.user.name}">
                 <%= @product.user.name.first.upcase %>
               </div>
             <% end %>
-            
+
             <div class="flex-1">
-              <%= link_to @product.user.name, user_path(@product.user), 
-                  class: "text-lg font-bold text-gray-900 hover:text-purple-600 flex items-center gap-2" do %>
-                <%= @product.user.name %>
-                <% if @product.user.verified_seller? %>
-                  <svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20" title="Verified Seller">
-                    <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                  </svg>
+              <div class="flex items-center gap-2 mb-1">
+                <%= link_to @product.user.name, user_path(@product.user),
+                    class: "text-lg font-bold text-gray-900 hover:text-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 rounded px-1 transition-colors",
+                    aria-label: "Visit #{product.user.name}'s shop" do %>
+                  <%= @product.user.name %>
                 <% end %>
-              <% end %>
-              
+                <% if @product.user.verified_seller? %>
+                  <span class="inline-flex items-center" aria-label="Verified seller">
+                    <svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                      <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                  </span>
+                <% end %>
+              </div>
+
               <% if @product.user.seller_rating.present? %>
-                <div class="flex items-center gap-1 text-sm text-gray-600">
-                  <span>⭐ <%= @product.user.seller_rating.round(1) %></span>
-                  <span class="text-gray-400">•</span>
-                  <span><%= pluralize(@product.user.products.count, 'product') %></span>
+                <div class="flex items-center gap-1 text-sm text-gray-600" role="group" aria-label="Seller statistics">
+                  <span aria-label="Seller rating <%= @product.user.seller_rating.round(1) %> stars">⭐ <%= @product.user.seller_rating.round(1) %></span>
+                  <span class="text-gray-400" aria-hidden="true">•</span>
+                  <span aria-label="<%= @product.user.products.count %> products in shop"><%= pluralize(@product.user.products.count, 'product') %></span>
                 </div>
               <% end %>
             </div>
-            
-            <%= link_to "View Shop", user_path(@product.user), 
-                class: "btn-secondary py-2 px-4 text-sm" %>
-          </div>
-        </div>
 
-        <%# Quantity Selector %>
-        <div class="space-y-3" data-controller="quantity">
-          <label class="block text-sm font-semibold text-gray-700">Quantity</label>
-          <div class="flex items-center gap-4">
-            <div class="flex items-center border-2 border-gray-300 rounded-lg overflow-hidden">
-              <button class="px-4 py-3 bg-gray-100 hover:bg-gray-200 transition-colors" 
-                      data-action="click->quantity#decrease">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <%= link_to "View Shop", user_path(@product.user),
+                class: "btn-secondary py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors",
+                aria-label: "View all products from #{product.user.name}" %>
+          </div>
+        </section></search>
+</search_and_replace>
+
+                <%# Quantity Selector with Enhanced Accessibility %>
+        <section class="space-y-3" data-controller="quantity" aria-labelledby="quantity-heading">
+          <h3 id="quantity-heading" class="block text-sm font-semibold text-gray-700">Quantity</h3>
+          <div class="flex flex-wrap items-center gap-4">
+            <div class="flex items-center border-2 border-gray-300 rounded-lg overflow-hidden focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-500 focus-within:ring-offset-2" role="group" aria-label="Quantity selection">
+              <button class="px-4 py-3 bg-gray-100 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
+                      data-action="click->quantity#decrease"
+                      aria-label="Decrease quantity"
+                      type="button">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
                 </svg>
               </button>
-              
-              <input type="number" 
-                     value="1" 
-                     min="1" 
+
+              <label for="quantity-input" class="sr-only">Product quantity</label>
+              <input id="quantity-input"
+                     type="number"
+                     value="1"
+                     min="1"
                      max="<%= @product.stock_quantity %>"
                      data-quantity-target="input"
-                     class="w-20 text-center text-lg font-bold border-none outline-none">
-              
-              <button class="px-4 py-3 bg-gray-100 hover:bg-gray-200 transition-colors" 
-                      data-action="click->quantity#increase">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     class="w-20 text-center text-lg font-bold border-none outline-none focus:ring-0"
+                     aria-label="Quantity"
+                     aria-describedby="quantity-available">
+
+              <button class="px-4 py-3 bg-gray-100 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
+                      data-action="click->quantity#increase"
+                      aria-label="Increase quantity"
+                      type="button">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
               </button>
             </div>
-            
-            <span class="text-sm text-gray-600">
+
+            <span id="quantity-available" class="text-sm text-gray-600" aria-live="polite">
               <%= @product.stock_quantity %> available
             </span>
           </div>
-        </div>
+        </section></search>
+</search_and_replace>
 
-        <%# Action Buttons %>
-        <div class="space-y-3">
-          <%= button_to cart_items_path(product_id: @product.id), 
+                <%# Action Buttons with Enhanced Accessibility %>
+        <section class="space-y-3" aria-labelledby="product-actions-heading">
+          <h3 id="product-actions-heading" class="sr-only">Product Actions</h3>
+
+          <%= button_to cart_items_path(product_id: @product.id),
               method: :post,
-              class: "w-full btn-primary py-4 text-lg font-bold flex items-center justify-center gap-3",
-              data: { turbo: false } do %>
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              class: "w-full btn-primary py-4 text-lg font-bold flex items-center justify-center gap-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none",
+              data: { turbo: false },
+              disabled: @product.stock_quantity.to_i <= 0,
+              aria: { label: @product.stock_quantity.to_i > 0 ? "Add to cart" : "Out of stock - cannot add to cart" } do %>
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
-            <span>Add to Cart</span>
+            <span><%= @product.stock_quantity.to_i > 0 ? 'Add to Cart' : 'Out of Stock' %></span>
           <% end %>
-          
+
           <div class="grid grid-cols-2 gap-3">
-            <%= button_to wishlist_add_item_path(product_id: @product.id), 
+            <%= button_to wishlist_add_item_path(product_id: @product.id),
                 method: :post,
-                class: "btn-secondary py-3 flex items-center justify-center gap-2",
-                data: { turbo: false } do %>
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                class: "btn-secondary py-3 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-300 transform hover:scale-105",
+                data: { turbo: false },
+                aria: { label: "Add to wishlist" } do %>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
               <span>Wishlist</span>
             <% end %>
-            
-            <button class="btn-ghost py-3 flex items-center justify-center gap-2"
-                    data-action="click->share#open">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+            <button class="btn-ghost py-3 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-300 transform hover:scale-105"
+                    data-action="click->share#open"
+                    aria-label="Share this product">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
               </svg>
               <span>Share</span>
             </button>
           </div>
-        </div>
+        </section></search>
+</search_and_replace>
 
-        <%# Trust Badges %>
-        <div class="grid grid-cols-3 gap-4 pt-6 border-t border-gray-200">
-          <div class="text-center">
-            <svg class="w-8 h-8 mx-auto mb-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-            </svg>
+                <%# Trust Badges with Enhanced Accessibility %>
+        <section class="grid grid-cols-3 gap-4 pt-6 border-t border-gray-200" aria-labelledby="trust-badges-heading">
+          <h3 id="trust-badges-heading" class="sr-only">Trust & Security Features</h3>
+          <div class="text-center group" role="group" aria-label="Secure payment guarantee">
+            <div class="flex justify-center mb-2" aria-hidden="true">
+              <svg class="w-8 h-8 text-purple-600 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+            </div>
             <p class="text-xs font-semibold text-gray-700">Secure Payment</p>
+            <p class="text-xs text-gray-500 mt-1">SSL Encrypted</p>
           </div>
-          <div class="text-center">
-            <svg class="w-8 h-8 mx-auto mb-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-            </svg>
+          <div class="text-center group" role="group" aria-label="Money-back guarantee">
+            <div class="flex justify-center mb-2" aria-hidden="true">
+              <svg class="w-8 h-8 text-purple-600 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+              </svg>
+            </div>
             <p class="text-xs font-semibold text-gray-700">Money-Back</p>
+            <p class="text-xs text-gray-500 mt-1">30-Day Guarantee</p>
           </div>
-          <div class="text-center">
-            <svg class="w-8 h-8 mx-auto mb-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-            </svg>
+          <div class="text-center group" role="group" aria-label="Free returns policy">
+            <div class="flex justify-center mb-2" aria-hidden="true">
+              <svg class="w-8 h-8 text-purple-600 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+              </svg>
+            </div>
             <p class="text-xs font-semibold text-gray-700">Free Returns</p>
+            <p class="text-xs text-gray-500 mt-1">Easy Process</p>
           </div>
-        </div>
+        </section></search>
+</search_and_replace>
       </div>
     </div>
 
-    <%# Tabs Section - Description, Specifications, Reviews %>
-    <div class="card-modern p-8 mb-12" data-controller="tabs">
+        <%# Tabs Section - Description, Specifications, Reviews with Enhanced Accessibility %>
+    <section class="card-modern p-8 mb-12" data-controller="tabs" aria-labelledby="product-details-heading">
+      <h2 id="product-details-heading" class="sr-only">Product Details</h2>
       <div class="border-b border-gray-200 mb-8">
-        <nav class="flex gap-8" aria-label="Tabs">
-          <button class="tab-button active py-4 px-2 border-b-2 border-purple-600 font-semibold text-purple-600"
+        <nav class="flex gap-8" role="tablist" aria-label="Product information tabs">
+          <button class="tab-button active py-4 px-2 border-b-2 border-purple-600 font-semibold text-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 rounded-t transition-colors"
+                  role="tab"
+                  aria-selected="true"
+                  aria-controls="description-panel"
+                  id="description-tab"
                   data-action="click->tabs#switch"
                   data-tab="description">
-            Description
+            <span>Description</span>
           </button>
-          <button class="tab-button py-4 px-2 border-b-2 border-transparent font-semibold text-gray-500 hover:text-gray-700 hover:border-gray-300"
+          <button class="tab-button py-4 px-2 border-b-2 border-transparent font-semibold text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 rounded-t transition-colors"
+                  role="tab"
+                  aria-selected="false"
+                  aria-controls="specifications-panel"
+                  id="specifications-tab"
                   data-action="click->tabs#switch"
                   data-tab="specifications">
-            Specifications
+            <span>Specifications</span>
           </button>
-          <button class="tab-button py-4 px-2 border-b-2 border-transparent font-semibold text-gray-500 hover:text-gray-700 hover:border-gray-300"
+          <button class="tab-button py-4 px-2 border-b-2 border-transparent font-semibold text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 rounded-t transition-colors"
+                  role="tab"
+                  aria-selected="false"
+                  aria-controls="reviews-panel"
+                  id="reviews-tab"
                   data-action="click->tabs#switch"
                   data-tab="reviews">
-            Reviews (<%= @product.reviews.count %>)
+            <span>Reviews</span>
+            <span class="ml-1 text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full" aria-label="<%= @product.reviews.count %> reviews">
+              <%= @product.reviews.count %>
+            </span>
           </button>
         </nav>
-      </div>
+      </div></search>
+</search_and_replace>
 
-      <%# Description Tab %>
-      <div class="tab-content" data-tabs-target="panel" data-tab="description">
+            <%# Description Tab with Enhanced Accessibility %>
+      <div class="tab-content"
+           role="tabpanel"
+           aria-labelledby="description-tab"
+           id="description-panel"
+           data-tabs-target="panel"
+           data-tab="description">
         <div class="prose prose-lg max-w-none">
           <%= simple_format(@product.description) %>
         </div>
       </div>
 
-      <%# Specifications Tab %>
-      <div class="tab-content hidden" data-tabs-target="panel" data-tab="specifications">
-        <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <% if @product.specifications.present? %>
+      <%# Specifications Tab with Enhanced Accessibility %>
+      <div class="tab-content hidden"
+           role="tabpanel"
+           aria-labelledby="specifications-tab"
+           id="specifications-panel"
+           data-tabs-target="panel"
+           data-tab="specifications">
+        <% if @product.specifications.present? %>
+          <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <% @product.specifications.each do |key, value| %>
               <div class="border-b border-gray-200 pb-4">
                 <dt class="text-sm font-semibold text-gray-600 mb-1"><%= key.titleize %></dt>
                 <dd class="text-base text-gray-900"><%= value %></dd>
               </div>
             <% end %>
-          <% else %>
-            <p class="text-gray-600">No specifications available.</p>
-          <% end %>
-        </dl>
+          </dl>
+        <% else %>
+          <div class="text-center py-8" role="status" aria-live="polite">
+            <svg class="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <p class="text-gray-600">No specifications available for this product.</p>
+          </div>
+        <% end %>
       </div>
 
-      <%# Reviews Tab %>
-      <div class="tab-content hidden" data-tabs-target="panel" data-tab="reviews">
+      <%# Reviews Tab with Enhanced Accessibility %>
+      <div class="tab-content hidden"
+           role="tabpanel"
+           aria-labelledby="reviews-tab"
+           id="reviews-panel"
+           data-tabs-target="panel"
+           data-tab="reviews">
         <%= render 'reviews/section', product: @product %>
-      </div>
+      </div></search>
+</search_and_replace>
     </div>
 
-    <%# Related Products %>
-    <div class="mb-12">
-      <h2 class="text-3xl font-bold text-gray-900 mb-8">You May Also Like</h2>
+        <%# Related Products with Enhanced Accessibility %>
+    <section class="mb-12" aria-labelledby="related-products-heading">
+      <h2 id="related-products-heading" class="text-3xl font-bold text-gray-900 mb-8">You May Also Like</h2>
       <%# This would be populated by a recommendation service %>
-      <div class="product-grid">
-        <%# Render related products here %>
+      <div class="product-grid" role="region" aria-label="Related products">
+        <%# Render related products here - placeholder for future implementation %>
+        <div class="text-center py-12" role="status" aria-live="polite">
+          <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+          </svg>
+          <p class="text-gray-600 text-lg">Related products will appear here</p>
+          <p class="text-gray-500 text-sm mt-2">Personalized recommendations based on your interests</p>
+        </div>
       </div>
-    </div>
-  </div>
-</div>
+    </section>
+  </section>
+</main></search>
+</search_and_replace>

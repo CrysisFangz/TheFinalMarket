@@ -4,10 +4,35 @@
     <title><%= content_for(:title) || "The Final Market - Premium Online Marketplace" %></title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
     <meta name="description" content="<%= content_for(:description) || 'Discover unique products from trusted sellers worldwide. Shop with confidence on The Final Market.' %>">
+    <meta name="keywords" content="<%= content_for(:keywords) || 'marketplace, online shopping, products, sellers, e-commerce' %>">
+    <meta name="author" content="The Final Market">
+    <meta name="robots" content="index, follow">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="The Final Market">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#667eea">
-    
+    <meta name="theme-color" content="#7c3aed">
+    <meta name="msapplication-TileColor" content="#7c3aed">
+    <meta name="msapplication-config" content="/browserconfig.xml">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<%= request.original_url %>">
+    <meta property="og:title" content="<%= content_for(:title) || "The Final Market - Premium Online Marketplace" %>">
+    <meta property="og:description" content="<%= content_for(:description) || 'Discover unique products from trusted sellers worldwide. Shop with confidence on The Final Market.' %>">
+    <meta property="og:image" content="<%= content_for(:og_image) || root_url + 'icon.png' %>">
+    <meta property="og:site_name" content="The Final Market">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="<%= request.original_url %>">
+    <meta property="twitter:title" content="<%= content_for(:title) || "The Final Market - Premium Online Marketplace" %>">
+    <meta property="twitter:description" content="<%= content_for(:description) || 'Discover unique products from trusted sellers worldwide. Shop with confidence on The Final Market.' %>">
+    <meta property="twitter:image" content="<%= content_for(:twitter_image) || root_url + 'icon.png' %>">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="<%= request.original_url %>">
+
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <%= yield :head %>
@@ -16,28 +41,81 @@
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
+    <link rel="manifest" href="/manifest.json">
 
-    <%# Stylesheets %>
+    <%# Stylesheets with performance optimizations %>
     <%= stylesheet_link_tag "modern_design_system", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
-    
-    <%# Preconnect to external resources %>
+
+    <%# Preconnect to external resources for performance %>
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
-    
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+
+    <%# Resource hints for critical assets %>
+    <link rel="preload" href="<%= stylesheet_path('application') %>" as="style">
+    <link rel="preload" href="<%= javascript_path('application') %>" as="script">
+
     <%# Toastify for notifications %>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    
-    <%# Schema.org structured data %>
+
+    <%# Enhanced Schema.org structured data %>
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
       "name": "The Final Market",
-      "url": "<%= root_url %>"
+      "alternateName": "Final Market",
+      "url": "<%= root_url %>",
+      "description": "Premium online marketplace for unique products from trusted sellers worldwide",
+      "publisher": {
+        "@type": "Organization",
+        "name": "The Final Market",
+        "url": "<%= root_url %>"
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "<%= search_url(query: '{search_term_string}') %>",
+        "query-input": "required name=search_term_string"
+      }
     }
+    </script>
+
+    <%# Performance and Core Web Vitals monitoring %>
+    <script>
+      // Core Web Vitals monitoring
+      if ('web-vitals' in window === false) {
+        // Fallback performance monitoring
+        window.addEventListener('load', function() {
+          if ('performance' in window && 'getEntriesByType' in performance) {
+            const navigation = performance.getEntriesByType('navigation')[0];
+            if (navigation) {
+              const perfData = {
+                'DNS Lookup': navigation.domainLookupEnd - navigation.domainLookupStart,
+                'TCP Connection': navigation.connectEnd - navigation.connectStart,
+                'Request': navigation.responseStart - navigation.requestStart,
+                'Response': navigation.responseEnd - navigation.responseStart,
+                'DOM Processing': navigation.domContentLoadedEventEnd - navigation.responseEnd,
+                'Total Load Time': navigation.loadEventEnd - navigation.navigationStart
+              };
+
+              // Send to analytics (if available)
+              if (typeof gtag !== 'undefined') {
+                gtag('event', 'web_vitals', {
+                  'event_category': 'Performance',
+                  'event_label': 'Page Load',
+                  'value': Math.round(navigation.loadEventEnd - navigation.navigationStart)
+                });
+              }
+
+              console.log('Performance Metrics:', perfData);
+            }
+          }
+        });
+      }
     </script>
   </head>
 
@@ -333,13 +411,16 @@
       <% end %>
     <% end %>
 
-    <%# Main Content %>
-    <main id="main-content" class="min-h-screen">
-      <%= yield %>
+    <!-- Main Content with Enhanced Structure -->
+    <main id="main-content" class="min-h-screen" role="main" aria-label="Main content">
+      <!-- Error Boundary Container -->
+      <div data-controller="error-boundary" data-error-boundary-target="container">
+        <%= yield %>
+      </div>
     </main>
 
-    <%# Footer %>
-    <footer class="bg-gray-900 text-white mt-20">
+    <!-- Footer with Enhanced Structure -->
+    <footer class="bg-gray-900 text-white mt-20" role="contentinfo" aria-label="Site footer">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           

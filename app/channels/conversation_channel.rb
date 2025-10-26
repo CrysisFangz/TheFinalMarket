@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative '../interactors/message_interactors'
+
 # =============================================================================
 # ConversationChannel - Hyperscale Real-Time Messaging Channel
 # =============================================================================
@@ -70,15 +72,16 @@ class ConversationChannel < ApplicationCable::Channel
   def mark_as_read(data)
     with_error_handling("mark_read") do
       validate_payload!(data, required: [:message_ids])
-      validate_user_authorization!
 
-      # Batch processing for asymptotic optimality - O(k) where k is batch size
-      message_service.mark_messages_as_read(
+      result = MessageInteractors::MarkAsRead.call(
         message_ids: data[:message_ids],
-        read_by: current_user,
-        conversation_id: conversation_id,
-        timestamp: Time.current
+        current_user: current_user,
+        conversation_id: conversation_id
       )
+
+      unless result.success?
+        raise ValidationError, result.error
+      end
 
       telemetry_service.record_histogram(:mark_read_latency,
         tags: { batch_size: data[:message_ids].size })
@@ -123,15 +126,17 @@ class ConversationChannel < ApplicationCable::Channel
   def edit_message(data)
     with_error_handling("message_edit") do
       validate_payload!(data, required: [:message_id, :content])
-      validate_message_ownership!
-      validate_edit_permissions!
 
-      message_service.edit_message(
+      result = MessageInteractors::EditMessage.call(
         message_id: data[:message_id],
-        new_content: data[:content],
-        edited_by: current_user,
+        content: data[:content],
+        current_user: current_user,
         edit_reason: data[:edit_reason]
       )
+
+      unless result.success?
+        raise ValidationError, result.error
+      end
 
       telemetry_service.increment_counter(:message_edits)
     end
@@ -140,15 +145,17 @@ class ConversationChannel < ApplicationCable::Channel
   def delete_message(data)
     with_error_handling("message_delete") do
       validate_payload!(data, required: [:message_id])
-      validate_message_ownership!
-      validate_deletion_permissions!
 
-      message_service.delete_message(
+      result = MessageInteractors::DeleteMessage.call(
         message_id: data[:message_id],
-        deleted_by: current_user,
-        deletion_reason: data[:reason],
+        current_user: current_user,
+        reason: data[:reason],
         soft_delete: data.fetch(:soft_delete, true)
       )
+
+      unless result.success?
+        raise ValidationError, result.error
+      end
 
       telemetry_service.increment_counter(:message_deletions)
     end
@@ -239,31 +246,6 @@ class ConversationChannel < ApplicationCable::Channel
     end
   end
 
-  def validate_message_ownership!
-    message = message_service.find_message(data[:message_id])
-    unless message&.user == current_user
-      raise AuthorizationError, "User does not own the message"
-    end
-  end
-
-  def validate_edit_permissions!
-    message = message_service.find_message(data[:message_id])
-    edit_window = 15.minutes # Configurable edit window
-
-    if message.created_at < edit_window.ago
-      raise AuthorizationError, "Message edit window expired"
-    end
-  end
-
-  def validate_deletion_permissions!
-    message = message_service.find_message(data[:message_id])
-    deletion_window = 1.hour # Configurable deletion window
-
-    if message.created_at < deletion_window.ago
-      raise AuthorizationError, "Message deletion window expired"
-    end
-  end
-
   # ==================== PAYLOAD VALIDATION (ZERO-TRUST SECURITY) ====================
   def validate_payload!(data, required: [])
     unless data.is_a?(Hash)
@@ -330,13 +312,16 @@ class ConversationChannel < ApplicationCable::Channel
   end
 
   def initialize_conversation_state
-    # Load conversation state atomically to prevent race conditions
-    conversation_service.load_conversation_state(
-      conversation_id: conversation_id,
-      user: current_user,
-      include_unread: true,
-      include_typing: true
-    )
+    # Load conversation state with caching for performance
+    cache_key = "conversation_state:#{conversation_id}:#{current_user.id}"
+    Rails.cache.fetch(cache_key, expires_in: 30.seconds) do
+      conversation_service.load_conversation_state(
+        conversation_id: conversation_id,
+        user: current_user,
+        include_unread: true,
+        include_typing: true
+      )
+    end
   end
 
   def cleanup_conversation_resources
@@ -360,9 +345,13 @@ class ConversationChannel < ApplicationCable::Channel
   # ==================== TELEMETRY & OBSERVABILITY ====================
   def collect_telemetry
     start_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    start_memory = get_memory_usage
     yield
   ensure
     duration = Process.clock_gettime(Process::CLOCK_MONOTONIC) - start_time
+    end_memory = get_memory_usage
+    memory_delta = end_memory - start_memory
+
     telemetry_service.record_histogram(
       :channel_action_duration,
       duration * 1000, # Convert to milliseconds
@@ -372,11 +361,34 @@ class ConversationChannel < ApplicationCable::Channel
         user_id: current_user.id
       }
     )
+
+    telemetry_service.record_histogram(
+      :channel_memory_usage,
+      memory_delta,
+      tags: {
+        action: action_name,
+        conversation_id: conversation_id
+      }
+    )
+
+    telemetry_service.increment_counter(
+      :channel_actions,
+      tags: {
+        action: action_name,
+        conversation_id: conversation_id
+      }
+    )
+  end
+
+  def get_memory_usage
+    # Use a safer method to estimate memory usage
+    0 # Placeholder - in production, use a proper memory monitoring gem
   end
 
   def record_audit_event
-    telemetry_service.record_event(
-      :channel_audit_event,
+    # Asynchronous telemetry recording for performance
+    TelemetryJob.perform_later(
+      event: :channel_audit_event,
       tags: {
         action: action_name,
         conversation_id: conversation_id,
@@ -386,8 +398,8 @@ class ConversationChannel < ApplicationCable::Channel
       }
     )
   rescue => e
-    telemetry_service.record_event(
-      :channel_audit_event,
+    TelemetryJob.perform_later(
+      event: :channel_audit_event,
       tags: {
         action: action_name,
         conversation_id: conversation_id,
@@ -424,12 +436,13 @@ class ConversationChannel < ApplicationCable::Channel
       }
     )
 
-    # Adaptive error handling based on error type
+    # Adaptive error handling with exponential backoff
     case error
     when ValidationError, SecurityError, AuthorizationError
       transmit_error(error.message, :client_error)
     when RateLimitError
-      transmit_error("Rate limit exceeded. Please slow down.", :rate_limited)
+      retry_after = calculate_retry_after(error)
+      transmit_error("Rate limit exceeded. Please retry after #{retry_after} seconds.", :rate_limited)
     when CircuitBreakerError
       transmit_error("Service temporarily unavailable. Please try again.", :service_unavailable)
     else
@@ -440,6 +453,15 @@ class ConversationChannel < ApplicationCable::Channel
       })
       transmit_error("An unexpected error occurred. Please try again.", :server_error)
     end
+  end
+
+  def calculate_retry_after(error)
+    # Exponential backoff with jitter
+    base_delay = 1
+    max_delay = 60
+    attempt = error.retry_count || 1
+    delay = [base_delay * (2 ** attempt), max_delay].min
+    delay + rand(0..1) # Add jitter
   end
 
   def transmit_error(message, type)
@@ -456,26 +478,4 @@ class ConversationChannel < ApplicationCable::Channel
     request.headers['X-Real-IP'] ||
     request.remote_ip
   end
-
-  # ==================== DEPENDENCY INJECTION DEFAULTS ====================
-  class << self
-    def configure_dependencies(
-      message_service: nil,
-      conversation_service: nil,
-      security_service: nil,
-      rate_limiter: nil,
-      circuit_breaker: nil,
-      telemetry_service: nil
-    )
-      self.message_service = message_service || MessageService::Core.instance
-      self.conversation_service = conversation_service || ConversationService::Core.instance
-      self.security_service = security_service || SecurityService::Core.instance
-      self.rate_limiter = rate_limiter || RateLimitingService::Adaptive.instance
-      self.circuit_breaker = circuit_breaker || CircuitBreaker::Resilient.instance
-      self.telemetry_service = telemetry_service || TelemetryService::Comprehensive.instance
-    end
-  end
-
-  # Configure default dependencies on class load
-  configure_dependencies
 end

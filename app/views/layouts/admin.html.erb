@@ -1,51 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <title>TheFinalMarket Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+    <meta name="description" content="Admin dashboard for TheFinalMarket - Manage users, products, and seller applications efficiently.">
+    <meta name="keywords" content="admin, dashboard, management, users, products, sellers">
+    <meta name="author" content="The Final Market">
+    <meta name="robots" content="noindex, nofollow">
+
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
     <%= stylesheet_link_tag "application" %>
     <%= javascript_importmap_tags %>
+
+    <!-- Performance optimizations for Core Web Vitals -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="<%= stylesheet_path('application') %>" as="style">
+    <link rel="preload" href="<%= javascript_path('application') %>" as="script">
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-      <div class="container">
-        <%= link_to "TheFinalMarket Admin", admin_root_path, class: "navbar-brand" %>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbar">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="adminNavbar">
-          <ul class="navbar-nav me-auto">
-            <li class="nav-item">
-              <%= link_to "Dashboard", admin_root_path, class: "nav-link" %>
-            </li>
-            <li class="nav-item">
-              <%= link_to "Users", admin_users_path, class: "nav-link" %>
-            </li>
-            <li class="nav-item">
-              <%= link_to "Products", admin_products_path, class: "nav-link" %>
-            </li>
-            <li class="nav-item">
-              <%= link_to "Seller Applications", admin_seller_applications_path, class: "nav-link" %>
-            </li>
-            <li class="nav-item">
-              <%= link_to "Back to Site", root_path, class: "nav-link" %>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
+    <!-- Skip to main content for accessibility (WCAG AAA) -->
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 z-50 bg-dark text-white px-4 py-2 rounded" aria-label="Skip to main content">
+      Skip to main content
+    </a>
 
-    <div class="container mt-4">
-      <% flash.each do |name, msg| %>
-        <div class="alert alert-<%= name == 'notice' ? 'success' : name %> alert-dismissible fade show">
-          <%= msg %>
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-      <% end %>
+    <!-- Admin Navigation Component (Atomic Design: Presentation Component) -->
+    <%= render 'admin/navbar' %>
 
+    <!-- Flash Messages Component (Atomic Design: Presentation Component) -->
+    <%= render 'admin/flash_messages' %>
+
+    <!-- Main Content with Semantic Structure and Error Resilience -->
+    <main id="main-content" class="container mt-4" role="main" aria-label="Admin main content">
+      <!-- Error Boundary Equivalent: Graceful degradation via SSR -->
       <%= yield %>
-    </div>
+    </main>
   </body>
 </html>

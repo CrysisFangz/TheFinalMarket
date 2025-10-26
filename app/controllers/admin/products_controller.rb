@@ -22,419 +22,657 @@ class Admin::ProductsController < Admin::BaseController
   # Advanced product lifecycle management with global marketplace control
   def index
     # 🚀 Quantum-Optimized Product Query Processing (O(log n) scaling)
-    @products = Rails.cache.fetch("admin_products_index_#{current_admin.id}_#{params[:page]}_#{params[:filter]}", expires_in: 30.seconds) do
-      products_query = AdminProductQueryService.new(current_admin, params).execute_with_optimization
-      products_query.includes(
-        :seller, :categories, :variants, :images, :reviews,
-        :inventory_records, :performance_metrics, :compliance_records,
-        :global_distribution, :marketplace_listings, :ai_insights
-      ).order(created_at: :desc)
+    @products = CircuitBreaker.execute_with_fallback(:admin_products_index) do
+      Rails.cache.fetch("admin_products_index_#{current_admin.id}_#{params[:page]}_#{params[:filter]}", expires_in: 30.seconds) do
+        products_query = AdminProductQueryService.new(current_admin, params).execute_with_optimization
+        products_query.includes(
+          :seller, :categories, :variants, :images, :reviews,
+          :inventory_records, :performance_metrics, :compliance_records,
+          :global_distribution, :marketplace_listings, :ai_insights
+        ).order(created_at: :desc)
+      end
     end
 
     # 🚀 Real-Time Product Analytics Dashboard
-    @product_analytics = AdminProductAnalyticsService.new(current_admin, @products).generate_comprehensive_analytics
+    @product_analytics = CircuitBreaker.execute_with_fallback(:product_analytics) do
+      AdminProductAnalyticsService.new(current_admin, @products).generate_comprehensive_analytics
+    end
 
     # 🚀 AI-Powered Product Categorization
-    @product_categorization = AiProductCategorizationService.new(@products).perform_intelligent_categorization
+    @product_categorization = CircuitBreaker.execute_with_fallback(:product_categorization) do
+      AiProductCategorizationService.new(@products).perform_intelligent_categorization
+    end
 
     # 🚀 Global Marketplace Intelligence
-    @marketplace_intelligence = MarketplaceIntelligenceService.new(@products).analyze_global_performance
+    @marketplace_intelligence = CircuitBreaker.execute_with_fallback(:marketplace_intelligence) do
+      MarketplaceIntelligenceService.new(@products).analyze_global_performance
+    end
 
     # 🚀 Inventory Optimization Analysis
-    @inventory_optimization = InventoryOptimizationService.new(@products).identify_optimization_opportunities
+    @inventory_optimization = CircuitBreaker.execute_with_fallback(:inventory_optimization) do
+      InventoryOptimizationService.new(@products).identify_optimization_opportunities
+    end
 
     # 🚀 Performance Benchmarking
-    @performance_benchmarks = PerformanceBenchmarkService.new(@products).generate_benchmarks
+    @performance_benchmarks = CircuitBreaker.execute_with_fallback(:performance_benchmarks) do
+      PerformanceBenchmarkService.new(@products).generate_benchmarks
+    end
 
     # 🚀 Compliance Status Overview
-    @compliance_overview = ComplianceOverviewService.new(@products).validate_global_compliance
+    @compliance_overview = CircuitBreaker.execute_with_fallback(:compliance_overview) do
+      ComplianceOverviewService.new(@products).validate_global_compliance
+    end
 
     # 🚀 Geographic Distribution Analysis
-    @geographic_analytics = GeographicAnalyticsService.new(@products).analyze_global_distribution
+    @geographic_analytics = CircuitBreaker.execute_with_fallback(:geographic_analytics) do
+      GeographicAnalyticsService.new(@products).analyze_global_distribution
+    end
 
     # 🚀 Performance Metrics Headers
     response.headers['X-Admin-Products-Response-Time'] = Benchmark.ms { @products.to_a }.round(2).to_s + 'ms'
     response.headers['X-Cache-Status'] = 'HIT' if @products.cached?
+  rescue StandardError => e
+    Rails.logger.error "Products index error: #{e.message}"
+    flash[:error] = 'Unable to load products.'
+    redirect_to admin_products_path
   end
 
   def show
     # 🚀 Comprehensive Product Intelligence Dashboard
-    @product_intelligence = AdminProductIntelligenceService.new(@product).generate_comprehensive_intelligence
+    @product_intelligence = CircuitBreaker.execute_with_fallback(:product_intelligence) do
+      AdminProductIntelligenceService.new(@product).generate_comprehensive_intelligence
+    end
 
     # 🚀 Global Performance Analytics
-    @global_performance = GlobalPerformanceService.new(@product).analyze_worldwide_performance
+    @global_performance = CircuitBreaker.execute_with_fallback(:global_performance) do
+      GlobalPerformanceService.new(@product).analyze_worldwide_performance
+    end
 
     # 🚀 AI-Powered Product Insights
-    @ai_insights = AiProductInsightsService.new(@product).generate_intelligent_insights
+    @ai_insights = CircuitBreaker.execute_with_fallback(:ai_insights) do
+      AiProductInsightsService.new(@product).generate_intelligent_insights
+    end
 
     # 🚀 Marketplace Positioning Analysis
-    @marketplace_positioning = MarketplacePositioningService.new(@product).analyze_positioning
+    @marketplace_positioning = CircuitBreaker.execute_with_fallback(:marketplace_positioning) do
+      MarketplacePositioningService.new(@product).analyze_positioning
+    end
 
     # 🚀 Inventory Management Intelligence
-    @inventory_intelligence = InventoryIntelligenceService.new(@product).manage_global_inventory
+    @inventory_intelligence = CircuitBreaker.execute_with_fallback(:inventory_intelligence) do
+      InventoryIntelligenceService.new(@product).manage_global_inventory
+    end
 
     # 🚀 Compliance Monitoring Dashboard
-    @compliance_monitoring = ComplianceMonitoringService.new(@product).monitor_global_compliance
+    @compliance_monitoring = CircuitBreaker.execute_with_fallback(:compliance_monitoring) do
+      ComplianceMonitoringService.new(@product).monitor_global_compliance
+    end
 
     # 🚀 Financial Performance Analysis
-    @financial_performance = FinancialPerformanceService.new(@product).analyze_financial_impact
+    @financial_performance = CircuitBreaker.execute_with_fallback(:financial_performance) do
+      FinancialPerformanceService.new(@product).analyze_financial_impact
+    end
 
     # 🚀 Customer Behavior Analytics
-    @customer_behavior = CustomerBehaviorService.new(@product).analyze_customer_interactions
+    @customer_behavior = CircuitBreaker.execute_with_fallback(:customer_behavior) do
+      CustomerBehaviorService.new(@product).analyze_customer_interactions
+    end
 
     # 🚀 Competitive Intelligence
-    @competitive_intelligence = CompetitiveIntelligenceService.new(@product).analyze_competitive_landscape
+    @competitive_intelligence = CircuitBreaker.execute_with_fallback(:competitive_intelligence) do
+      CompetitiveIntelligenceService.new(@product).analyze_competitive_landscape
+    end
 
     # 🚀 Performance Metrics Header
     response.headers['X-Product-Intelligence-Load-Time'] = Benchmark.ms { @product_intelligence.to_a }.round(2).to_s + 'ms'
+  rescue StandardError => e
+    Rails.logger.error "Product show error: #{e.message}"
+    flash[:error] = 'Unable to load product details.'
+    redirect_to admin_products_path
   end
 
   def update
     # 🚀 Enterprise Product Update with Distributed Processing
-    update_result = AdminProductUpdateService.new(
-      @product,
-      current_admin,
-      product_params,
-      request
-    ).execute_with_enterprise_processing
+    update_result = CircuitBreaker.execute_with_fallback(:product_update) do
+      AdminProductUpdateService.new(
+        @product,
+        current_admin,
+        product_params,
+        request
+      ).execute_with_enterprise_processing
+    end
 
     if update_result.success?
       # 🚀 Real-Time Update Broadcasting
-      ProductUpdateBroadcaster.new(@product, update_result.changes).broadcast
+      CircuitBreaker.execute_with_fallback(:product_update_broadcast) do
+        ProductUpdateBroadcaster.new(@product, update_result.changes).broadcast
+      end
 
       # 🚀 Global Inventory Synchronization
-      GlobalInventorySyncService.new(@product, update_result.changes).synchronize_globally
+      CircuitBreaker.execute_with_fallback(:global_inventory_sync) do
+        GlobalInventorySyncService.new(@product, update_result.changes).synchronize_globally
+      end
 
       # 🚀 Marketplace Update Propagation
-      MarketplaceUpdateService.new(@product, update_result.changes).propagate_updates
+      CircuitBreaker.execute_with_fallback(:marketplace_update) do
+        MarketplaceUpdateService.new(@product, update_result.changes).propagate_updates
+      end
 
       # 🚀 AI Insight Regeneration
-      AiInsightRegenerationService.new(@product).regenerate_insights
+      CircuitBreaker.execute_with_fallback(:ai_insight_regeneration) do
+        AiInsightRegenerationService.new(@product).regenerate_insights
+      end
 
       # 🚀 Performance Metric Recalculation
-      PerformanceMetricService.new(@product).recalculate_metrics
+      CircuitBreaker.execute_with_fallback(:performance_metric_recalculation) do
+        PerformanceMetricService.new(@product).recalculate_metrics
+      end
 
       # 🚀 Compliance Revalidation
-      ComplianceRevalidationService.new(@product).revalidate_compliance
+      CircuitBreaker.execute_with_fallback(:compliance_revalidation) do
+        ComplianceRevalidationService.new(@product).revalidate_compliance
+      end
 
       # 🚀 Notification Distribution
-      UpdateNotificationService.new(@product, update_result.changes).distribute_notifications
+      CircuitBreaker.execute_with_fallback(:update_notification) do
+        UpdateNotificationService.new(@product, update_result.changes).distribute_notifications
+      end
 
       # 🚀 Analytics Update
-      ProductAnalyticsService.new(@product).update_analytics
+      CircuitBreaker.execute_with_fallback(:product_analytics_update) do
+        ProductAnalyticsService.new(@product).update_analytics
+      end
 
       flash[:success] = "Product updated with enterprise-grade processing"
       redirect_to admin_product_path(@product)
     else
       # 🚀 Update Failure Analysis
-      @failure_analysis = UpdateFailureService.new(update_result.errors).analyze_failure
+      @failure_analysis = CircuitBreaker.execute_with_fallback(:update_failure_analysis) do
+        UpdateFailureService.new(update_result.errors).analyze_failure
+      end
 
       # 🚀 Alternative Update Strategies
-      @alternative_strategies = AlternativeUpdateService.new(@product, product_params).suggest_strategies
+      @alternative_strategies = CircuitBreaker.execute_with_fallback(:alternative_update_strategies) do
+        AlternativeUpdateService.new(@product, product_params).suggest_strategies
+      end
 
       flash.now[:danger] = "Update failed with detailed analysis provided"
       render :show
     end
+  rescue StandardError => e
+    Rails.logger.error "Product update error: #{e.message}"
+    flash[:error] = 'Unable to update product.'
+    redirect_to admin_product_path(@product)
   end
 
   def moderate
     # 🚀 AI-Powered Content Moderation
-    moderation_result = ProductModerationService.new(
-      @product,
-      current_admin,
-      params[:moderation_action],
-      request
-    ).execute_with_ai_assistance
+    moderation_result = CircuitBreaker.execute_with_fallback(:product_moderation) do
+      ProductModerationService.new(
+        @product,
+        current_admin,
+        params[:moderation_action],
+        request
+      ).execute_with_ai_assistance
+    end
 
     if moderation_result.success?
       # 🚀 Content Analysis and Classification
-      ContentAnalysisService.new(@product).analyze_content
+      CircuitBreaker.execute_with_fallback(:content_analysis) do
+        ContentAnalysisService.new(@product).analyze_content
+      end
 
       # 🚀 Automated Policy Enforcement
-      PolicyEnforcementService.new(moderation_result).enforce_policies
+      CircuitBreaker.execute_with_fallback(:policy_enforcement) do
+        PolicyEnforcementService.new(moderation_result).enforce_policies
+      end
 
       # 🚀 User Impact Assessment
-      UserImpactService.new(@product, moderation_result).assess_impact
+      CircuitBreaker.execute_with_fallback(:user_impact_assessment) do
+        UserImpactService.new(@product, moderation_result).assess_impact
+      end
 
       # 🚀 Marketplace Notification
-      MarketplaceNotificationService.new(moderation_result).notify_marketplace
+      CircuitBreaker.execute_with_fallback(:marketplace_notification) do
+        MarketplaceNotificationService.new(moderation_result).notify_marketplace
+      end
 
       # 🚀 Documentation Automation
-      DocumentationAutomationService.new(moderation_result).generate_documentation
+      CircuitBreaker.execute_with_fallback(:documentation_automation) do
+        DocumentationAutomationService.new(moderation_result).generate_documentation
+      end
 
       # 🚀 Analytics Integration
-      ModerationAnalyticsService.new(moderation_result).integrate_analytics
+      CircuitBreaker.execute_with_fallback(:moderation_analytics) do
+        ModerationAnalyticsService.new(moderation_result).integrate_analytics
+      end
 
       redirect_to admin_product_path(@product), notice: 'Product moderated with AI assistance.'
     else
       # 🚀 Moderation Failure Analysis
-      @moderation_failure_analysis = ModerationFailureService.new(moderation_result.errors).analyze
+      @moderation_failure_analysis = CircuitBreaker.execute_with_fallback(:moderation_failure_analysis) do
+        ModerationFailureService.new(moderation_result.errors).analyze
+      end
 
       redirect_to admin_product_path(@product), alert: 'Moderation failed with alternative approaches.'
     end
+  rescue StandardError => e
+    Rails.logger.error "Product moderation error: #{e.message}"
+    flash[:error] = 'Unable to moderate product.'
+    redirect_to admin_product_path(@product)
   end
 
   def feature
     # 🚀 Intelligent Product Featuring with Market Analysis
-    featuring_result = ProductFeaturingService.new(
-      @product,
-      current_admin,
-      params[:featuring_strategy],
-      request
-    ).execute_with_market_analysis
+    featuring_result = CircuitBreaker.execute_with_fallback(:product_featuring) do
+      ProductFeaturingService.new(
+        @product,
+        current_admin,
+        params[:featuring_strategy],
+        request
+      ).execute_with_market_analysis
+    end
 
     if featuring_result.success?
       # 🚀 Marketplace Positioning Optimization
-      MarketplacePositioningService.new(@product).optimize_positioning
+      CircuitBreaker.execute_with_fallback(:marketplace_positioning_optimization) do
+        MarketplacePositioningService.new(@product).optimize_positioning
+      end
 
       # 🚀 Promotional Strategy Development
-      PromotionalStrategyService.new(featuring_result).develop_strategy
+      CircuitBreaker.execute_with_fallback(:promotional_strategy) do
+        PromotionalStrategyService.new(featuring_result).develop_strategy
+      end
 
       # 🚀 Performance Monitoring Setup
-      PerformanceMonitoringSetupService.new(@product).setup_featured_monitoring
+      CircuitBreaker.execute_with_fallback(:performance_monitoring_setup) do
+        PerformanceMonitoringSetupService.new(@product).setup_featured_monitoring
+      end
 
       # 🚀 ROI Tracking Implementation
-      ROITrackingService.new(@product).implement_tracking
+      CircuitBreaker.execute_with_fallback(:roi_tracking) do
+        ROITrackingService.new(@product).implement_tracking
+      end
 
       # 🚀 Success Notification Distribution
-      FeaturingNotificationService.new(featuring_result).distribute_success
+      CircuitBreaker.execute_with_fallback(:featuring_notification) do
+        FeaturingNotificationService.new(featuring_result).distribute_success
+      end
 
       redirect_to admin_product_path(@product), notice: 'Product featured with market optimization.'
     else
       # 🚀 Featuring Failure Analysis
-      @featuring_failure_analysis = FeaturingFailureService.new(featuring_result.errors).analyze
+      @featuring_failure_analysis = CircuitBreaker.execute_with_fallback(:featuring_failure_analysis) do
+        FeaturingFailureService.new(featuring_result.errors).analyze
+      end
 
       redirect_to admin_product_path(@product), alert: 'Featuring failed with optimization suggestions.'
     end
+  rescue StandardError => e
+    Rails.logger.error "Product featuring error: #{e.message}"
+    flash[:error] = 'Unable to feature product.'
+    redirect_to admin_product_path(@product)
   end
 
   def suspend
     # 🚀 Enterprise Product Suspension with Global Impact Management
-    suspension_result = ProductSuspensionService.new(
-      @product,
-      current_admin,
-      params[:reason],
-      request
-    ).execute_with_global_impact_management
+    suspension_result = CircuitBreaker.execute_with_fallback(:product_suspension) do
+      ProductSuspensionService.new(
+        @product,
+        current_admin,
+        params[:reason],
+        request
+      ).execute_with_global_impact_management
+    end
 
     if suspension_result.success?
       # 🚀 Global Inventory Management
-      GlobalInventoryManagementService.new(@product).manage_suspension_impact
+      CircuitBreaker.execute_with_fallback(:global_inventory_management) do
+        GlobalInventoryManagementService.new(@product).manage_suspension_impact
+      end
 
       # 🚀 Marketplace Removal Coordination
-      MarketplaceRemovalService.new(@product).coordinate_removal
+      CircuitBreaker.execute_with_fallback(:marketplace_removal) do
+        MarketplaceRemovalService.new(@product).coordinate_removal
+      end
 
       # 🚀 Order Impact Assessment
-      OrderImpactService.new(@product).assess_order_impact
+      CircuitBreaker.execute_with_fallback(:order_impact_assessment) do
+        OrderImpactService.new(@product).assess_order_impact
+      end
 
       # 🚀 Seller Communication Management
-      SellerCommunicationService.new(@product, suspension_result).manage_communication
+      CircuitBreaker.execute_with_fallback(:seller_communication) do
+        SellerCommunicationService.new(@product, suspension_result).manage_communication
+      end
 
       # 🚀 Financial Settlement Processing
-      FinancialSettlementService.new(@product).process_settlement
+      CircuitBreaker.execute_with_fallback(:financial_settlement) do
+        FinancialSettlementService.new(@product).process_settlement
+      end
 
       # 🚀 Legal Documentation Generation
-      LegalDocumentationService.new(suspension_result).generate_documents
+      CircuitBreaker.execute_with_fallback(:legal_documentation) do
+        LegalDocumentationService.new(suspension_result).generate_documents
+      end
 
       # 🚀 Stakeholder Notification
-      StakeholderNotificationService.new(suspension_result).notify_stakeholders
+      CircuitBreaker.execute_with_fallback(:stakeholder_notification) do
+        StakeholderNotificationService.new(suspension_result).notify_stakeholders
+      end
 
       # 🚀 Analytics Update
-      SuspensionAnalyticsService.new(suspension_result).update_analytics
+      CircuitBreaker.execute_with_fallback(:suspension_analytics) do
+        SuspensionAnalyticsService.new(suspension_result).update_analytics
+      end
 
       redirect_to admin_product_path(@product), notice: 'Product suspended with global impact management.'
     else
       # 🚀 Suspension Failure Analysis
-      @suspension_failure_analysis = SuspensionFailureService.new(suspension_result.errors).analyze
+      @suspension_failure_analysis = CircuitBreaker.execute_with_fallback(:suspension_failure_analysis) do
+        SuspensionFailureService.new(suspension_result.errors).analyze
+      end
 
       redirect_to admin_product_path(@product), alert: 'Suspension failed with strategic alternatives.'
     end
+  rescue StandardError => e
+    Rails.logger.error "Product suspension error: #{e.message}"
+    flash[:error] = 'Unable to suspend product.'
+    redirect_to admin_product_path(@product)
   end
 
   def global_distribute
     # 🚀 Global Distribution Management with Multi-Marketplace Coordination
-    distribution_result = GlobalDistributionService.new(
-      @product,
-      current_admin,
-      params[:distribution_strategy],
-      request
-    ).execute_with_multi_marketplace_coordination
+    distribution_result = CircuitBreaker.execute_with_fallback(:global_distribution) do
+      GlobalDistributionService.new(
+        @product,
+        current_admin,
+        params[:distribution_strategy],
+        request
+      ).execute_with_multi_marketplace_coordination
+    end
 
     if distribution_result.success?
       # 🚀 International Marketplace Integration
-      InternationalMarketplaceService.new(@product).integrate_internationally
+      CircuitBreaker.execute_with_fallback(:international_marketplace) do
+        InternationalMarketplaceService.new(@product).integrate_internationally
+      end
 
       # 🚀 Localization Management
-      LocalizationService.new(@product).manage_localization
+      CircuitBreaker.execute_with_fallback(:localization_management) do
+        LocalizationService.new(@product).manage_localization
+      end
 
       # 🚀 International Compliance Management
-      InternationalComplianceService.new(@product).manage_compliance
+      CircuitBreaker.execute_with_fallback(:international_compliance) do
+        InternationalComplianceService.new(@product).manage_compliance
+      end
 
       # 🚀 Global Inventory Distribution
-      GlobalInventoryDistributionService.new(@product).distribute_inventory
+      CircuitBreaker.execute_with_fallback(:global_inventory_distribution) do
+        GlobalInventoryDistributionService.new(@product).distribute_inventory
+      end
 
       # 🚀 International Pricing Strategy
-      InternationalPricingService.new(@product).implement_pricing_strategy
+      CircuitBreaker.execute_with_fallback(:international_pricing) do
+        InternationalPricingService.new(@product).implement_pricing_strategy
+      end
 
       # 🚀 Cross-Border Logistics Coordination
-      CrossBorderLogisticsService.new(@product).coordinate_logistics
+      CircuitBreaker.execute_with_fallback(:cross_border_logistics) do
+        CrossBorderLogisticsService.new(@product).coordinate_logistics
+      end
 
       # 🚀 International Marketing Coordination
-      InternationalMarketingService.new(@product).coordinate_marketing
+      CircuitBreaker.execute_with_fallback(:international_marketing) do
+        InternationalMarketingService.new(@product).coordinate_marketing
+      end
 
       # 🚀 Global Performance Monitoring
-      GlobalPerformanceMonitoringService.new(@product).setup_monitoring
+      CircuitBreaker.execute_with_fallback(:global_performance_monitoring) do
+        GlobalPerformanceMonitoringService.new(@product).setup_monitoring
+      end
 
       # 🚀 Success Notification Distribution
-      GlobalDistributionNotificationService.new(distribution_result).distribute_success
+      CircuitBreaker.execute_with_fallback(:global_distribution_notification) do
+        GlobalDistributionNotificationService.new(distribution_result).distribute_success
+      end
 
       redirect_to admin_product_path(@product), notice: 'Product distributed globally with multi-marketplace coordination.'
     else
       # 🚀 Distribution Failure Analysis
-      @distribution_failure_analysis = GlobalDistributionFailureService.new(distribution_result.errors).analyze
+      @distribution_failure_analysis = CircuitBreaker.execute_with_fallback(:distribution_failure_analysis) do
+        GlobalDistributionFailureService.new(distribution_result.errors).analyze
+      end
 
       redirect_to admin_product_path(@product), alert: 'Distribution failed with strategic alternatives.'
     end
+  rescue StandardError => e
+    Rails.logger.error "Global distribution error: #{e.message}"
+    flash[:error] = 'Unable to distribute product globally.'
+    redirect_to admin_product_path(@product)
   end
 
   def analyze_performance
     # 🚀 Comprehensive Performance Analysis Dashboard
-    @performance_analysis = PerformanceAnalysisService.new(@product).perform_comprehensive_analysis
+    @performance_analysis = CircuitBreaker.execute_with_fallback(:performance_analysis) do
+      PerformanceAnalysisService.new(@product).perform_comprehensive_analysis
+    end
 
     # 🚀 Sales Trend Analysis
-    @sales_trends = SalesTrendService.new(@product).analyze_trends
+    @sales_trends = CircuitBreaker.execute_with_fallback(:sales_trends) do
+      SalesTrendService.new(@product).analyze_trends
+    end
 
     # 🚀 Customer Behavior Insights
-    @customer_insights = CustomerInsightsService.new(@product).generate_insights
+    @customer_insights = CircuitBreaker.execute_with_fallback(:customer_insights) do
+      CustomerInsightsService.new(@product).generate_insights
+    end
 
     # 🚀 Competitive Analysis
-    @competitive_analysis = CompetitiveAnalysisService.new(@product).perform_analysis
+    @competitive_analysis = CircuitBreaker.execute_with_fallback(:competitive_analysis) do
+      CompetitiveAnalysisService.new(@product).perform_analysis
+    end
 
     # 🚀 ROI Analysis and Optimization
-    @roi_analysis = ROIAnalysisService.new(@product).analyze_and_optimize
+    @roi_analysis = CircuitBreaker.execute_with_fallback(:roi_analysis) do
+      ROIAnalysisService.new(@product).analyze_and_optimize
+    end
 
     # 🚀 Market Positioning Assessment
-    @market_positioning = MarketPositioningService.new(@product).assess_positioning
+    @market_positioning = CircuitBreaker.execute_with_fallback(:market_positioning) do
+      MarketPositioningService.new(@product).assess_positioning
+    end
 
     # 🚀 Pricing Strategy Analysis
-    @pricing_strategy = PricingStrategyService.new(@product).analyze_strategy
+    @pricing_strategy = CircuitBreaker.execute_with_fallback(:pricing_strategy) do
+      PricingStrategyService.new(@product).analyze_strategy
+    end
 
     # 🚀 Promotional Effectiveness Analysis
-    @promotional_effectiveness = PromotionalEffectivenessService.new(@product).analyze_effectiveness
+    @promotional_effectiveness = CircuitBreaker.execute_with_fallback(:promotional_effectiveness) do
+      PromotionalEffectivenessService.new(@product).analyze_effectiveness
+    end
 
     # 🚀 Geographic Performance Analysis
-    @geographic_performance = GeographicPerformanceService.new(@product).analyze_performance
+    @geographic_performance = CircuitBreaker.execute_with_fallback(:geographic_performance) do
+      GeographicPerformanceService.new(@product).analyze_performance
+    end
 
     # 🚀 Future Performance Prediction
-    @performance_prediction = PerformancePredictionService.new(@product).predict_future_performance
+    @performance_prediction = CircuitBreaker.execute_with_fallback(:performance_prediction) do
+      PerformancePredictionService.new(@product).predict_future_performance
+    end
 
     respond_to do |format|
       format.html { render :analyze_performance }
       format.json { render json: @performance_analysis }
-      format.pdf { generate_performance_report_pdf }
-      format.csv { generate_performance_report_csv }
+      format.pdf { send_data PerformanceAnalysisPresenter.new(@product).to_pdf, filename: "performance-analysis-#{@product.id}.pdf" }
+      format.csv { send_data PerformanceAnalysisPresenter.new(@product).to_csv, filename: "performance-analysis-#{@product.id}.csv" }
     end
+  rescue StandardError => e
+    Rails.logger.error "Performance analysis error: #{e.message}"
+    flash[:error] = 'Unable to analyze performance.'
+    redirect_to admin_product_path(@product)
   end
 
   # 🚀 BULK PRODUCT OPERATIONS INTERFACE
   def bulk_operations
     # 🚀 Bulk Product Management Dashboard
-    @bulk_operations = BulkOperationsService.new(current_admin, params[:operation_type]).setup_bulk_operations
+    @bulk_operations = CircuitBreaker.execute_with_fallback(:bulk_operations) do
+      BulkOperationsService.new(current_admin, params[:operation_type]).setup_bulk_operations
+    end
 
     # 🚀 Batch Processing Intelligence
-    @batch_processing = BatchProcessingService.new(@bulk_operations).optimize_processing
+    @batch_processing = CircuitBreaker.execute_with_fallback(:batch_processing) do
+      BatchProcessingService.new(@bulk_operations).optimize_processing
+    end
 
     # 🚀 Bulk Analytics and Reporting
-    @bulk_analytics = BulkAnalyticsService.new(@bulk_operations).generate_analytics
+    @bulk_analytics = CircuitBreaker.execute_with_fallback(:bulk_analytics) do
+      BulkAnalyticsService.new(@bulk_operations).generate_analytics
+    end
 
     # 🚀 Progress Monitoring and Tracking
-    @progress_monitoring = ProgressMonitoringService.new(@bulk_operations).monitor_progress
+    @progress_monitoring = CircuitBreaker.execute_with_fallback(:progress_monitoring) do
+      ProgressMonitoringService.new(@bulk_operations).monitor_progress
+    end
 
     # 🚀 Error Handling and Recovery
-    @error_handling = ErrorHandlingService.new(@bulk_operations).setup_error_handling
+    @error_handling = CircuitBreaker.execute_with_fallback(:error_handling) do
+      ErrorHandlingService.new(@bulk_operations).setup_error_handling
+    end
 
     # 🚀 Rollback Strategy Management
-    @rollback_strategy = RollbackStrategyService.new(@bulk_operations).manage_rollback
+    @rollback_strategy = CircuitBreaker.execute_with_fallback(:rollback_strategy) do
+      RollbackStrategyService.new(@bulk_operations).manage_rollback
+    end
 
     # 🚀 Notification and Alert Management
-    @notification_management = NotificationManagementService.new(@bulk_operations).manage_notifications
+    @notification_management = CircuitBreaker.execute_with_fallback(:notification_management) do
+      NotificationManagementService.new(@bulk_operations).manage_notifications
+    end
 
     # 🚀 Audit Trail and Compliance
-    @audit_compliance = AuditComplianceService.new(@bulk_operations).ensure_compliance
+    @audit_compliance = CircuitBreaker.execute_with_fallback(:audit_compliance) do
+      AuditComplianceService.new(@bulk_operations).ensure_compliance
+    end
 
     # 🚀 Performance Optimization
-    @performance_optimization = PerformanceOptimizationService.new(@bulk_operations).optimize_performance
+    @performance_optimization = CircuitBreaker.execute_with_fallback(:performance_optimization) do
+      PerformanceOptimizationService.new(@bulk_operations).optimize_performance
+    end
 
     respond_to do |format|
       format.html { render :bulk_operations }
       format.json { render json: @bulk_operations }
       format.xml { render xml: @bulk_operations }
     end
+  rescue StandardError => e
+    Rails.logger.error "Bulk operations error: #{e.message}"
+    flash[:error] = 'Unable to load bulk operations.'
+    redirect_to admin_products_path
   end
 
   # 🚀 PRODUCT CATALOG MANAGEMENT INTERFACE
   def catalog_management
     # 🚀 Global Product Catalog Management
-    @catalog_management = CatalogManagementService.new(current_admin).manage_global_catalog
+    @catalog_management = CircuitBreaker.execute_with_fallback(:catalog_management) do
+      CatalogManagementService.new(current_admin).manage_global_catalog
+    end
 
     # 🚀 Category Intelligence and Optimization
-    @category_intelligence = CategoryIntelligenceService.new.analyze_and_optimize
+    @category_intelligence = CircuitBreaker.execute_with_fallback(:category_intelligence) do
+      CategoryIntelligenceService.new.analyze_and_optimize
+    end
 
     # 🚀 Product Relationship Management
-    @product_relationships = ProductRelationshipService.new.manage_relationships
+    @product_relationships = CircuitBreaker.execute_with_fallback(:product_relationships) do
+      ProductRelationshipService.new.manage_relationships
+    end
 
     # 🚀 Catalog Performance Analytics
-    @catalog_analytics = CatalogAnalyticsService.new.analyze_performance
+    @catalog_analytics = CircuitBreaker.execute_with_fallback(:catalog_analytics) do
+      CatalogAnalyticsService.new.analyze_performance
+    end
 
     # 🚀 Search Optimization Management
-    @search_optimization = SearchOptimizationService.new.optimize_search
+    @search_optimization = CircuitBreaker.execute_with_fallback(:search_optimization) do
+      SearchOptimizationService.new.optimize_search
+    end
 
     # 🚀 Recommendation Engine Management
-    @recommendation_engine = RecommendationEngineService.new.manage_engine
+    @recommendation_engine = CircuitBreaker.execute_with_fallback(:recommendation_engine) do
+      RecommendationEngineService.new.manage_engine
+    end
 
     # 🚀 Catalog Quality Assurance
-    @quality_assurance = QualityAssuranceService.new.ensure_quality
+    @quality_assurance = CircuitBreaker.execute_with_fallback(:quality_assurance) do
+      QualityAssuranceService.new.ensure_quality
+    end
 
     # 🚀 Catalog Compliance Monitoring
-    @catalog_compliance = CatalogComplianceService.new.monitor_compliance
+    @catalog_compliance = CircuitBreaker.execute_with_fallback(:catalog_compliance) do
+      CatalogComplianceService.new.monitor_compliance
+    end
 
     # 🚀 Catalog Innovation Management
-    @catalog_innovation = CatalogInnovationService.new.manage_innovation
+    @catalog_innovation = CircuitBreaker.execute_with_fallback(:catalog_innovation) do
+      CatalogInnovationService.new.manage_innovation
+    end
 
     respond_to do |format|
       format.html { render :catalog_management }
       format.json { render json: @catalog_management }
       format.xml { render xml: @catalog_management }
     end
+  rescue StandardError => e
+    Rails.logger.error "Catalog management error: #{e.message}"
+    flash[:error] = 'Unable to load catalog management.'
+    redirect_to admin_products_path
   end
 
   private
 
   # 🚀 ENTERPRISE SERVICE INITIALIZATION
   def initialize_enterprise_services
-    @admin_product_service ||= AdminProductService.new(current_admin)
-    @product_analytics_service ||= AdminProductAnalyticsService.new(current_admin)
-    @marketplace_service ||= MarketplaceIntelligenceService.new
-    @inventory_service ||= InventoryManagementService.new
-    @compliance_service ||= GlobalComplianceService.new
+    @admin_product_service ||= CircuitBreaker.execute_with_fallback(:admin_product_service) do
+      AdminProductService.new(current_admin)
+    end
+    @product_analytics_service ||= CircuitBreaker.execute_with_fallback(:product_analytics_service) do
+      AdminProductAnalyticsService.new(current_admin)
+    end
+    @marketplace_service ||= CircuitBreaker.execute_with_fallback(:marketplace_service) do
+      MarketplaceIntelligenceService.new
+    end
+    @inventory_service ||= CircuitBreaker.execute_with_fallback(:inventory_service) do
+      InventoryManagementService.new
+    end
+    @compliance_service ||= CircuitBreaker.execute_with_fallback(:compliance_service) do
+      GlobalComplianceService.new
+    end
   end
 
   def set_product
-    @product = Rails.cache.fetch("admin_product_#{params[:id]}", expires_in: 60.seconds) do
-      Product.includes(
-        :seller, :categories, :variants, :images, :reviews,
-        :inventory_records, :performance_metrics, :global_distribution
-      ).find(params[:id])
+    @product = CircuitBreaker.execute_with_fallback(:set_product) do
+      Rails.cache.fetch("admin_product_#{params[:id]}", expires_in: 60.seconds) do
+        Product.includes(
+          :seller, :categories, :variants, :images, :reviews,
+          :inventory_records, :performance_metrics, :global_distribution
+        ).find(params[:id])
+      end
     end
   end
 
   def authenticate_admin_with_behavioral_analysis
     # 🚀 AI-Enhanced Administrative Authentication
-    auth_result = AdminAuthenticationService.new(
-      current_admin,
-      request,
-      session
-    ).authenticate_with_behavioral_analysis
+    auth_result = CircuitBreaker.execute_with_fallback(:authenticate_admin_with_behavioral_analysis) do
+      AdminAuthenticationService.new(
+        current_admin,
+        request,
+        session
+      ).authenticate_with_behavioral_analysis
+    end
 
     unless auth_result.authorized?
       redirect_to new_admin_session_path, alert: 'Administrative access denied.'
@@ -442,51 +680,75 @@ class Admin::ProductsController < Admin::BaseController
     end
 
     # 🚀 Continuous Administrative Session Validation
-    ContinuousAdminAuthService.new(current_admin, request).validate_session_integrity
+    CircuitBreaker.execute_with_fallback(:continuous_admin_auth) do
+      ContinuousAdminAuthService.new(current_admin, request).validate_session_integrity
+    end
   end
 
   def initialize_product_analytics
-    @product_analytics = AdminProductAnalyticsService.new(current_admin).initialize_analytics
+    @product_analytics = CircuitBreaker.execute_with_fallback(:initialize_product_analytics) do
+      AdminProductAnalyticsService.new(current_admin).initialize_analytics
+    end
   end
 
   def setup_marketplace_monitoring
-    @marketplace_monitoring = MarketplaceMonitoringService.new(current_admin).setup_monitoring
+    @marketplace_monitoring = CircuitBreaker.execute_with_fallback(:setup_marketplace_monitoring) do
+      MarketplaceMonitoringService.new(current_admin).setup_monitoring
+    end
   end
 
   def validate_administrative_privileges
-    @privilege_validation = AdministrativePrivilegeService.new(current_admin).validate_privileges
+    @privilege_validation = CircuitBreaker.execute_with_fallback(:validate_administrative_privileges) do
+      AdministrativePrivilegeService.new(current_admin).validate_privileges
+    end
   end
 
   def initialize_ai_powered_insights
-    @ai_insights = AiProductInsightsService.new(current_admin).initialize_insights
+    @ai_insights = CircuitBreaker.execute_with_fallback(:initialize_ai_powered_insights) do
+      AiProductInsightsService.new(current_admin).initialize_insights
+    end
   end
 
   def setup_global_compliance_monitoring
-    @compliance_monitoring = GlobalComplianceMonitoringService.new(current_admin).setup_monitoring
+    @compliance_monitoring = CircuitBreaker.execute_with_fallback(:setup_global_compliance_monitoring) do
+      GlobalComplianceMonitoringService.new(current_admin).setup_monitoring
+    end
   end
 
   def initialize_inventory_management
-    @inventory_management = InventoryManagementService.new(current_admin).initialize_management
+    @inventory_management = CircuitBreaker.execute_with_fallback(:initialize_inventory_management) do
+      InventoryManagementService.new(current_admin).initialize_management
+    end
   end
 
   def track_administrative_product_actions
-    AdministrativeProductActionTracker.new(current_admin, @product, action_name).track_action
+    CircuitBreaker.execute_with_fallback(:track_administrative_product_actions) do
+      AdministrativeProductActionTracker.new(current_admin, @product, action_name).track_action
+    end
   end
 
   def update_global_product_metrics
-    GlobalProductMetricsService.new(@product).update_metrics
+    CircuitBreaker.execute_with_fallback(:update_global_product_metrics) do
+      GlobalProductMetricsService.new(@product).update_metrics
+    end
   end
 
   def broadcast_real_time_product_updates
-    ProductUpdateBroadcaster.new(@product, action_name).broadcast
+    CircuitBreaker.execute_with_fallback(:broadcast_real_time_product_updates) do
+      ProductUpdateBroadcaster.new(@product, action_name).broadcast
+    end
   end
 
   def audit_product_management_activities
-    ProductManagementAuditService.new(current_admin, @product, action_name).create_audit_entry
+    CircuitBreaker.execute_with_fallback(:audit_product_management_activities) do
+      ProductManagementAuditService.new(current_admin, @product, action_name).create_audit_entry
+    end
   end
 
   def trigger_predictive_product_insights
-    PredictiveProductInsightsService.new(@product).trigger_insights
+    CircuitBreaker.execute_with_fallback(:trigger_predictive_product_insights) do
+      PredictiveProductInsightsService.new(@product).trigger_insights
+    end
   end
 
   def product_params
@@ -503,38 +765,50 @@ class Admin::ProductsController < Admin::BaseController
 
   # 🚀 CIRCUIT BREAKER PROTECTION
   def circuit_breaker
-    @circuit_breaker ||= AdminProductCircuitBreakerService.new(
-      failure_threshold: 5,
-      recovery_timeout: 30.seconds,
-      monitoring_period: 60.seconds
-    )
+    @circuit_breaker ||= CircuitBreaker.execute_with_fallback(:admin_product_circuit_breaker) do
+      AdminProductCircuitBreakerService.new(
+        failure_threshold: 5,
+        recovery_timeout: 30.seconds,
+        monitoring_period: 60.seconds
+      )
+    end
   end
 
   # 🚀 PERFORMANCE MONITORING
   def performance_monitor
-    @performance_monitor ||= AdminProductPerformanceMonitorService.new(
-      p99_target: 4.milliseconds,
-      throughput_target: 15000.requests_per_second
-    )
+    @performance_monitor ||= CircuitBreaker.execute_with_fallback(:performance_monitor) do
+      AdminProductPerformanceMonitorService.new(
+        p99_target: 4.milliseconds,
+        throughput_target: 15000.requests_per_second
+      )
+    end
   end
 
   # 🚀 ERROR HANDLING WITH ANTIFRAGILE RECOVERY
   rescue_from StandardError do |exception|
     # 🚀 Intelligent Administrative Error Classification
-    error_classification = AdminProductErrorClassificationService.new(exception).classify
+    error_classification = CircuitBreaker.execute_with_fallback(:error_classification) do
+      AdminProductErrorClassificationService.new(exception).classify
+    end
 
     # 🚀 Adaptive Administrative Recovery Strategy
-    recovery_strategy = AdaptiveAdminProductRecoveryService.new(error_classification).determine_strategy
+    recovery_strategy = CircuitBreaker.execute_with_fallback(:recovery_strategy) do
+      AdaptiveAdminProductRecoveryService.new(error_classification).determine_strategy
+    end
 
     # 🚀 Circuit Breaker State Management
-    circuit_breaker.record_failure(exception)
+    CircuitBreaker.execute_with_fallback(:circuit_breaker_record_failure) do
+      circuit_breaker.record_failure(exception)
+    end
 
     # 🚀 Comprehensive Administrative Error Response
-    @error_response = AdminProductErrorResponseService.new(
-      exception,
-      error_classification,
-      recovery_strategy
-    ).generate_response
+    @error_response = CircuitBreaker.execute_with_fallback(:error_response) do
+      AdminProductErrorResponseService.new(
+        exception,
+        error_classification,
+        recovery_strategy
+      ).generate_response
+    end
 
     respond_to do |format|
       format.html { render 'admin/errors/enterprise_admin_product_error', status: error_classification.http_status }

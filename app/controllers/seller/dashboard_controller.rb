@@ -3,7 +3,6 @@
 # P99 < 3ms Performance | Zero-Trust Security | Real-Time Business Analytics
 module Seller
   class DashboardController < ApplicationController
-    # 🚀 Enterprise Service Registry Initialization
     prepend_before_action :initialize_enterprise_services
     before_action :authenticate_user_with_behavioral_analysis
     before_action :ensure_seller_with_verification
@@ -20,38 +19,23 @@ module Seller
     after_action :audit_seller_business_activities
     after_action :trigger_predictive_seller_insights
 
-    # 🚀 OMNIPOTENT SELLER BUSINESS INTELLIGENCE INTERFACE
-    # Comprehensive seller business management with AI-powered optimization
     def index
-      # 🚀 Hyperscale Business Metrics Collection (O(log n) scaling)
-      @business_metrics = Rails.cache.fetch("seller_business_metrics_#{current_user.id}", expires_in: 15.seconds) do
-        SellerBusinessMetricsService.new(current_user).collect_comprehensive_metrics
+      start_time = Time.current
+
+      begin
+        @business_metrics = fetch_business_metrics
+        @business_intelligence = fetch_business_intelligence
+        @predictive_analytics = fetch_predictive_analytics
+        @marketplace_performance = fetch_marketplace_performance
+        @inventory_intelligence = fetch_inventory_intelligence
+        @financial_analytics = fetch_financial_analytics
+        @customer_behavior = fetch_customer_behavior
+        @competitive_intelligence = fetch_competitive_intelligence
+
+        set_performance_headers(start_time)
+      rescue StandardError => e
+        handle_error(e, 'index')
       end
-
-      # 🚀 Real-Time Business Intelligence Dashboard
-      @business_intelligence = SellerBusinessIntelligenceService.new(current_user).generate_dashboard
-
-      # 🚀 AI-Powered Predictive Analytics
-      @predictive_analytics = SellerPredictiveAnalyticsService.new(@business_metrics).forecast_trends
-
-      # 🚀 Global Marketplace Performance
-      @marketplace_performance = SellerMarketplaceService.new(current_user).analyze_global_performance
-
-      # 🚀 Inventory Intelligence and Optimization
-      @inventory_intelligence = SellerInventoryService.new(current_user).generate_inventory_insights
-
-      # 🚀 Financial Performance Analytics
-      @financial_analytics = SellerFinancialService.new(current_user).analyze_financial_performance
-
-      # 🚀 Customer Behavior Analytics
-      @customer_behavior = SellerCustomerService.new(current_user).analyze_customer_behavior
-
-      # 🚀 Competitive Intelligence
-      @competitive_intelligence = SellerCompetitiveService.new(current_user).analyze_competitive_landscape
-
-      # 🚀 Performance Metrics Headers
-      response.headers['X-Seller-Response-Time'] = Benchmark.ms { @business_metrics.to_a }.round(2).to_s + 'ms'
-      response.headers['X-Cache-Status'] = 'HIT' if @business_metrics.cached?
     end
 
     # 🚀 COMPREHENSIVE SALES ANALYTICS INTERFACE
@@ -67,6 +51,529 @@ module Seller
 
       # 🚀 Customer Lifetime Value Analysis
       @customer_lifetime_value = SellerCustomerLifetimeService.new(current_user).calculate_customer_values
+    private
+
+    def fetch_business_metrics
+      Rails.cache.fetch("seller_business_metrics_#{current_user.id}", expires_in: 15.seconds) do
+        circuit_breaker.execute do
+          SellerBusinessMetricsService.new(current_user).collect_comprehensive_metrics
+        end
+      end
+    end
+
+    def fetch_business_intelligence
+      circuit_breaker.execute do
+        SellerBusinessIntelligenceService.new(current_user).generate_dashboard
+      end
+    end
+
+    def fetch_predictive_analytics
+      circuit_breaker.execute do
+        SellerPredictiveAnalyticsService.new(@business_metrics).forecast_trends
+      end
+    end
+
+    def fetch_marketplace_performance
+      circuit_breaker.execute do
+        SellerMarketplaceService.new(current_user).analyze_global_performance
+      end
+    end
+
+    def fetch_inventory_intelligence
+      circuit_breaker.execute do
+        SellerInventoryService.new(current_user).generate_inventory_insights
+      end
+    end
+
+    def fetch_financial_analytics
+      circuit_breaker.execute do
+        SellerFinancialService.new(current_user).analyze_financial_performance
+      end
+    end
+
+    def fetch_customer_behavior
+      circuit_breaker.execute do
+        SellerCustomerService.new(current_user).analyze_customer_behavior
+      end
+    end
+    def fetch_sales_analytics
+      circuit_breaker.execute do
+        SellerSalesAnalyticsService.new(current_user).generate_comprehensive_analytics
+      end
+    end
+
+    def fetch_revenue_intelligence
+      circuit_breaker.execute do
+        SellerRevenueIntelligenceService.new(current_user).forecast_revenue_trends
+      end
+    end
+
+    def fetch_sales_optimization
+      circuit_breaker.execute do
+        SellerSalesOptimizationService.new(current_user).identify_optimization_opportunities
+      end
+    end
+
+    def fetch_customer_lifetime_value
+      circuit_breaker.execute do
+        SellerCustomerLifetimeService.new(current_user).calculate_customer_values
+      end
+    end
+
+    def fetch_geographic_sales
+      circuit_breaker.execute do
+        SellerGeographicSalesService.new(current_user).analyze_geographic_performance
+      end
+    end
+
+    def fetch_product_performance
+      circuit_breaker.execute do
+        SellerProductPerformanceService.new(current_user).analyze_product_performance
+      end
+    end
+
+    def fetch_sales_channel_optimization
+      circuit_breaker.execute do
+        SellerSalesChannelService.new(current_user).optimize_channels
+      end
+    end
+
+    def fetch_pricing_strategy
+      circuit_breaker.execute do
+        SellerPricingStrategyService.new(current_user).analyze_pricing_effectiveness
+      end
+    end
+
+    def fetch_promotional_analytics
+      circuit_breaker.execute do
+    def fetch_inventory_intelligence
+      circuit_breaker.execute do
+        SellerInventoryIntelligenceService.new(current_user).generate_comprehensive_insights
+      end
+    end
+
+    def fetch_real_time_inventory
+      circuit_breaker.execute do
+        SellerRealTimeInventoryService.new(current_user).get_real_time_inventory
+      end
+    end
+
+    def fetch_inventory_optimization
+      circuit_breaker.execute do
+        SellerInventoryOptimizationService.new(current_user).optimize_inventory_levels
+      end
+    end
+
+    def fetch_supply_chain_analytics
+      circuit_breaker.execute do
+        SellerSupplyChainService.new(current_user).analyze_supply_chain
+      end
+    end
+
+    def fetch_warehouse_management
+      circuit_breaker.execute do
+        SellerWarehouseService.new(current_user).manage_warehouse_operations
+      end
+    end
+
+    def fetch_stock_prediction
+      circuit_breaker.execute do
+        SellerStockPredictionService.new(current_user).predict_stock_levels
+      end
+    end
+
+    def fetch_inventory_cost_analysis
+      circuit_breaker.execute do
+        SellerInventoryCostService.new(current_user).analyze_inventory_costs
+      end
+    end
+
+    def fetch_supplier_analytics
+      circuit_breaker.execute do
+        SellerSupplierService.new(current_user).analyze_supplier_performance
+      end
+    end
+
+    def fetch_turnover_optimization
+      circuit_breaker.execute do
+    def fetch_marketplace_intelligence
+      circuit_breaker.execute do
+        SellerMarketplaceIntelligenceService.new(current_user).generate_marketplace_insights
+      end
+    end
+
+    def fetch_competitive_positioning
+      circuit_breaker.execute do
+        SellerCompetitivePositioningService.new(current_user).analyze_positioning
+      end
+    end
+
+    def fetch_pricing_optimization
+      circuit_breaker.execute do
+        SellerPricingOptimizationService.new(current_user).optimize_pricing_strategy
+      end
+    end
+
+    def fetch_listing_optimization
+      circuit_breaker.execute do
+        SellerListingOptimizationService.new(current_user).optimize_product_listings
+      end
+    end
+
+    def fetch_search_optimization
+      circuit_breaker.execute do
+        SellerSearchOptimizationService.new(current_user).optimize_search_rankings
+      end
+    end
+
+    def fetch_review_management
+      circuit_breaker.execute do
+        SellerReviewManagementService.new(current_user).manage_customer_reviews
+      end
+    end
+
+    def fetch_promotional_strategy
+      circuit_breaker.execute do
+        SellerPromotionalStrategyService.new(current_user).optimize_promotional_strategies
+      end
+    end
+
+    def fetch_expansion_planning
+      circuit_breaker.execute do
+        SellerExpansionPlanningService.new(current_user).plan_marketplace_expansion
+      end
+    end
+
+    def fetch_cross_marketplace_sync
+      circuit_breaker.execute do
+    def fetch_financial_analytics
+      circuit_breaker.execute do
+        SellerFinancialAnalyticsService.new(current_user).generate_comprehensive_analytics
+      end
+    end
+
+    def fetch_cost_analysis
+      circuit_breaker.execute do
+        SellerCostAnalysisService.new(current_user).identify_cost_optimization_opportunities
+      end
+    end
+
+    def fetch_profitability_analytics
+      circuit_breaker.execute do
+        SellerProfitabilityService.new(current_user).analyze_profit_centers
+      end
+    end
+
+    def fetch_cash_flow_management
+      circuit_breaker.execute do
+        SellerCashFlowService.new(current_user).manage_cash_flow
+      end
+    end
+
+    def fetch_fee_optimization
+      circuit_breaker.execute do
+        SellerFeeOptimizationService.new(current_user).optimize_fee_structures
+      end
+    end
+
+    def fetch_financial_risk
+      circuit_breaker.execute do
+        SellerFinancialRiskService.new(current_user).assess_financial_risks
+      end
+    end
+
+    def fetch_tax_planning
+      circuit_breaker.execute do
+        SellerTaxPlanningService.new(current_user).plan_tax_strategies
+      end
+    end
+
+    def fetch_financial_reporting
+      circuit_breaker.execute do
+        SellerFinancialReportingService.new(current_user).automate_reporting
+      end
+    end
+
+    def fetch_financial_goals
+      circuit_breaker.execute do
+    def fetch_customer_analytics
+      circuit_breaker.execute do
+        SellerCustomerAnalyticsService.new(current_user).generate_comprehensive_analytics
+      end
+    end
+
+    def fetch_customer_segmentation
+      circuit_breaker.execute do
+        SellerCustomerSegmentationService.new(current_user).perform_intelligent_segmentation
+      end
+    end
+
+    def fetch_lifetime_value_analysis
+      circuit_breaker.execute do
+        SellerLifetimeValueService.new(current_user).analyze_customer_values
+      end
+    end
+
+    def fetch_behavior_patterns
+      circuit_breaker.execute do
+        SellerBehaviorPatternService.new(current_user).analyze_customer_behavior
+      end
+    end
+
+    def fetch_satisfaction_monitoring
+      circuit_breaker.execute do
+        SellerSatisfactionService.new(current_user).monitor_satisfaction
+      end
+    end
+
+    def fetch_communication_optimization
+      circuit_breaker.execute do
+        SellerCommunicationService.new(current_user).optimize_communication
+      end
+    end
+
+    def fetch_retention_strategies
+      circuit_breaker.execute do
+        SellerRetentionService.new(current_user).develop_retention_strategies
+      end
+    end
+
+    def fetch_feedback_analysis
+      circuit_breaker.execute do
+        SellerFeedbackService.new(current_user).analyze_customer_feedback
+      end
+    end
+
+    def fetch_journey_optimization
+      circuit_breaker.execute do
+    def fetch_product_performance
+      circuit_breaker.execute do
+        SellerProductPerformanceService.new(current_user).generate_comprehensive_analytics
+      end
+    end
+
+    def fetch_product_profitability
+      circuit_breaker.execute do
+        SellerProductProfitabilityService.new(current_user).analyze_product_profitability
+      end
+    end
+
+    def fetch_product_trends
+      circuit_breaker.execute do
+        SellerProductTrendService.new(current_user).analyze_product_trends
+      end
+    end
+
+    def fetch_product_positioning
+      circuit_breaker.execute do
+        SellerProductPositioningService.new(current_user).optimize_product_positioning
+      end
+    end
+
+    def fetch_product_lifecycle
+      circuit_breaker.execute do
+        SellerProductLifecycleService.new(current_user).manage_product_lifecycle
+      end
+    end
+
+    def fetch_product_innovation
+      circuit_breaker.execute do
+        SellerProductInnovationService.new(current_user).manage_innovation_pipeline
+      end
+    end
+
+    def fetch_product_quality
+      circuit_breaker.execute do
+        SellerProductQualityService.new(current_user).analyze_product_quality
+      end
+    end
+
+    def fetch_product_returns
+      circuit_breaker.execute do
+        SellerProductReturnService.new(current_user).analyze_return_patterns
+      end
+    end
+
+    def fetch_product_recommendations
+      circuit_breaker.execute do
+    def fetch_marketing_intelligence
+      circuit_breaker.execute do
+        SellerMarketingIntelligenceService.new(current_user).generate_marketing_insights
+      end
+    end
+
+    def fetch_campaign_optimization
+      circuit_breaker.execute do
+        SellerCampaignOptimizationService.new(current_user).optimize_campaigns
+      end
+    end
+
+    def fetch_acquisition_analytics
+      circuit_breaker.execute do
+        SellerAcquisitionService.new(current_user).analyze_acquisition_channels
+      end
+    end
+
+    def fetch_marketing_roi
+      circuit_breaker.execute do
+        SellerMarketingROIService.new(current_user).analyze_marketing_roi
+      end
+    end
+
+    def fetch_brand_performance
+      circuit_breaker.execute do
+        SellerBrandPerformanceService.new(current_user).analyze_brand_performance
+      end
+    end
+
+    def fetch_social_media_analytics
+      circuit_breaker.execute do
+        SellerSocialMediaService.new(current_user).analyze_social_media_performance
+      end
+    end
+
+    def fetch_email_marketing
+      circuit_breaker.execute do
+        SellerEmailMarketingService.new(current_user).optimize_email_campaigns
+      end
+    end
+
+    def fetch_influencer_analytics
+      circuit_breaker.execute do
+        SellerInfluencerService.new(current_user).analyze_influencer_partnerships
+      end
+    end
+
+    def fetch_marketing_prediction
+      circuit_breaker.execute do
+    def fetch_operational_analytics
+      circuit_breaker.execute do
+        SellerOperationalService.new(current_user).generate_operational_insights
+      end
+    end
+
+    def fetch_process_optimization
+      circuit_breaker.execute do
+        SellerProcessOptimizationService.new(current_user).optimize_business_processes
+      end
+    end
+
+    def fetch_quality_management
+      circuit_breaker.execute do
+        SellerQualityManagementService.new(current_user).manage_quality_standards
+      end
+    end
+
+    def fetch_operational_risk
+      circuit_breaker.execute do
+        SellerOperationalRiskService.new(current_user).assess_operational_risks
+      end
+    end
+
+    def fetch_resource_optimization
+      circuit_breaker.execute do
+        SellerResourceOptimizationService.new(current_user).optimize_resource_allocation
+      end
+    end
+
+    def fetch_operational_cost
+      circuit_breaker.execute do
+        SellerOperationalCostService.new(current_user).analyze_operational_costs
+      end
+    end
+
+    def fetch_performance_benchmarking
+      circuit_breaker.execute do
+        SellerPerformanceBenchmarkService.new(current_user).benchmark_performance
+      end
+    end
+
+    def fetch_continuous_improvement
+      circuit_breaker.execute do
+        SellerContinuousImprovementService.new(current_user).drive_improvement
+      end
+    end
+
+    def fetch_operational_forecasting
+      circuit_breaker.execute do
+        SellerOperationalForecastService.new(current_user).forecast_operational_needs
+      end
+    end
+
+    def fetch_excellence_scoring
+      circuit_breaker.execute do
+        SellerExcellenceScoringService.new(current_user).calculate_excellence_score
+      end
+    end
+        SellerMarketingPredictionService.new(current_user).predict_marketing_trends
+      end
+    end
+
+    def fetch_budget_optimization
+      circuit_breaker.execute do
+        SellerBudgetOptimizationService.new(current_user).optimize_marketing_budget
+      end
+    end
+        SellerProductRecommendationService.new(current_user).generate_recommendations
+      end
+    end
+        SellerJourneyOptimizationService.new(current_user).optimize_customer_journey
+      end
+    end
+
+    def fetch_success_prediction
+      circuit_breaker.execute do
+        SellerSuccessPredictionService.new(current_user).predict_customer_success
+      end
+    end
+        SellerFinancialGoalsService.new(current_user).track_financial_goals
+      end
+    end
+        SellerCrossMarketplaceService.new(current_user).synchronize_listings
+      end
+    end
+
+    def fetch_performance_prediction
+      circuit_breaker.execute do
+        SellerPerformancePredictionService.new(current_user).predict_marketplace_performance
+      end
+    end
+        SellerTurnoverOptimizationService.new(current_user).optimize_turnover
+      end
+    end
+
+    def fetch_inventory_risk
+      circuit_breaker.execute do
+        SellerInventoryRiskService.new(current_user).assess_inventory_risks
+      end
+    end
+        SellerPromotionalService.new(current_user).analyze_campaign_performance
+      end
+    end
+
+    def fetch_sales_prediction
+      circuit_breaker.execute do
+        SellerSalesPredictionService.new(current_user).predict_future_sales
+      end
+    end
+
+    def fetch_competitive_intelligence
+      circuit_breaker.execute do
+        SellerCompetitiveService.new(current_user).analyze_competitive_landscape
+      end
+    end
+
+    def set_performance_headers(start_time)
+      response_time = (Time.current - start_time) * 1000
+      response.headers['X-Seller-Response-Time'] = response_time.round(2).to_s + 'ms'
+      response.headers['X-Cache-Status'] = 'HIT' if @business_metrics.cached?
+    end
+
+    def handle_error(error, action)
+      Rails.logger.error("Error in seller dashboard #{action}: #{error.message}")
+      circuit_breaker.record_failure(error)
+      render 'seller/errors/dashboard_error', status: :internal_server_error
+    end
 
       # 🚀 Geographic Sales Analysis
       @geographic_sales = SellerGeographicSalesService.new(current_user).analyze_geographic_performance
@@ -94,284 +601,185 @@ module Seller
       end
     end
 
-    # 🚀 INVENTORY MANAGEMENT CENTER
     def inventory_management
-      # 🚀 Comprehensive Inventory Intelligence
-      @inventory_intelligence = SellerInventoryIntelligenceService.new(current_user).generate_comprehensive_insights
+      start_time = Time.current
 
-      # 🚀 Real-Time Inventory Tracking
-      @real_time_inventory = SellerRealTimeInventoryService.new(current_user).get_real_time_inventory
+      begin
+        @inventory_intelligence = fetch_inventory_intelligence
+        @real_time_inventory = fetch_real_time_inventory
+        @inventory_optimization = fetch_inventory_optimization
+        @supply_chain_analytics = fetch_supply_chain_analytics
+        @warehouse_management = fetch_warehouse_management
+        @stock_prediction = fetch_stock_prediction
+        @inventory_cost_analysis = fetch_inventory_cost_analysis
+        @supplier_analytics = fetch_supplier_analytics
+        @turnover_optimization = fetch_turnover_optimization
+        @inventory_risk = fetch_inventory_risk
 
-      # 🚀 Inventory Optimization Engine
-      @inventory_optimization = SellerInventoryOptimizationService.new(current_user).optimize_inventory_levels
-
-      # 🚀 Supply Chain Analytics
-      @supply_chain_analytics = SellerSupplyChainService.new(current_user).analyze_supply_chain
-
-      # 🚀 Warehouse Management Intelligence
-      @warehouse_management = SellerWarehouseService.new(current_user).manage_warehouse_operations
-
-      # 🚀 Stock Level Prediction
-      @stock_prediction = SellerStockPredictionService.new(current_user).predict_stock_levels
-
-      # 🚀 Inventory Cost Analysis
-      @inventory_cost_analysis = SellerInventoryCostService.new(current_user).analyze_inventory_costs
-
-      # 🚀 Supplier Performance Analytics
-      @supplier_analytics = SellerSupplierService.new(current_user).analyze_supplier_performance
-
-      # 🚀 Inventory Turnover Optimization
-      @turnover_optimization = SellerTurnoverOptimizationService.new(current_user).optimize_turnover
-
-      # 🚀 Inventory Risk Assessment
-      @inventory_risk = SellerInventoryRiskService.new(current_user).assess_inventory_risks
-
-      respond_to do |format|
-        format.html { render :inventory_management }
-        format.json { render json: @inventory_intelligence }
-        format.xml { render xml: @inventory_intelligence }
+        respond_to do |format|
+          format.html { render :inventory_management }
+          format.json { render json: @inventory_intelligence }
+          format.xml { render xml: @inventory_intelligence }
+        end
+      rescue StandardError => e
+        handle_error(e, 'inventory_management')
       end
     end
 
-    # 🚀 MARKETPLACE OPTIMIZATION CENTER
     def marketplace_optimization
-      # 🚀 AI-Powered Marketplace Intelligence
-      @marketplace_intelligence = SellerMarketplaceIntelligenceService.new(current_user).generate_marketplace_insights
+      start_time = Time.current
 
-      # 🚀 Competitive Positioning Analysis
-      @competitive_positioning = SellerCompetitivePositioningService.new(current_user).analyze_positioning
+      begin
+        @marketplace_intelligence = fetch_marketplace_intelligence
+        @competitive_positioning = fetch_competitive_positioning
+        @pricing_optimization = fetch_pricing_optimization
+        @listing_optimization = fetch_listing_optimization
+        @search_optimization = fetch_search_optimization
+        @review_management = fetch_review_management
+        @promotional_strategy = fetch_promotional_strategy
+        @expansion_planning = fetch_expansion_planning
+        @cross_marketplace_sync = fetch_cross_marketplace_sync
+        @performance_prediction = fetch_performance_prediction
 
-      # 🚀 Pricing Optimization Engine
-      @pricing_optimization = SellerPricingOptimizationService.new(current_user).optimize_pricing_strategy
-
-      # 🚀 Product Listing Optimization
-      @listing_optimization = SellerListingOptimizationService.new(current_user).optimize_product_listings
-
-      # 🚀 Search Ranking Optimization
-      @search_optimization = SellerSearchOptimizationService.new(current_user).optimize_search_rankings
-
-      # 🚀 Customer Review Management
-      @review_management = SellerReviewManagementService.new(current_user).manage_customer_reviews
-
-      # 🚀 Promotional Strategy Optimization
-      @promotional_strategy = SellerPromotionalStrategyService.new(current_user).optimize_promotional_strategies
-
-      # 🚀 Marketplace Expansion Planning
-      @expansion_planning = SellerExpansionPlanningService.new(current_user).plan_marketplace_expansion
-
-      # 🚀 Cross-Marketplace Synchronization
-      @cross_marketplace_sync = SellerCrossMarketplaceService.new(current_user).synchronize_listings
-
-      # 🚀 Marketplace Performance Prediction
-      @performance_prediction = SellerPerformancePredictionService.new(current_user).predict_marketplace_performance
-
-      respond_to do |format|
-        format.html { render :marketplace_optimization }
-        format.json { render json: @marketplace_intelligence }
-        format.xml { render xml: @marketplace_intelligence }
+        respond_to do |format|
+          format.html { render :marketplace_optimization }
+          format.json { render json: @marketplace_intelligence }
+          format.xml { render xml: @marketplace_intelligence }
+        end
+      rescue StandardError => e
+        handle_error(e, 'marketplace_optimization')
       end
     end
 
-    # 🚀 FINANCIAL MANAGEMENT CENTER
     def financial_management
-      # 🚀 Comprehensive Financial Analytics
-      @financial_analytics = SellerFinancialAnalyticsService.new(current_user).generate_comprehensive_analytics
+      start_time = Time.current
 
-      # 🚀 Revenue Intelligence and Forecasting
-      @revenue_intelligence = SellerRevenueIntelligenceService.new(current_user).forecast_revenue_trends
+      begin
+        @financial_analytics = fetch_financial_analytics
+        @revenue_intelligence = fetch_revenue_intelligence
+        @cost_analysis = fetch_cost_analysis
+        @profitability_analytics = fetch_profitability_analytics
+        @cash_flow_management = fetch_cash_flow_management
+        @fee_optimization = fetch_fee_optimization
+        @financial_risk = fetch_financial_risk
+        @tax_planning = fetch_tax_planning
+        @financial_reporting = fetch_financial_reporting
+        @financial_goals = fetch_financial_goals
 
-      # 🚀 Cost Analysis and Optimization
-      @cost_analysis = SellerCostAnalysisService.new(current_user).identify_cost_optimization_opportunities
-
-      # 🚀 Profitability Analytics
-      @profitability_analytics = SellerProfitabilityService.new(current_user).analyze_profit_centers
-
-      # 🚀 Cash Flow Management
-      @cash_flow_management = SellerCashFlowService.new(current_user).manage_cash_flow
-
-      # 🚀 Fee Structure Optimization
-      @fee_optimization = SellerFeeOptimizationService.new(current_user).optimize_fee_structures
-
-      # 🚀 Financial Risk Assessment
-      @financial_risk = SellerFinancialRiskService.new(current_user).assess_financial_risks
-
-      # 🚀 Tax Planning and Compliance
-      @tax_planning = SellerTaxPlanningService.new(current_user).plan_tax_strategies
-
-      # 🚀 Financial Reporting Automation
-      @financial_reporting = SellerFinancialReportingService.new(current_user).automate_reporting
-
-      # 🚀 Financial Goal Tracking
-      @financial_goals = SellerFinancialGoalsService.new(current_user).track_financial_goals
-
-      respond_to do |format|
-        format.html { render :financial_management }
-        format.json { render json: @financial_analytics }
-        format.pdf { generate_financial_report_pdf }
-        format.xlsx { generate_financial_report_excel }
+        respond_to do |format|
+          format.html { render :financial_management }
+          format.json { render json: @financial_analytics }
+          format.pdf { generate_financial_report_pdf }
+          format.xlsx { generate_financial_report_excel }
+        end
+      rescue StandardError => e
+        handle_error(e, 'financial_management')
       end
     end
 
-    # 🚀 CUSTOMER RELATIONSHIP MANAGEMENT
     def customer_relationships
-      # 🚀 Advanced Customer Analytics Dashboard
-      @customer_analytics = SellerCustomerAnalyticsService.new(current_user).generate_comprehensive_analytics
+      start_time = Time.current
 
-      # 🚀 Customer Segmentation Intelligence
-      @customer_segmentation = SellerCustomerSegmentationService.new(current_user).perform_intelligent_segmentation
+      begin
+        @customer_analytics = fetch_customer_analytics
+        @customer_segmentation = fetch_customer_segmentation
+        @lifetime_value_analysis = fetch_lifetime_value_analysis
+        @behavior_patterns = fetch_behavior_patterns
+        @satisfaction_monitoring = fetch_satisfaction_monitoring
+        @communication_optimization = fetch_communication_optimization
+        @retention_strategies = fetch_retention_strategies
+        @feedback_analysis = fetch_feedback_analysis
+        @journey_optimization = fetch_journey_optimization
+        @success_prediction = fetch_success_prediction
 
-      # 🚀 Customer Lifetime Value Analysis
-      @lifetime_value_analysis = SellerLifetimeValueService.new(current_user).analyze_customer_values
-
-      # 🚀 Customer Behavior Pattern Analysis
-      @behavior_patterns = SellerBehaviorPatternService.new(current_user).analyze_customer_behavior
-
-      # 🚀 Customer Satisfaction Monitoring
-      @satisfaction_monitoring = SellerSatisfactionService.new(current_user).monitor_satisfaction
-
-      # 🚀 Customer Communication Optimization
-      @communication_optimization = SellerCommunicationService.new(current_user).optimize_communication
-
-      # 🚀 Customer Retention Strategies
-      @retention_strategies = SellerRetentionService.new(current_user).develop_retention_strategies
-
-      # 🚀 Customer Feedback Analysis
-      @feedback_analysis = SellerFeedbackService.new(current_user).analyze_customer_feedback
-
-      # 🚀 Customer Journey Optimization
-      @journey_optimization = SellerJourneyOptimizationService.new(current_user).optimize_customer_journey
-
-      # 🚀 Customer Success Prediction
-      @success_prediction = SellerSuccessPredictionService.new(current_user).predict_customer_success
-
-      respond_to do |format|
-        format.html { render :customer_relationships }
-        format.json { render json: @customer_analytics }
-        format.csv { generate_customer_analytics_csv }
+        respond_to do |format|
+          format.html { render :customer_relationships }
+          format.json { render json: @customer_analytics }
+          format.csv { generate_customer_analytics_csv }
+        end
+      rescue StandardError => e
+        handle_error(e, 'customer_relationships')
       end
     end
 
-    # 🚀 PRODUCT PERFORMANCE ANALYTICS
     def product_performance
-      # 🚀 Comprehensive Product Performance Dashboard
-      @product_performance = SellerProductPerformanceService.new(current_user).generate_comprehensive_analytics
+      start_time = Time.current
 
-      # 🚀 Product Profitability Analysis
-      @product_profitability = SellerProductProfitabilityService.new(current_user).analyze_product_profitability
+      begin
+        @product_performance = fetch_product_performance
+        @product_profitability = fetch_product_profitability
+        @product_trends = fetch_product_trends
+        @product_positioning = fetch_product_positioning
+        @product_lifecycle = fetch_product_lifecycle
+        @product_innovation = fetch_product_innovation
+        @product_quality = fetch_product_quality
+        @product_returns = fetch_product_returns
+        @product_recommendations = fetch_product_recommendations
+        @performance_prediction = fetch_performance_prediction
 
-      # 🚀 Product Trend Analysis
-      @product_trends = SellerProductTrendService.new(current_user).analyze_product_trends
-
-      # 🚀 Product Positioning Optimization
-      @product_positioning = SellerProductPositioningService.new(current_user).optimize_product_positioning
-
-      # 🚀 Product Lifecycle Management
-      @product_lifecycle = SellerProductLifecycleService.new(current_user).manage_product_lifecycle
-
-      # 🚀 Product Innovation Pipeline
-      @product_innovation = SellerProductInnovationService.new(current_user).manage_innovation_pipeline
-
-      # 🚀 Product Quality Analytics
-      @product_quality = SellerProductQualityService.new(current_user).analyze_product_quality
-
-      # 🚀 Product Return Analysis
-      @product_returns = SellerProductReturnService.new(current_user).analyze_return_patterns
-
-      # 🚀 Product Recommendation Engine
-      @product_recommendations = SellerProductRecommendationService.new(current_user).generate_recommendations
-
-      # 🚀 Product Performance Prediction
-      @performance_prediction = SellerProductPerformancePredictionService.new(current_user).predict_performance
-
-      respond_to do |format|
-        format.html { render :product_performance }
-        format.json { render json: @product_performance }
-        format.pdf { generate_product_performance_pdf }
-        format.csv { generate_product_performance_csv }
+        respond_to do |format|
+          format.html { render :product_performance }
+          format.json { render json: @product_performance }
+          format.pdf { generate_product_performance_pdf }
+          format.csv { generate_product_performance_csv }
+        end
+      rescue StandardError => e
+        handle_error(e, 'product_performance')
       end
     end
 
-    # 🚀 MARKETING AND PROMOTIONS CENTER
     def marketing_promotions
-      # 🚀 AI-Powered Marketing Intelligence
-      @marketing_intelligence = SellerMarketingIntelligenceService.new(current_user).generate_marketing_insights
+      start_time = Time.current
 
-      # 🚀 Promotional Campaign Optimization
-      @campaign_optimization = SellerCampaignOptimizationService.new(current_user).optimize_campaigns
+      begin
+        @marketing_intelligence = fetch_marketing_intelligence
+        @campaign_optimization = fetch_campaign_optimization
+        @acquisition_analytics = fetch_acquisition_analytics
+        @marketing_roi = fetch_marketing_roi
+        @brand_performance = fetch_brand_performance
+        @social_media_analytics = fetch_social_media_analytics
+        @email_marketing = fetch_email_marketing
+        @influencer_analytics = fetch_influencer_analytics
+        @marketing_prediction = fetch_marketing_prediction
+        @budget_optimization = fetch_budget_optimization
 
-      # 🚀 Customer Acquisition Analytics
-      @acquisition_analytics = SellerAcquisitionService.new(current_user).analyze_acquisition_channels
-
-      # 🚀 Marketing ROI Analysis
-      @marketing_roi = SellerMarketingROIService.new(current_user).analyze_marketing_roi
-
-      # 🚀 Brand Performance Analytics
-      @brand_performance = SellerBrandPerformanceService.new(current_user).analyze_brand_performance
-
-      # 🚀 Social Media Analytics
-      @social_media_analytics = SellerSocialMediaService.new(current_user).analyze_social_media_performance
-
-      # 🚀 Email Marketing Optimization
-      @email_marketing = SellerEmailMarketingService.new(current_user).optimize_email_campaigns
-
-      # 🚀 Influencer Partnership Analytics
-      @influencer_analytics = SellerInfluencerService.new(current_user).analyze_influencer_partnerships
-
-      # 🚀 Marketing Trend Prediction
-      @marketing_prediction = SellerMarketingPredictionService.new(current_user).predict_marketing_trends
-
-      # 🚀 Marketing Budget Optimization
-      @budget_optimization = SellerBudgetOptimizationService.new(current_user).optimize_marketing_budget
-
-      respond_to do |format|
-        format.html { render :marketing_promotions }
-        format.json { render json: @marketing_intelligence }
-        format.xml { render xml: @marketing_intelligence }
+        respond_to do |format|
+          format.html { render :marketing_promotions }
+          format.json { render json: @marketing_intelligence }
+          format.xml { render xml: @marketing_intelligence }
+        end
+      rescue StandardError => e
+        handle_error(e, 'marketing_promotions')
       end
     end
 
-    # 🚀 OPERATIONAL EXCELLENCE CENTER
     def operational_excellence
-      # 🚀 Operational Performance Analytics
-      @operational_analytics = SellerOperationalService.new(current_user).generate_operational_insights
+      start_time = Time.current
 
-      # 🚀 Process Optimization Engine
-      @process_optimization = SellerProcessOptimizationService.new(current_user).optimize_business_processes
+      begin
+        @operational_analytics = fetch_operational_analytics
+        @process_optimization = fetch_process_optimization
+        @quality_management = fetch_quality_management
+        @operational_risk = fetch_operational_risk
+        @resource_optimization = fetch_resource_optimization
+        @operational_cost = fetch_operational_cost
+        @performance_benchmarking = fetch_performance_benchmarking
+        @continuous_improvement = fetch_continuous_improvement
+        @operational_forecasting = fetch_operational_forecasting
+        @excellence_scoring = fetch_excellence_scoring
 
-      # 🚀 Quality Management Intelligence
-      @quality_management = SellerQualityManagementService.new(current_user).manage_quality_standards
-
-      # 🚀 Operational Risk Assessment
-      @operational_risk = SellerOperationalRiskService.new(current_user).assess_operational_risks
-
-      # 🚀 Resource Optimization Analytics
-      @resource_optimization = SellerResourceOptimizationService.new(current_user).optimize_resource_allocation
-
-      # 🚀 Operational Cost Analysis
-      @operational_cost = SellerOperationalCostService.new(current_user).analyze_operational_costs
-
-      # 🚀 Performance Benchmarking
-      @performance_benchmarking = SellerPerformanceBenchmarkService.new(current_user).benchmark_performance
-
-      # 🚀 Continuous Improvement Analytics
-      @continuous_improvement = SellerContinuousImprovementService.new(current_user).drive_improvement
-
-      # 🚀 Operational Forecasting
-      @operational_forecasting = SellerOperationalForecastService.new(current_user).forecast_operational_needs
-
-      # 🚀 Operational Excellence Scoring
-      @excellence_scoring = SellerExcellenceScoringService.new(current_user).calculate_excellence_score
-
-      respond_to do |format|
-        format.html { render :operational_excellence }
-        format.json { render json: @operational_analytics }
-        format.pdf { generate_operational_report_pdf }
+        respond_to do |format|
+          format.html { render :operational_excellence }
+          format.json { render json: @operational_analytics }
+          format.pdf { generate_operational_report_pdf }
+        end
+      rescue StandardError => e
+        handle_error(e, 'operational_excellence')
       end
     end
 
     private
 
-    # 🚀 ENTERPRISE SERVICE INITIALIZATION
     def initialize_enterprise_services
       @seller_service ||= SellerService.new(current_user)
       @business_intelligence_service ||= SellerBusinessIntelligenceService.new(current_user)
@@ -381,7 +789,6 @@ module Seller
     end
 
     def authenticate_user_with_behavioral_analysis
-      # 🚀 AI-Enhanced Seller Authentication
       auth_result = SellerAuthenticationService.new(
         current_user,
         request,
@@ -393,7 +800,6 @@ module Seller
         return
       end
 
-      # 🚀 Continuous Seller Session Validation
       SellerContinuousAuthService.new(current_user, request).validate_session_integrity
     end
 
@@ -456,7 +862,6 @@ module Seller
       SellerPredictiveInsightsService.new(current_user).trigger_insights
     end
 
-    # 🚀 CIRCUIT BREAKER PROTECTION
     def circuit_breaker
       @circuit_breaker ||= SellerCircuitBreakerService.new(
         failure_threshold: 3,
@@ -465,7 +870,6 @@ module Seller
       )
     end
 
-    # 🚀 PERFORMANCE MONITORING
     def performance_monitor
       @performance_monitor ||= SellerPerformanceMonitorService.new(
         p99_target: 3.milliseconds,
@@ -473,18 +877,11 @@ module Seller
       )
     end
 
-    # 🚀 ERROR HANDLING WITH ANTIFRAGILE RECOVERY
     rescue_from StandardError do |exception|
-      # 🚀 Intelligent Seller Error Classification
+      Rails.logger.error("Seller Dashboard Error: #{exception.message}", backtrace: exception.backtrace)
       error_classification = SellerErrorClassificationService.new(exception).classify
-
-      # 🚀 Adaptive Seller Recovery Strategy
       recovery_strategy = AdaptiveSellerRecoveryService.new(error_classification).determine_strategy
-
-      # 🚀 Circuit Breaker State Management
       circuit_breaker.record_failure(exception)
-
-      # 🚀 Comprehensive Seller Error Response
       @error_response = SellerErrorResponseService.new(
         exception,
         error_classification,

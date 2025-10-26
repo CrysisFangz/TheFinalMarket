@@ -1,7 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/**
+ * Prime Mandate Spirit Components - Legacy Support
+ *
+ * Legacy spiritual theme components optimized for performance and accessibility.
+ * These components complement the main Tailwind CSS system.
+ */
+
+/* Enhanced Spirit Loader - Performance Optimized */
 .spirit-loader {
   width: 48px;
   height: 48px;
   position: relative;
+  /* Hardware acceleration for 60FPS */
+  transform: translateZ(0);
 }
 
 .spirit-loader:before,
@@ -11,10 +24,14 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: var(--color-spirit-secondary);
+  background: var(--color-primary-light);
   opacity: 0.7;
   filter: blur(5px);
-}
+  /* Hardware acceleration */
+  transform: translateZ(0);
+  will-change: transform, opacity;
+}</search>
+</search_and_replace>
 
 .spirit-loader:before {
   animation: spirit-pulse-grow 2s ease-in-out infinite;

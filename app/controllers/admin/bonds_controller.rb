@@ -24,8 +24,19 @@ class Admin::BondsController < Admin::BaseController
   # @performance Optimized with eager loading and pagination
   # @security Filtered by admin authorization scope
   def index
-    @bonds = fetch_bonds_with_pagination
-    @summary_stats = calculate_bond_summary_stats
+    @bonds = CircuitBreaker.execute_with_fallback(:admin_bonds_fetch) do
+      fetch_bonds_with_pagination
+    end
+
+    @summary_stats = CircuitBreaker.execute_with_fallback(:admin_bonds_stats) do
+      calculate_bond_summary_stats
+    end
+
+    @presenter = CircuitBreaker.execute_with_fallback(:admin_bonds_presenter) do
+      AdminBondsPresenter.new(@bonds, @summary_stats)
+    end
+  rescue => e
+    handle_bonds_error(e)
   end
 
   ##
@@ -33,8 +44,12 @@ class Admin::BondsController < Admin::BaseController
   #
   # @security Ensures bond belongs to authorized admin scope
   def show
-    @bond_history = @bond.bond_transactions.includes(:payment_transaction).order(created_at: :desc)
-    @user_bonds_count = @bond.user.bonds.where(status: :active).count
+    @bond_history = CircuitBreaker.execute_with_fallback(:bond_history) do
+      @bond.bond_transactions.includes(:payment_transaction).order(created_at: :desc)
+    end
+    @user_bonds_count = CircuitBreaker.execute_with_fallback(:user_bonds_count) do
+      @bond.user.bonds.where(status: :active).count
+    end
   end
 
   ##
@@ -80,10 +95,12 @@ class Admin::BondsController < Admin::BaseController
   #
   # @return [ActiveRecord::Relation] Paginated bonds with user data
   def fetch_bonds_with_pagination
-    Bond.includes(:user, :bond_transactions)
-        .order(created_at: :desc)
-        .page(params[:page])
-        .per(BONDS_PER_PAGE)
+    CircuitBreaker.execute_with_fallback(:bond_fetch) do
+      Bond.includes(:user, :bond_transactions)
+          .order(created_at: :desc)
+          .page(params[:page])
+          .per(BONDS_PER_PAGE)
+    end
   end
 
   ##
@@ -109,7 +126,9 @@ class Admin::BondsController < Admin::BaseController
   # @raise [ActiveRecord::RecordNotFound] if bond not found
   # @return [Bond] The found bond
   def set_bond
-    @bond = Bond.find(params[:id])
+    @bond = CircuitBreaker.execute_with_fallback(:bond_find) do
+      Bond.find(params[:id])
+    end
   rescue ActiveRecord::RecordNotFound
     Rails.logger.warn("Admin attempted to access non-existent bond: #{params[:id]}")
     redirect_to admin_bonds_path, alert: 'Bond not found.'
@@ -159,7 +178,9 @@ class Admin::BondsController < Admin::BaseController
   #
   # @return [ServiceResult] Result of the approval operation
   def execute_bond_approval
-    AdminBondApprovalService.new(current_admin, @bond).execute
+    CircuitBreaker.execute_with_fallback(:bond_approval) do
+      AdminBondApprovalService.new(current_admin, @bond).execute
+    end
   rescue => e
     Rails.logger.error("Bond approval failed for bond #{@bond.id}: #{e.message}")
     ServiceResult.failure("Failed to approve bond: #{e.message}")
@@ -171,7 +192,9 @@ class Admin::BondsController < Admin::BaseController
   # @return [ServiceResult] Result of the forfeiture operation
   def execute_bond_forfeiture
     reason = params.dig(:bond, :forfeiture_reason)
-    AdminBondForfeitureService.new(current_admin, @bond, reason).execute
+    CircuitBreaker.execute_with_fallback(:bond_forfeiture) do
+      AdminBondForfeitureService.new(current_admin, @bond, reason).execute
+    end
   rescue => e
     Rails.logger.error("Bond forfeiture failed for bond #{@bond.id}: #{e.message}")
     ServiceResult.failure("Failed to forfeit bond: #{e.message}")

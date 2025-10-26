@@ -1,20 +1,25 @@
+require 'analytics_report_presenter'
+
 class Admin::AnalyticsController < Admin::BaseController
   def index
-    @analytics = AnalyticsService.new(
-      start_date: params.fetch(:start_date, 30.days.ago),
-      end_date: params.fetch(:end_date, Time.current)
-    )
+    analytics_result = CircuitBreaker.execute_with_fallback(:admin_analytics_fetch) do
+      AdminAnalyticsQuery.call(
+        start_date: params.fetch(:start_date, 30.days.ago),
+        end_date: params.fetch(:end_date, Time.current)
+      )
+    end
 
-    @sales_data = @analytics.sales_overview
-    @user_metrics = @analytics.user_metrics
-    @product_performance = @analytics.product_performance
-    @customer_insights = @analytics.customer_insights
+    @presenter = CircuitBreaker.execute_with_fallback(:admin_analytics_presenter) do
+      AdminAnalyticsPresenter.new(analytics_result)
+    end
 
     respond_to do |format|
       format.html
-      format.json { render json: build_dashboard_data }
-      format.csv { send_data generate_csv_report, filename: "analytics-#{Date.current}.csv" }
+      format.json { render json: @presenter.to_json }
+      format.csv { send_data @presenter.to_csv, filename: "analytics-#{Date.current}.csv" }
     end
+  rescue StandardError => e
+    handle_analytics_error(e)
   end
 
   def real_time
@@ -27,74 +32,87 @@ class Admin::AnalyticsController < Admin::BaseController
 
     respond_to do |format|
       format.turbo_stream
-      format.json { render json: build_real_time_data }
+      format.json { render json: @presenter.to_json }
     end
+  rescue StandardError => e
+    handle_analytics_error(e)
   end
 
   def cohorts
-    @cohort_analysis = CohortAnalysisService.new(
-      start_date: params.fetch(:start_date, 12.months.ago),
-      end_date: params.fetch(:end_date, Time.current)
-    ).analyze
+    cohort_result = CircuitBreaker.execute_with_fallback(:admin_cohort_analysis) do
+      AdminCohortAnalysisQuery.call(
+        start_date: params.fetch(:start_date, 12.months.ago),
+        end_date: params.fetch(:end_date, Time.current)
+      )
+    end
+
+    @presenter = CircuitBreaker.execute_with_fallback(:admin_cohort_presenter) do
+      AdminCohortAnalysisPresenter.new(cohort_result)
+    end
 
     respond_to do |format|
       format.html
-      format.json { render json: @cohort_analysis }
+      format.json { render json: @presenter.to_json }
     end
+  rescue StandardError => e
+    handle_analytics_error(e)
   end
 
   def export
-    report_type = params[:type]
-    start_date = params.fetch(:start_date, 30.days.ago)
-    end_date = params.fetch(:end_date, Time.current)
-
-    ExportAnalyticsJob.perform_later(
-      report_type: report_type,
-      start_date: start_date,
-      end_date: end_date,
-      user_id: current_user.id
-    )
+    export_result = CircuitBreaker.execute_with_fallback(:admin_analytics_export) do
+      AdminAnalyticsExportService.call(
+        report_type: params[:type],
+        start_date: params.fetch(:start_date, 30.days.ago),
+        end_date: params.fetch(:end_date, Time.current),
+        user_id: current_user.id
+      )
+    end
 
     redirect_to admin_analytics_path, notice: 'Your report is being generated and will be emailed to you shortly.'
+  rescue StandardError => e
+    handle_analytics_error(e)
   end
 
   private
 
-  def build_dashboard_data
-    {
-      sales_overview: @sales_data,
-      user_metrics: @user_metrics,
-      product_performance: @product_performance,
-      customer_insights: @customer_insights
-    }
+  def handle_analytics_error(error)
+    error_classification = AdminErrorClassificationService.new(error).classify
+    recovery_strategy = AdaptiveAdminRecoveryService.new(error_classification).determine_strategy
+    circuit_breaker.record_failure(error)
+
+    @error_response = AdminErrorResponseService.new(
+      error,
+      error_classification,
+      recovery_strategy
+    ).generate_response
+
+    respond_to do |format|
+      format.html {
+        flash[:error] = @error_response.user_message
+        redirect_to admin_analytics_path
+      }
+      format.json { render json: @error_response, status: error_classification.http_status }
+    end
   end
 
-  def build_real_time_data
-    {
-      current_visitors: @current_visitors,
-      active_carts: @active_carts,
-      recent_orders: @recent_orders.as_json(
-        only: [:id, :total_amount, :status],
-        include: { user: { only: [:id, :email] } }
-      ),
-      recent_events: @recent_events.as_json(
-        only: [:name, :time],
-        include: { visit: { only: [:landing_page, :device_type] } }
-      )
-    }
-  end
+  # Enhanced Error Handling with Antifragile Recovery
+  rescue_from StandardError do |exception|
+    error_classification = AdminErrorClassificationService.new(exception).classify
+    recovery_strategy = AdaptiveAdminRecoveryService.new(error_classification).determine_strategy
+    circuit_breaker.record_failure(exception)
 
-  def generate_csv_report
-    CSV.generate(headers: true) do |csv|
-      csv << ['Metric', 'Value', 'Date Range']
-      
-      @sales_data.each do |key, value|
-        csv << [key.to_s.humanize, value, "#{params[:start_date]} - #{params[:end_date]}"]
-      end
-      
-      @user_metrics.each do |key, value|
-        csv << [key.to_s.humanize, value, "#{params[:start_date]} - #{params[:end_date]}"]
-      end
+    @error_response = AdminErrorResponseService.new(
+      exception,
+      error_classification,
+      recovery_strategy
+    ).generate_response
+
+    respond_to do |format|
+      format.html {
+        flash[:error] = @error_response.user_message
+        redirect_to admin_analytics_path
+      }
+      format.json { render json: @error_response, status: error_classification.http_status }
     end
   end
 end

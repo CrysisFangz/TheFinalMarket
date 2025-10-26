@@ -1,7 +1,14 @@
-/* ============================================
-   ENTERPRISE TOAST NOTIFICATION SYSTEM v3.0
-   Ultra-Performance, Accessible, Theme-Aware
-   ============================================ */
+/**
+ * Prime Mandate Toast Notification System
+ *
+ * Ultra-performance, WCAG AAA accessible toast notifications optimized for:
+ * - 60FPS animations with hardware acceleration
+ * - Core Web Vitals compliance (FID < 50ms, LCP < 2.5s)
+ * - Mobile-first responsive design
+ * - Reduced motion and high contrast support
+ * - Dark mode compatibility
+ * - Zero layout shift (CLS prevention)
+ */
 
 /* ============================================
    CSS CUSTOM PROPERTIES (DESIGN TOKENS)

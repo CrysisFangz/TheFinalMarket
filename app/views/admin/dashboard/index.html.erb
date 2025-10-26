@@ -8,40 +8,42 @@
   - Zero-Trust: Cryptographic data validation perimeter
   ============================================================================ -->
 
-<!-- Dashboard Container with Advanced State Management -->
-<div id="admin-dashboard" class="dashboard-container hyperscale-ready">
+<main id="admin-dashboard" class="container mx-auto px-4 py-8 bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen relative">
+  <!-- Background overlay for visual depth -->
+  <div class="absolute inset-0 bg-gradient-to-br from-blue-50 to-purple-50 opacity-50 pointer-events-none"></div>
+
   <!-- Cognitive Header: Self-Elucidating Interface Hierarchy -->
-  <header class="dashboard-header" role="banner" aria-label="Administrative Control Center">
-    <div class="header-content">
+  <header class="relative z-10 bg-white shadow-lg rounded-lg p-6 mb-8" role="banner" aria-label="Administrative Control Center">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
       <!-- Adaptive Title with Contextual Intelligence -->
-      <h1 class="dashboard-title hyperscale-typography"
+      <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4 lg:mb-0"
           data-testid="dashboard-title"
           aria-describedby="dashboard-description">
-        <span class="title-primary">Mission Control Center</span>
-        <span class="title-secondary" aria-hidden="true">• Live •</span>
+        <span>Mission Control Center</span>
+        <span class="ml-2 text-green-500 font-semibold" aria-hidden="true">• Live •</span>
       </h1>
 
       <!-- Contextual Description for Cognitive Accessibility -->
-      <p id="dashboard-description" class="dashboard-description sr-only">
+      <p id="dashboard-description" class="sr-only">
         Real-time marketplace analytics and control interface with hyperscale capabilities
       </p>
 
       <!-- Advanced Control Panel -->
-      <div class="dashboard-controls" role="toolbar" aria-label="Dashboard Controls">
+      <div class="flex flex-col sm:flex-row gap-4" role="toolbar" aria-label="Dashboard Controls">
         <!-- Temporal Navigation with Intelligent Defaults -->
-        <div class="temporal-navigator" role="group" aria-label="Time Range Selection">
+        <div role="group" aria-label="Time Range Selection">
           <%= render partial: 'admin/dashboard/components/time_selector',
                      locals: { current_range: @time_range, available_ranges: @available_ranges } %>
         </div>
 
         <!-- View Mode Toggle with Accessibility -->
-        <div class="view-mode-toggle" role="group" aria-label="Display Mode">
+        <div role="group" aria-label="Display Mode">
           <%= render partial: 'admin/dashboard/components/view_mode_toggle',
                      locals: { current_mode: @view_mode } %>
         </div>
 
         <!-- Export Capabilities -->
-        <div class="export-controls" role="group" aria-label="Data Export">
+        <div role="group" aria-label="Data Export">
           <%= render partial: 'admin/dashboard/components/export_controls',
                      locals: { export_formats: @export_formats } %>
         </div>
@@ -50,7 +52,7 @@
   </header>
 
   <!-- Hyperscale Metrics Grid: Asymptotically Optimal Layout -->
-  <section class="metrics-grid hyperscale-grid"
+  <section class="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
            data-component="metrics-grid"
            aria-label="Key Performance Indicators">
 
@@ -82,12 +84,12 @@
   </section>
 
   <!-- Adaptive Content Streams: Context-Aware Information Flow -->
-  <section class="content-streams adaptive-layout"
+  <section class="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8"
            data-component="content-streams"
            aria-label="Dynamic Content Streams">
 
     <!-- Intelligent Activity Feed -->
-    <div class="activity-stream-container" data-stream="activity">
+    <div data-stream="activity">
       <%= render partial: 'admin/dashboard/streams/activity_stream',
                  locals: {
                    recent_activities: @recent_activities,
@@ -96,7 +98,7 @@
     </div>
 
     <!-- Contextual User Management -->
-    <div class="user-stream-container" data-stream="users">
+    <div data-stream="users">
       <%= render partial: 'admin/dashboard/streams/user_stream',
                  locals: {
                    recent_users: @recent_users,
@@ -106,7 +108,7 @@
     </div>
 
     <!-- Product Intelligence Stream -->
-    <div class="product-stream-container" data-stream="products">
+    <div data-stream="products">
       <%= render partial: 'admin/dashboard/streams/product_stream',
                  locals: {
                    recent_products: @recent_products,
@@ -116,7 +118,7 @@
     </div>
 
     <!-- Financial Oversight Stream -->
-    <div class="financial-stream-container" data-stream="financial">
+    <div data-stream="financial">
       <%= render partial: 'admin/dashboard/streams/financial_stream',
                  locals: {
                    revenue_metrics: @revenue_metrics,
@@ -127,7 +129,7 @@
   </section>
 
   <!-- Sophisticated Interaction Layer -->
-  <section class="interaction-layer hyperscale-interactions"
+  <section class="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-6"
            data-component="interaction-layer"
            aria-label="Advanced Interactions">
 
@@ -211,13 +213,30 @@
     font-family: var(--font-primary);
     line-height: 1.6;
     color: var(--color-text-primary);
-    background: var(--color-bg-primary);
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    position: relative;
+  }
+
+  .dashboard-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
   }
 
   .hyperscale-ready {
     contain: layout style paint;
     content-visibility: auto;
     transform: translateZ(0); /* GPU acceleration */
+    position: relative;
+    z-index: 1;
   }
 
   .hyperscale-grid {
@@ -234,6 +253,10 @@
     font-weight: 600;
     letter-spacing: -0.025em;
     margin: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
   /* Responsive Design for Hyperscale Deployment */

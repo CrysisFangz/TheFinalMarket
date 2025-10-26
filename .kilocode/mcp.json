@@ -10,7 +10,10 @@
         "DEFAULT_MINIMUM_TOKENS": ""
       },
       "timeout": 300,
-      "alwaysAllow": []
+      "alwaysAllow": [
+        "resolve-library-id",
+        "get-library-docs"
+      ]
     },
     "memory": {
       "command": "npx",

@@ -123,13 +123,13 @@ gem "circuitbox", "~> 2.0"
 gem "semian", "~> 0.11"  # Enhanced circuit breaker
 
 # Bulkhead isolation for service protection
-gem "bulkhead", "~> 0.1"
+# gem "bulkhead", "~> 0.1"  # Commented out - gem not available
 
 # Adaptive rate limiting with intelligent backoff
 gem "rack-throttle", "~> 0.7"
 
 # Distributed tracing and observability
-gem "zipkin-tracer", "~> 0.54"
+gem "zipkin-tracer", "~> 0.48"
 gem "opentracing", "~> 0.5"
 
 # Health check orchestration
@@ -160,7 +160,7 @@ gem "elasticsearch-rails", "~> 8.0"
 gem "searchkick", "~> 5.4"
 
 # Event store for audit trails and temporal queries
-gem "event_store_client", "~> 1.2"
+# gem "event_store_client", "~> 1.2"  # Commented out - dependency conflict with square.rb
 
 # Database query optimization and health monitoring
 gem "database_consistency", "~> 1.7", require: false
@@ -225,7 +225,7 @@ gem "vite_rails", "~> 3.0"
 # BUSINESS LAYER - Domain-Driven Design (Event Storming)
 # =============================================================================
 # Domain event publishing and subscription
-gem "wisper", "~> 2.2"
+gem "wisper", "~> 3.0"
 
 # Payment processing with Square and advanced fraud detection
 gem "square.rb", "~> 42.2"

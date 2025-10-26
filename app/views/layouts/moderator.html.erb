@@ -1,48 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#007bff">
+    <meta name="description" content="TheFinalMarket Moderator Dashboard - Manage disputes and cases efficiently.">
     <title>TheFinalMarket Moderator</title>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
-    <%= stylesheet_link_tag "application" %>
+    <%= stylesheet_link_tag "application", media: "all" %>
     <%= javascript_importmap_tags %>
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-info">
-      <div class="container">
-        <%= link_to "TheFinalMarket Moderator", moderator_root_path, class: "navbar-brand" %>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#modNavbar">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="modNavbar">
-          <ul class="navbar-nav me-auto">
-            <li class="nav-item">
-              <%= link_to "All Disputes", moderator_disputes_path, class: "nav-link" %>
-            </li>
-            <li class="nav-item">
-              <%= link_to "My Cases", moderator_disputes_path(my_cases: true), class: "nav-link" %>
-            </li>
-            <li class="nav-item">
-              <%= link_to "Unassigned", moderator_disputes_path(unassigned: true), class: "nav-link" %>
-            </li>
-            <li class="nav-item">
-              <%= link_to "Back to Site", root_path, class: "nav-link" %>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
+    <!-- Skip link for accessibility -->
+    <a href="#main-content" class="sr-only sr-only-focusable">Skip to main content</a>
 
-    <div class="container mt-4">
-      <% flash.each do |name, msg| %>
-        <div class="alert alert-<%= name == 'notice' ? 'success' : name %> alert-dismissible fade show">
-          <%= msg %>
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-      <% end %>
+    <!-- Moderator Navigation -->
+    <%= render 'shared/moderator_navbar' %>
+
+    <main id="main-content" class="container mt-4">
+      <!-- Flash Messages -->
+      <%= render 'shared/flash_messages' %>
 
       <%= yield %>
-    </div>
+    </main>
   </body>
 </html>

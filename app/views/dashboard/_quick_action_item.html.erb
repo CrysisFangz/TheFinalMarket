@@ -9,16 +9,9 @@
   text ||= 'Action'
   badge ||= nil
 %>
-<%= link_to link, class: quick_action_item_classes, 'aria-label': text do %>
-  <% if icon %>
-    <div class="<%= quick_action_item_classes %>-icon">
-      <%= icon %>
-    </div>
-  <% end %>
-  <span><%= text %></span>
-  <% if badge.present? %>
-    <span class="<%= notification_badge_classes %>" aria-label="<%= t('dashboard.unread_count', count: badge, default: "#{badge} unread items") %>">
-      <%= badge %>
-    </span>
-  <% end %>
-<% end %>
+<div data-controller="quick-action-item"
+     data-link="<%= link %>"
+     data-icon="<%= icon %>"
+     data-text="<%= text %>"
+     data-badge="<%= badge %>">
+</div>

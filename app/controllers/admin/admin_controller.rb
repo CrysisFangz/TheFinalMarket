@@ -48,18 +48,20 @@ class Admin::AdminController < ApplicationController
   # Main Administrative Dashboard: Optimized for Hyperscale
   def index
     # Delegate to service with caching and circuit breaker for resilience
-    dashboard_data = circuit_breaker.execute do
+    dashboard_data = CircuitBreaker.execute_with_fallback(:admin_dashboard_fetch) do
       cache_service.fetch("admin_dashboard_#{current_admin.id}_#{params.hash}", expires_in: 5.minutes) do
         dashboard_service.fetch_dashboard_data(current_admin, params)
       end
     end
 
-    @dashboard_data = dashboard_data
+    @presenter = CircuitBreaker.execute_with_fallback(:admin_dashboard_presenter) do
+      AdminDashboardPresenter.new(dashboard_data)
+    end
 
-    # Render with format flexibility and error handling
     respond_to do |format|
       format.html { render :index, layout: 'admin' }
-      format.json { render json: @dashboard_data, status: :ok }
+      format.json { render json: @presenter.to_json, status: :ok }
+      format.csv { send_data @presenter.to_csv, filename: "admin-dashboard-#{Time.current.to_date}.csv" }
     end
   rescue StandardError => e
     handle_dashboard_error(e)
@@ -94,13 +96,39 @@ class Admin::AdminController < ApplicationController
     end
   end
 
-  # Error Handling for Dashboard
+  # Error Handling for Dashboard with Enhanced Resilience
   def handle_dashboard_error(error)
-    Rails.logger.error("Dashboard Error: #{error.message}")
-    @dashboard_data = { error: 'Service temporarily unavailable' }
+    error_classification = AdminErrorClassificationService.new(error).classify
+    recovery_strategy = AdaptiveAdminRecoveryService.new(error_classification).determine_strategy
+    circuit_breaker.record_failure(error)
+
+    @error_response = AdminErrorResponseService.new(
+      error,
+      error_classification,
+      recovery_strategy
+    ).generate_response
+
     respond_to do |format|
-      format.html { render :error, status: :service_unavailable }
-      format.json { render json: @dashboard_data, status: :service_unavailable }
+      format.html { render 'admin/errors/enterprise_admin_error', status: error_classification.http_status }
+      format.json { render json: @error_response, status: error_classification.http_status }
+    end
+  end
+
+  # Enhanced Error Handling with Antifragile Recovery
+  rescue_from StandardError do |exception|
+    error_classification = AdminErrorClassificationService.new(exception).classify
+    recovery_strategy = AdaptiveAdminRecoveryService.new(error_classification).determine_strategy
+    circuit_breaker.record_failure(exception)
+
+    @error_response = AdminErrorResponseService.new(
+      exception,
+      error_classification,
+      recovery_strategy
+    ).generate_response
+
+    respond_to do |format|
+      format.html { render 'admin/errors/enterprise_admin_error', status: error_classification.http_status }
+      format.json { render json: @error_response, status: error_classification.http_status }
     end
   end
 end

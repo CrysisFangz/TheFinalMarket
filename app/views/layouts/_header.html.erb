@@ -1,0 +1,296 @@
+<%#
+  Header Partial - Atomic Presentation Component
+  Pure function of props: user_signed_in?, current_user, etc.
+  No business logic, state management, or side-effects.
+%>
+
+<%#
+  Skip to main content (Accessibility - WCAG AAA)
+  Enhanced with proper ARIA and focus management
+%>
+<a href="#main-content"
+   class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 z-50 bg-purple-600 text-white px-4 py-2 rounded-lg transition-all duration-200"
+   aria-label="Skip to main content">
+  Skip to main content
+</a>
+
+<%#
+  Global Loading Overlay - Progressive Enhancement
+  Non-blocking, with fallback for JS disabled
+%>
+<div data-controller="loading"
+     class="fixed inset-0 flex items-center justify-center z-50 bg-white/90 backdrop-blur-sm pointer-events-none opacity-0 transition-opacity duration-300"
+     data-loading-target="overlay"
+     role="status"
+     aria-live="polite"
+     aria-label="Loading content">
+  <div class="spinner" aria-hidden="true"></div>
+  <span class="sr-only">Loading...</span>
+</div>
+
+<%#
+  Navigation Header - Container Component
+  Manages state via Stimulus controllers for unidirectional flow
+%>
+<header class="sticky top-0 z-40 glass border-b border-gray-200/50 shadow-sm"
+        data-controller="mobile-menu notifications"
+        data-notifications-count-value="<%= current_user&.unread_notifications_count.to_i || 0 %>"
+        role="banner">
+
+  <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" role="navigation" aria-label="Main navigation">
+    <div class="flex justify-between items-center h-20">
+
+      <%# Logo - Pure Presentation %>
+      <div class="flex items-center gap-8">
+        <%= link_to root_path, class: "flex items-center gap-3 group", aria-label: "Go to homepage" do %>
+          <%= image_tag "logo.svg",
+              class: "h-10 w-auto transition-transform group-hover:scale-110 duration-200",
+              alt: "The Final Market Logo",
+              loading: "eager" %>
+          <span class="text-2xl font-extrabold bg-gradient-to-r from-purple-600 via-pink-500 to-red-500 bg-clip-text text-transparent">
+            The Final Market
+          </span>
+        <% end %>
+
+        <%# Desktop Navigation - Atomic Links %>
+        <div class="hidden lg:flex items-center gap-6" role="menubar">
+          <%= link_to "Browse", products_path,
+              class: "text-gray-700 hover:text-purple-600 font-semibold transition-colors relative group",
+              role: "menuitem",
+              aria-label: "Browse products" %>
+          <%= link_to "Categories", categories_path,
+              class: "text-gray-700 hover:text-purple-600 font-semibold transition-colors relative group",
+              role: "menuitem",
+              aria-label: "View categories" %>
+          <%= link_to "Deals", deals_path,
+              class: "text-gray-700 hover:text-purple-600 font-semibold transition-colors relative group flex items-center gap-1",
+              role: "menuitem",
+              aria-label: "View deals" do %>
+            <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+              <path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clip-rule="evenodd" />
+            </svg>
+            <span>Deals</span>
+          <% end %>
+        </div>
+      </div>
+
+      <%# Search Bar - Enhanced for Accessibility %>
+      <div class="hidden md:flex flex-1 max-w-2xl mx-8">
+        <div class="search-modern w-full" data-controller="live-search">
+          <%= form_with url: search_path, method: :get, class: "relative",
+              data: { live_search_target: "form", turbo_frame: "search_results" } do |f| %>
+
+            <label for="search-query" class="sr-only">Search products, brands, categories</label>
+            <svg class="search-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+
+            <%= f.text_field :query,
+                id: "search-query",
+                class: "search-input",
+                placeholder: "Search products, brands, categories...",
+                autocomplete: "off",
+                data: {
+                  live_search_target: "input",
+                  action: "input->live-search#search focus->live-search#showResults blur->live-search#hideResults"
+                },
+                aria-describedby: "search-help" %>
+
+            <div id="search-help" class="sr-only">Use arrow keys to navigate results, Enter to select</div>
+            <div class="search-results" data-live-search-target="results" role="listbox" aria-label="Search results"></div>
+          <% end %>
+        </div>
+      </div>
+
+      <%# User Actions - State-Aware Presentation %>
+      <div class="flex items-center gap-4">
+
+        <% if user_signed_in? %>
+
+          <%# Wishlist - Pure Link with Badge %>
+          <%= link_to wishlist_path,
+              class: "hidden sm:flex relative p-2 text-gray-600 hover:text-purple-600 transition-colors",
+              title: "Wishlist",
+              aria-label: "View wishlist" do %>
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+            <% if current_user.wishlist_items.count > 0 %>
+              <span class="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform bg-red-500 rounded-full"
+                    aria-label="<%= current_user.wishlist_items.count %> items in wishlist">
+                <%= current_user.wishlist_items.count %>
+              </span>
+            <% end %>
+          <% end %>
+
+          <%# Cart - Dynamic State %>
+          <%= link_to cart_path,
+              class: "relative p-2 text-gray-600 hover:text-purple-600 transition-colors",
+              data: { turbo_frame: "cart" },
+              title: "Shopping Cart",
+              aria-label: "View shopping cart" do %>
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            <span data-cart-target="count"
+                  class="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform bg-purple-600 rounded-full"
+                  aria-label="<%= current_user.cart_items.sum(:quantity) %> items in cart">
+              <%= current_user.cart_items.sum(:quantity) %>
+            </span>
+          <% end %>
+
+          <%# Notifications - Interactive Button %>
+          <button type="button"
+                  class="hidden sm:flex relative p-2 text-gray-600 hover:text-purple-600 transition-colors"
+                  data-notifications-target="button"
+                  data-action="click->notifications#toggleDropdown"
+                  title="Notifications"
+                  aria-label="View notifications"
+                  aria-expanded="false"
+                  aria-haspopup="true">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+            <span data-notifications-target="badge"
+                  class="<%= 'hidden' if current_user.unread_notifications_count.zero? %> absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform bg-red-500 rounded-full animate-pulse"
+                  aria-label="<%= current_user.unread_notifications_count %> unread notifications">
+              <%= current_user.unread_notifications_count %>
+            </span>
+          </button>
+
+          <%# User Menu - Dropdown with ARIA %>
+          <div class="relative" data-controller="dropdown">
+            <button type="button"
+                    class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                    data-action="click->dropdown#toggle"
+                    aria-expanded="false"
+                    aria-haspopup="true"
+                    aria-label="User menu">
+              <% if current_user.avatar&.attached? %>
+                <%= image_tag current_user.avatar.variant(resize_to_limit: [80, 80]),
+                    class: "w-10 h-10 rounded-full object-cover ring-2 ring-purple-100",
+                    alt: "User avatar" %>
+              <% else %>
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-lg font-bold ring-2 ring-purple-100">
+                  <%= current_user.name.first.upcase %>
+                </div>
+              <% end %>
+              <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            <div class="hidden absolute right-0 mt-2 w-64 rounded-xl shadow-2xl bg-white ring-1 ring-black ring-opacity-5 overflow-hidden"
+                 data-dropdown-target="menu"
+                 role="menu"
+                 aria-orientation="vertical">
+              <%# User Info - Pure Display %>
+              <div class="p-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+                <p class="font-bold text-lg"><%= current_user.name %></p>
+                <p class="text-sm text-purple-100"><%= current_user.email %></p>
+              </div>
+
+              <div class="py-2">
+                <%= link_to user_path(current_user),
+                    class: "flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-purple-50 transition-colors",
+                    role: "menuitem" do %>
+                  <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  <span>Your Profile</span>
+                <% end %>
+
+                <%= link_to orders_path,
+                    class: "flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-purple-50 transition-colors",
+                    role: "menuitem" do %>
+                  <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                  </svg>
+                  <span>Orders</span>
+                <% end %>
+
+                <% if current_user.seller? %>
+                  <%= link_to seller_dashboard_path,
+                      class: "flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-purple-50 transition-colors",
+                      role: "menuitem" do %>
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                    <span>Seller Dashboard</span>
+                  <% end %>
+                <% end %>
+
+                <%= link_to settings_path,
+                    class: "flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-purple-50 transition-colors",
+                    role: "menuitem" do %>
+                  <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span>Settings</span>
+                <% end %>
+              </div>
+
+              <div class="border-t border-gray-200">
+                <%= button_to logout_path,
+                    method: :delete,
+                    class: "flex items-center gap-3 w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors",
+                    role: "menuitem" do %>
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  <span>Sign Out</span>
+                <% end %>
+              </div>
+            </div>
+          </div>
+
+        <% else %>
+          <%# Guest Actions - Pure Links %>
+          <div class="flex items-center gap-3">
+            <%= link_to "Sign In", login_path,
+                class: "hidden sm:block text-gray-700 hover:text-purple-600 font-semibold transition-colors",
+                aria-label: "Sign in to your account" %>
+            <%= link_to "Sign Up", signup_path,
+                class: "btn-primary py-2 px-6",
+                aria-label: "Create a new account" %>
+          </div>
+        <% end %>
+
+        <%# Mobile Menu Button - Interactive %>
+        <button type="button"
+                class="lg:hidden p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+                data-action="click->mobile-menu#toggle"
+                aria-expanded="false"
+                aria-label="Open mobile menu">
+          <span class="sr-only">Open menu</span>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <%# Mobile Menu - Collapsible with ARIA %>
+  <div class="lg:hidden hidden" data-mobile-menu-target="menu" role="menu" aria-label="Mobile navigation">
+    <div class="px-4 py-6 space-y-4 bg-white border-t border-gray-200">
+      <%= link_to "Browse", products_path,
+          class: "block text-gray-700 hover:text-purple-600 font-semibold py-2",
+          role: "menuitem" %>
+      <%= link_to "Categories", categories_path,
+          class: "block text-gray-700 hover:text-purple-600 font-semibold py-2",
+          role: "menuitem" %>
+      <%= link_to "Deals", deals_path,
+          class: "block text-gray-700 hover:text-purple-600 font-semibold py-2",
+          role: "menuitem" %>
+
+      <% unless user_signed_in? %>
+        <div class="pt-4 border-t border-gray-200 space-y-2">
+          <%= link_to "Sign In", login_path, class: "block btn-ghost w-full text-center py-3", role: "menuitem" %>
+          <%= link_to "Sign Up", signup_path, class: "block btn-primary w-full text-center py-3", role: "menuitem" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</header>

@@ -120,6 +120,10 @@ ExperimentState = Struct.new(
     true
   end
 
+  def enabled?
+    status.value == :running
+  end
+
   private
 
   def self.parse_variants(alternatives)
@@ -997,6 +1001,109 @@ class AbTestingService
 
   def self.experiment_analytics(name, time_range = {})
     ExperimentObservableOperation.get_experiment_analytics(name, time_range)
+  end
+
+  # ═══════════════════════════════════════════════════════════════════════════════════
+  # MANAGEMENT INTERFACE: Experiment State Management
+  # ═══════════════════════════════════════════════════════════════════════════════════
+
+  def self.start_experiment(experiment_name)
+    with_observation('start_experiment') do |trace_id|
+      experiment = Split::ExperimentCatalog.find(experiment_name)
+      return failure_result('Experiment not found') unless experiment
+
+      current_status = Status.from_string(experiment.status || 'draft')
+      new_status = ExperimentStatusMachine.transition(current_status, :running)
+
+      return failure_result('Invalid state transition') unless new_status
+
+      experiment.start
+      EventBus.publish(:experiment_started,
+        experiment_name: experiment_name,
+        timestamp: Time.current
+      )
+
+      success_result(ExperimentState.from_experiment(experiment), 'Experiment started successfully')
+    end
+  end
+
+  def self.pause_experiment(experiment_name)
+    with_observation('pause_experiment') do |trace_id|
+      experiment = Split::ExperimentCatalog.find(experiment_name)
+      return failure_result('Experiment not found') unless experiment
+
+      current_status = Status.from_string(experiment.status || 'draft')
+      new_status = ExperimentStatusMachine.transition(current_status, :paused)
+
+      return failure_result('Invalid state transition') unless new_status
+
+      experiment.pause
+      EventBus.publish(:experiment_paused,
+        experiment_name: experiment_name,
+        timestamp: Time.current
+      )
+
+      success_result(ExperimentState.from_experiment(experiment), 'Experiment paused successfully')
+    end
+  end
+
+  def self.resume_experiment(experiment_name)
+    with_observation('resume_experiment') do |trace_id|
+      experiment = Split::ExperimentCatalog.find(experiment_name)
+      return failure_result('Experiment not found') unless experiment
+
+      current_status = Status.from_string(experiment.status || 'draft')
+      new_status = ExperimentStatusMachine.transition(current_status, :running)
+
+      return failure_result('Invalid state transition') unless new_status
+
+      experiment.resume
+      EventBus.publish(:experiment_resumed,
+        experiment_name: experiment_name,
+        timestamp: Time.current
+      )
+
+      success_result(ExperimentState.from_experiment(experiment), 'Experiment resumed successfully')
+    end
+  end
+
+  def self.reset_experiment(experiment_name)
+    with_observation('reset_experiment') do |trace_id|
+      experiment = Split::ExperimentCatalog.find(experiment_name)
+      return failure_result('Experiment not found') unless experiment
+
+      experiment.reset
+      EventBus.publish(:experiment_reset,
+        experiment_name: experiment_name,
+        timestamp: Time.current
+      )
+
+      success_result(ExperimentState.from_experiment(experiment), 'Experiment reset successfully')
+    end
+  end
+
+  def self.delete_experiment(experiment_name)
+    with_observation('delete_experiment') do |trace_id|
+      experiment = Split::ExperimentCatalog.find(experiment_name)
+      return failure_result('Experiment not found') unless experiment
+
+      experiment.delete
+      EventBus.publish(:experiment_deleted,
+        experiment_name: experiment_name,
+        timestamp: Time.current
+      )
+
+      success_result({}, 'Experiment deleted successfully')
+    end
+  end
+
+  def self.get_experiment(experiment_name)
+    with_observation('get_experiment') do |trace_id|
+      experiment = Split::ExperimentCatalog.find(experiment_name)
+      return failure_result('Experiment not found') unless experiment
+
+      success_result(ExperimentState.from_experiment(experiment), 'Experiment retrieved successfully')
+    end
   end
 
   # ═══════════════════════════════════════════════════════════════════════════════════
