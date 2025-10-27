@@ -29,7 +29,7 @@ gem "rails", "~> 8.0.2", ">= 8.0.2.1"
 gem "pg", "~> 1.6"
 
 # Hyperscale web server with advanced request orchestration
-gem "puma", "~> 7.0", ">= 7.0.3"
+gem "puma", "~> 7.1"
 
 # =============================================================================
 # PERFORMANCE LAYER - Asymptotic Optimization & Hyper-Concurrency (O(min) Algorithms)
