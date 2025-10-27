@@ -699,7 +699,7 @@ GEM
       stringio
     ptools (1.5.0)
     public_suffix (6.0.2)
-    puma (7.0.3)
+    puma (7.1.0)
       nio4r (~> 2.0)
     pundit (2.5.1)
       activesupport (>= 3.0.0)
@@ -1169,7 +1169,7 @@ DEPENDENCIES
   pry-byebug (~> 3.10)
   pry-rails (~> 0.3)
   pry-stack_explorer (~> 0.6)
-  puma (~> 7.0, >= 7.0.3)
+  puma (~> 7.1)
   pundit (~> 2.5)
   pwa (~> 2.0)
   rack-attack (~> 6.7)
