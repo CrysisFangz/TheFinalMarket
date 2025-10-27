@@ -211,7 +211,7 @@ gem "turbo_boost-streams", "~> 0.1"
 gem "cocoon", "~> 1.2"
 
 # Component-driven architecture with advanced theming
-gem "view_component", "~> 3.23"
+gem "view_component", "~> 4.1"
 gem "view_component-contrib", "~> 0.2"
 
 # Advanced CSS processing with PostCSS and modern features
