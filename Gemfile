@@ -23,7 +23,7 @@ source "https://rubygems.org"
 # FOUNDATION LAYER - Ontologically Pure Rails Substrate (O(min) Performance)
 # =============================================================================
 # Rails framework engineered for transcendental performance characteristics
-gem "rails", "~> 8.0.2", ">= 8.0.2.1"
+gem "rails", "~> 8.0.4"
 
 # Zero-latency PostgreSQL vector optimized for asymptotic query performance
 gem "pg", "~> 1.6"
